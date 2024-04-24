@@ -9,7 +9,11 @@ Authors: Antoni Wójcik, Grzegorz Piśkorski, Zuzanna Olszówka, Bartłomiej Sł
 
 ### Requirements
 
-### How to run
+### How to runb backend
+- change directory to backend:
+```bash
+cd bakend
+```
 - make python interpreter with:
 ```bash
 python3 -m venv .venv
