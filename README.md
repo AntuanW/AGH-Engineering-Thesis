@@ -9,7 +9,7 @@ Authors: Antoni Wójcik, Grzegorz Piśkorski, Zuzanna Olszówka, Bartłomiej Sł
 
 ### Requirements
 
-### How to runb backend
+### How to run backend
 - change directory to backend:
 ```bash
 cd bakend
@@ -31,3 +31,16 @@ pip install -r requirements/basic.txt
 uvicorn app.main:app --reload
 ```
 
+### How to run frontend (of course you need to have Node.js and npm installed)
+- change directory to backend:
+```bash
+cd frontend
+```
+- install all dependencies:
+```bash
+npm install
+```
+- start development server:
+```bash
+npm start
+```
