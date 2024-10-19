@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import api_routes
 
+from logging_setup import setup_logging
+from pathlib import Path
+
 app = FastAPI()
 
 app.add_middleware(
@@ -14,7 +17,10 @@ app.add_middleware(
 
 app.include_router(api_routes.router)
 
+
+LOG_CONFIG = Path(__file__).parent / 'dlogging.yaml'
+setup_logging(LOG_CONFIG)
+
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app)
