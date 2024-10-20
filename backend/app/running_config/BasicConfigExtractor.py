@@ -14,11 +14,11 @@ from .exceptions.ConfigExtractionExceptions import (
 class BasicConfigExtractor:
     tags: XmlConfigConstants = XmlConfigConstants()
 
-    def get_topology_config_from_xml(self, decrypted_xml_path: str | Path):
-        packet_tracer_dict: dict = self.create_dict_from_xml(decrypted_xml_path)
-        return self.get_devices_configs_info(packet_tracer_dict)
+    def get_topology_config_from_xml(self, decrypted_xml_path: str | Path) -> list[DeviceConfigInfo]:
+        packet_tracer_dict: dict = self._create_dict_from_xml(decrypted_xml_path)
+        return self._get_devices_configs_info(packet_tracer_dict)
 
-    def create_dict_from_xml(self, decrypted_xml_path: str | Path) -> dict:
+    def _create_dict_from_xml(self, decrypted_xml_path: str | Path) -> dict:
         try:
             with open(decrypted_xml_path, 'r', encoding='utf-8') as file:
                 xml = file.read()
@@ -27,7 +27,7 @@ class BasicConfigExtractor:
 
         return xmltodict.parse(xml)
 
-    def get_devices_configs_info(self, topology_dict: dict) -> list[DeviceConfigInfo]:
+    def _get_devices_configs_info(self, topology_dict: dict) -> list[DeviceConfigInfo]:
         devices_info = []
         devices = (topology_dict[self.tags.PACKET_TRACER_TAG]
                                 [self.tags.NETWORK_TAG]
@@ -35,14 +35,14 @@ class BasicConfigExtractor:
                                 [self.tags.DEVICE_TAG])
 
         for device in devices:
-            dev_type: DeviceType = self.extract_device_type(device)
+            dev_type: DeviceType = self._extract_device_type(device)
             if dev_type != DeviceType.UNKNOWN:
-                dev_config: list[str] = self.extract_running_config_details(device)
+                dev_config: list[str] = self._extract_running_config_details(device)
                 devices_info.append(DeviceConfigInfo(dev_type, dev_config))
 
         return devices_info
 
-    def extract_running_config_details(self, device_dict: dict) -> list[str]:
+    def _extract_running_config_details(self, device_dict: dict) -> list[str]:
         try:
             dev_running_config: list[str] = (device_dict[self.tags.ENGINE_TAG]
                                                         [self.tags.RUNNING_CONFIG_TAG])
@@ -50,7 +50,7 @@ class BasicConfigExtractor:
             raise InvalidDecryptedCmlFormatException("Config extraction error - invalid format of decrypted xml.")
         return dev_running_config
 
-    def extract_device_type(self, device_dict: dict) -> DeviceType:
+    def _extract_device_type(self, device_dict: dict) -> DeviceType:
         try:
             dev_str: str = json.dumps(device_dict)
         except (ValueError, TypeError) as exc:
