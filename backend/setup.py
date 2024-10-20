@@ -1,8 +1,13 @@
 from setuptools import setup, find_packages
+import logging
 
 def parse_requirements(filename):
-    with open(filename, "r") as file:
-        return [line.strip() for line in file if line and not line.startswith("#")]
+    try:
+        with open(filename, "r") as file:
+            return [line.strip() for line in file if line and not line.startswith("#")]
+    except FileNotFoundError:
+        logging.error(f"{filename} not found!")
+        exit(1)
 
 
 setup(
