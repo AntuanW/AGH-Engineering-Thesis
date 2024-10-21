@@ -3,7 +3,7 @@ import json
 import re
 import logging
 from pathlib import Path
-from .util.DeviceConfigTypes import DeviceConfigInfo, DeviceType, XmlConfigConstants
+from .util.DeviceConfigTypes import DeviceConfigInfo, DeviceType, XmlConfigConstants, DeviceLink
 from .exceptions.ConfigExtractionExceptions import (
     XmlOpenException,
     InvalidDecryptedCmlFormatException,
@@ -34,18 +34,28 @@ class BasicConfigExtractor:
                                 [self.tags.DEVICES_TAG]
                                 [self.tags.DEVICE_TAG])
 
+        links: list[DeviceLink] = self._get_all_links(topology_dict)
+        links_matrix: dict[str, list[DeviceLink]] = self._create_links_matrix(links)
+
         for device in devices:
             dev_type: DeviceType = self._extract_device_type(device)
             if dev_type != DeviceType.UNKNOWN:
-                dev_config: list[str] = self._extract_running_config_details(device)
-                devices_info.append(DeviceConfigInfo(dev_type, dev_config))
+                dev_id: str = self._get_device_id(device)
+                devices_info.append(DeviceConfigInfo(
+                    dev_id=dev_id,
+                    dev_type=dev_type,
+                    def_running_config=self._extract_running_config_details(device),
+                    dev_name=self._extract_device_name(device),
+                    dev_links=self._get_device_links(dev_id, links)
+                ))
 
         return devices_info
 
     def _extract_running_config_details(self, device_dict: dict) -> list[str]:
         try:
             dev_running_config: list[str] = (device_dict[self.tags.ENGINE_TAG]
-                                                        [self.tags.RUNNING_CONFIG_TAG])
+                                                        [self.tags.RUNNING_CONFIG_TAG]
+                                                        [self.tags.LINE_TAG])
         except KeyError:
             raise InvalidDecryptedCmlFormatException("Config extraction error - invalid format of decrypted xml.")
         return dev_running_config
@@ -65,3 +75,54 @@ class BasicConfigExtractor:
 
         dev_type, _ = matches[0]
         return DeviceType[dev_type.upper()]
+
+    def _extract_device_name(self, device_dict: dict) -> str:
+        try:
+            dev_name: str = (device_dict[self.tags.ENGINE_TAG]
+                                        [self.tags.NAME_TAG]
+                                        [self.tags.TEXT_TAG])
+        except KeyError:
+            raise InvalidDecryptedCmlFormatException("Config extraction error - invalid format of decrypted xml.")
+        return dev_name
+
+    def _get_device_id(self, device_dict: dict) -> str:
+        try:
+            dev_id: str = device_dict[self.tags.ENGINE_TAG][self.tags.SAVE_REF_ID_TAG]
+        except KeyError:
+            raise InvalidDecryptedCmlFormatException("Failed to extract device id from decrypted xml.")
+        return dev_id
+
+    def _get_device_links(self, dev_id: str, links: list[DeviceLink]) -> list[DeviceLink]:
+        # TODO: implement this shit
+        raise NotImplementedError()
+
+    def _get_all_links(self, topology_dict: dict) -> list[DeviceLink]:
+        links_dict: dict = (topology_dict[self.tags.PACKET_TRACER_TAG]
+                                         [self.tags.NETWORK_TAG]
+                                         [self.tags.LINKS_TAG]
+                                         [self.tags.LINK_TAG])
+        links: list[DeviceLink] = []
+        for link in links_dict:
+            cable: dict = link[self.tags.CABLE_TAG]
+            from_id: str = cable[self.tags.FROM_TAG]
+            from_if: str = cable[self.tags.PORT_TAG][0]
+            to_id: str = cable[self.tags.TO_TAG]
+            to_if: str = cable[self.tags.PORT_TAG][1]
+            links.append(DeviceLink(
+                from_id=from_id,
+                from_if=from_if,
+                to_id=to_id,
+                to_if=to_if
+            ))
+        return links
+
+    def _create_links_matrix(self, links: list[DeviceLink]) -> dict[str, list[DeviceLink]]:
+        # TODO: implement this shit
+        links_map: dict = {}
+        for link in links:
+            if link.from_id not in links_map.keys():
+                links_map[link.from_id] = [link]
+
+            if link.to_id not in links_map.keys():
+                links_map[link.to_id] = [link]
+        return links_map
