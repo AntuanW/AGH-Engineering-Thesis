@@ -35,7 +35,6 @@ class BasicConfigExtractor:
                                 [self.tags.DEVICE_TAG])
 
         links: list[DeviceLink] = self._get_all_links(topology_dict)
-        links_matrix: dict[str, list[DeviceLink]] = self._create_links_matrix(links)
 
         for device in devices:
             dev_type: DeviceType = self._extract_device_type(device)
@@ -46,7 +45,7 @@ class BasicConfigExtractor:
                     dev_type=dev_type,
                     def_running_config=self._extract_running_config_details(device),
                     dev_name=self._extract_device_name(device),
-                    dev_links=self._get_device_links(dev_id, links)
+                    dev_neighbours=self._get_device_neighbours(dev_id, links)
                 ))
 
         return devices_info
@@ -92,9 +91,12 @@ class BasicConfigExtractor:
             raise InvalidDecryptedCmlFormatException("Failed to extract device id from decrypted xml.")
         return dev_id
 
-    def _get_device_links(self, dev_id: str, links: list[DeviceLink]) -> list[DeviceLink]:
-        # TODO: implement this shit
-        raise NotImplementedError()
+    def _get_device_neighbours(self, dev_id: str, links: list[DeviceLink]) -> list[DeviceLink]:
+        neighbours: list[DeviceLink] = []
+        for link in links:
+            if link.from_id == dev_id:
+                neighbours.append(link)
+        return neighbours
 
     def _get_all_links(self, topology_dict: dict) -> list[DeviceLink]:
         links_dict: dict = (topology_dict[self.tags.PACKET_TRACER_TAG]
@@ -114,15 +116,10 @@ class BasicConfigExtractor:
                 to_id=to_id,
                 to_if=to_if
             ))
+            links.append(DeviceLink(
+                from_id=to_id,
+                from_if=to_if,
+                to_id=from_id,
+                to_if=from_if
+            ))
         return links
-
-    def _create_links_matrix(self, links: list[DeviceLink]) -> dict[str, list[DeviceLink]]:
-        # TODO: implement this shit
-        links_map: dict = {}
-        for link in links:
-            if link.from_id not in links_map.keys():
-                links_map[link.from_id] = [link]
-
-            if link.to_id not in links_map.keys():
-                links_map[link.to_id] = [link]
-        return links_map
