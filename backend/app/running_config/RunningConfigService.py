@@ -24,5 +24,6 @@ class RunningConfigService:
         except Exception as exc:
             logging.error(f"Error occurred while extracting configs from xml: {str(exc)}")
 
-        logging.info(f"Successfully extracted configs for {len(topology_config)} devices.")
+        logging.info(f"Successfully extracted and saved configs for {len(topology_config)} devices.")
+
         return topology_config
