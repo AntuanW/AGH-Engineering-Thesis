@@ -12,15 +12,25 @@ class FileService:
     RESOURCES_PATH = Path(__file__).parent
 
     def strip_name(self, name: str):
+        """
+        Removes the .pkt or .xml extension from the filename
+        """
         if name.endswith(".pkt") or name.endswith(".xml"):
             return name[:-4]
         return name
 
     def check_file_exists(self, name: str, file_type: FileType):
+        """
+        Checks if the file with given name and type exists.
+        """
         path = self.get_path(name, file_type)
         return path.is_file()
 
     def get_path(self, name: str, file_type: FileType):
+        """
+        Returns the full path to a file with given name and type.
+        The files are stored under resources/[xml | pkt | configs | ...]
+        """
         name = self.strip_name(name)
         match file_type:
             case FileType.XML:

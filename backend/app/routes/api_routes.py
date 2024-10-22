@@ -14,6 +14,12 @@ def read_root():
 
 @router.post("/upload_pkt")
 async def upload_pkt(file: UploadFile = File(...), force_overwrite: bool = False):
+    """
+    Uploads a PKT file to server. The file must have a .pkt extension.
+    :param file: File object
+    :param force_overwrite: Whether to overwrite an existing file with the same name
+    :return: None
+    """
     if not file.filename.endswith(".pkt"):
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid file type")
 
@@ -35,6 +41,13 @@ async def upload_pkt(file: UploadFile = File(...), force_overwrite: bool = False
 
 @router.get("/decrypt_pkt")
 def decrypt_pkt(name: str, force_overwrite: bool = False):
+    """
+    Decrypts a PKT file to XML and returns the content
+    :param name: Name of the target PKT file (must be previously uploaded!).
+                 The prefix without '.pkt' is enough.
+    :param force_overwrite: Whether to overwrite an existing XML file with the same name
+    :return: XML file
+    """
     base_name = file_service.strip_name(name)
 
     if not file_service.check_file_exists(base_name, FileType.PKT):
