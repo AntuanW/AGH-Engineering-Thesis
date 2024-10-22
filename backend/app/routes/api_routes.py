@@ -47,6 +47,10 @@ def decrypt_pkt(name: str, force_overwrite: bool = False):
                  The prefix without '.pkt' is enough.
     :param force_overwrite: Whether to overwrite an existing XML file with the same name
     :return: XML file
+
+    CAUTION: THIS ENDPOINT CRASHES THE SWAGGER INTERFACE!!!
+    The generated XMLs are huge, and it supposedly runs out of memory.
+    Please use CURL for testing.
     """
     base_name = file_service.strip_name(name)
 
