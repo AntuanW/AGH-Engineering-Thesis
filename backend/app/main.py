@@ -18,7 +18,7 @@ app.add_middleware(
 app.include_router(api_routes.router)
 
 
-LOG_CONFIG = Path(__file__).parent / 'dlogging.yaml'
+LOG_CONFIG = Path(__file__).parent / 'logging.yaml'
 setup_logging(LOG_CONFIG)
 
 if __name__ == "__main__":
