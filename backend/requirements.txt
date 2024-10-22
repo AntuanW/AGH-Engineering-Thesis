@@ -2,3 +2,6 @@ fastapi
 uvicorn[standard]
 netmiko
 xmltodict
+pymongo[srv]
+python-dotenv
+pydantic
