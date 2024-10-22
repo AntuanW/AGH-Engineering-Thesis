@@ -43,7 +43,7 @@ class BasicConfigExtractor:
                 devices_info.append(DeviceConfigInfo(
                     dev_id=dev_id,
                     dev_type=dev_type,
-                    def_running_config=self._extract_running_config_details(device),
+                    dev_running_config=self._extract_running_config_details(device),
                     dev_name=self._extract_device_name(device),
                     dev_neighbours=self._get_device_neighbours(dev_id, links)
                 ))

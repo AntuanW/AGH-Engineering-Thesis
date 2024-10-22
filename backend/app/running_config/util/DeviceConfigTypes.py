@@ -41,6 +41,6 @@ class DeviceLink(BaseModel):
 class DeviceConfigInfo(BaseModel):
     dev_id: str
     dev_type: DeviceType
-    def_running_config: list[str]
+    dev_running_config: list[str]
     dev_name: str
     dev_neighbours: list[DeviceLink]
