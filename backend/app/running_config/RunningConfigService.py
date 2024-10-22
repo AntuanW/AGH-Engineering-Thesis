@@ -2,7 +2,6 @@ import logging
 
 from pathlib import Path
 from .BasicConfigExtractor import BasicConfigExtractor
-from .ConfigFileWriter import ConfigFileWriter
 from .util.DeviceConfigTypes import DeviceConfigInfo
 from .exceptions.ConfigExtractionExceptions import (
     XmlOpenException,
@@ -12,9 +11,8 @@ from .exceptions.ConfigExtractionExceptions import (
 
 
 class RunningConfigService:
-    def __init__(self, extractor: BasicConfigExtractor, file_writer: ConfigFileWriter):
+    def __init__(self, extractor: BasicConfigExtractor):
         self.extractor: BasicConfigExtractor = extractor
-        self.file_writer: ConfigFileWriter = file_writer
 
     def get_configs_for_upload(self, decrypted_xml_path: str | Path) -> list[DeviceConfigInfo]:
         topology_config: list[DeviceConfigInfo] = []
