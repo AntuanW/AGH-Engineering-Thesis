@@ -1,3 +1,3 @@
-from repository.device_repository import DeviceRepository
+from app.repository.device_repository import DeviceRepository
 
 device_repository = DeviceRepository()
