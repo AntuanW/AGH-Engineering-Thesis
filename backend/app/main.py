@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import api_routes
+from app.routes import api_routes
 
-from logging_setup import setup_logging
+from app.logging_setup import setup_logging
 from pathlib import Path
 
 app = FastAPI()
@@ -21,6 +21,9 @@ app.include_router(api_routes.router)
 LOG_CONFIG = Path(__file__).parent / 'logging.yaml'
 setup_logging(LOG_CONFIG)
 
-if __name__ == "__main__":
+def start():
     import uvicorn
     uvicorn.run(app)
+
+if __name__ == "__main__":
+    start()
