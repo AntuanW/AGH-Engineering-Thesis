@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import api_routes
+from app.routes import upload_config_router
 
 from app.logging_setup import setup_logging
 from pathlib import Path
@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(api_routes.router)
+app.include_router(upload_config_router.router)
 
 
 LOG_CONFIG = Path(__file__).parent / 'logging.yaml'

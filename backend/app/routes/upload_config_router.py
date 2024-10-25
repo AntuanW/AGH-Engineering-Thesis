@@ -1,15 +1,18 @@
-from fastapi import APIRouter, File, UploadFile, status, HTTPException
+from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends
 from fastapi.responses import FileResponse
-from backend.app.resources.FileService import FileService, FileType
-from backend.app.decryptor.DecryptorService import DecryptorService, PktDecryptor
 
-router = APIRouter()
+from app.resources.FileService import FileService, FileType
+from app.decryptor.DecryptorService import DecryptorService, PktDecryptor
+from app.running_config.RunningConfigService import RunningConfigService
+from app.running_config.BasicConfigExtractor import BasicConfigExtractor
+from app.running_config.util.DeviceConfigTypes import DeviceConfigInfo
+
+
+router = APIRouter(prefix="/config_upload")
+
+# dependencies
 file_service = FileService()
 decryptor_service = DecryptorService(PktDecryptor(), file_service)
-
-@router.get("/")
-def read_root():
-    return {"Hello": "World"}
 
 
 @router.post("/upload_pkt")
@@ -64,3 +67,11 @@ def decrypt_pkt(name: str, force_overwrite: bool = False):
 
     xml_path = file_service.get_path(base_name, FileType.XML)
     return FileResponse(xml_path)
+
+
+@router.post("/xml_extract")
+async def extract_config(
+        running_config_service: RunningConfigService = Depends(RunningConfigService),
+        basic_config_extractor: BasicConfigExtractor = Depends(BasicConfigExtractor)
+) -> list[DeviceConfigInfo]:
+    raise NotImplementedError()
