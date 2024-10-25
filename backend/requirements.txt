@@ -5,3 +5,4 @@ xmltodict
 pymongo[srv]
 python-dotenv
 pydantic
+pytest

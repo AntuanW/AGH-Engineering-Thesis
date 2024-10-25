@@ -1,5 +1,5 @@
-from app.repository.base_repository import BaseRepository
-from app.models.device import DeviceModel
+from base_repository import BaseRepository
+from ..models.device import DeviceModel
 
 
 class DeviceRepository(BaseRepository):
