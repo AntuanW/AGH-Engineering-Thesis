@@ -3,8 +3,8 @@ import json
 import re
 import logging
 from pathlib import Path
-from .util.DeviceConfigTypes import DeviceConfigInfo, DeviceType, XmlConfigConstants, DeviceLink
-from .exceptions.ConfigExtractionExceptions import (
+from .util.device_config_types import DeviceConfigInfo, DeviceType, XmlConfigConstants, DeviceLink
+from .exceptions.config_extraction_exceptions import (
     XmlOpenException,
     InvalidDecryptedCmlFormatException,
     DeviceJsonParseException

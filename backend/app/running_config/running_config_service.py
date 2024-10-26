@@ -1,9 +1,10 @@
 import logging
+from fastapi import Depends
 
 from pathlib import Path
-from .BasicConfigExtractor import BasicConfigExtractor
-from .util.DeviceConfigTypes import DeviceConfigInfo
-from .exceptions.ConfigExtractionExceptions import (
+from .basic_config_extractor import BasicConfigExtractor
+from .util.device_config_types import DeviceConfigInfo
+from .exceptions.config_extraction_exceptions import (
     XmlOpenException,
     InvalidDecryptedCmlFormatException,
     DeviceJsonParseException
@@ -11,7 +12,7 @@ from .exceptions.ConfigExtractionExceptions import (
 
 
 class RunningConfigService:
-    def __init__(self, extractor: BasicConfigExtractor):
+    def __init__(self, extractor: BasicConfigExtractor = Depends(BasicConfigExtractor)):
         self.extractor: BasicConfigExtractor = extractor
 
     def get_configs_for_upload(self, decrypted_xml_path: str | Path) -> list[DeviceConfigInfo]:
