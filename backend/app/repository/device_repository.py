@@ -1,4 +1,4 @@
-from base_repository import BaseRepository
+from .base_repository import BaseRepository
 from ..models.device import DeviceModel
 
 

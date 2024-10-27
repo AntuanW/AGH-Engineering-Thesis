@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pymongo import MongoClient
-from config import MONGODB_URI
+from .config import MONGODB_URI
 
 
 class BaseRepository(ABC):
