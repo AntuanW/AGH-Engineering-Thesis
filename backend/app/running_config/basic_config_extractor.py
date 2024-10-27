@@ -14,9 +14,9 @@ from .exceptions.config_extraction_exceptions import (
 class BasicConfigExtractor:
     tags: XmlConfigConstants = XmlConfigConstants()
 
-    def get_topology_config_from_xml(self, decrypted_xml_path: str | Path) -> list[DeviceConfigInfo]:
-        packet_tracer_dict: dict = self._create_dict_from_xml(decrypted_xml_path)
-        return self._get_devices_configs_info(packet_tracer_dict)
+    def get_topology_config_from_xml(self, decrypted_xml: dict) -> list[DeviceConfigInfo]:
+        # packet_tracer_dict: dict = self._create_dict_from_xml(decrypted_xml_path)
+        return self._get_devices_configs_info(decrypted_xml)
 
     def _create_dict_from_xml(self, decrypted_xml_path: str | Path) -> dict:
         try:

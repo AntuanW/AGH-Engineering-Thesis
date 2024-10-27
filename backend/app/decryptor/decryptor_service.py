@@ -1,4 +1,4 @@
-from backend.app.resources.FileService import *
+from app.resources.FileService import *
 import os
 from pathlib import Path
 

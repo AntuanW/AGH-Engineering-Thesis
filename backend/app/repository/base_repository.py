@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pymongo import MongoClient
-from config import MONGODB_URI
+from .config import MONGODB_URI
 
 
 class BaseRepository(ABC):
@@ -32,3 +32,6 @@ class BaseRepository(ABC):
     def delete(self, query):
         result = self.get_collection().delete_one(query)
         return result.deleted_count
+
+    def find_one(self, query):
+        return self.get_collection().find_one(query)

@@ -1,9 +1,9 @@
-from base_repository import BaseRepository
+from .base_repository import BaseRepository
 from ..models.topology import TopologyModel
 
 
 class TopologyRepository(BaseRepository):
-    def get_topology(self):
+    def get_collection(self):
         return self.db['topology']
 
     def insert(self, topology: TopologyModel):

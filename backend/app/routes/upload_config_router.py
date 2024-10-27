@@ -1,12 +1,12 @@
 from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends
 from fastapi.responses import FileResponse, JSONResponse
-from starlette.responses import JSONResponse
+from bson.objectid import ObjectId
 
 from app.resources.FileService import FileService, FileType
 from app.decryptor.decryptor_service import DecryptorService, PktDecryptor
 from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
-from app.running_config.util.device_config_types import DeviceConfigInfo
+from app.repository.decrypted_xml_repository import DecryptedXMLRepository
 
 
 router = APIRouter(prefix="/config_upload")
@@ -70,15 +70,22 @@ def decrypt_pkt(name: str, force_overwrite: bool = False):
     return FileResponse(xml_path)
 
 
-@router.post("/extract_xml")
+@router.post("/extract_xml/{topology_id}")
 async def extract_config(
+        topology_id: str,
         running_config_service: RunningConfigService = Depends(RunningConfigService),
-        topology_repository: TopologyRepository = Depends(TopologyRepository)
+        topology_repository: TopologyRepository = Depends(TopologyRepository),
+        decrypted_xml_repository: DecryptedXMLRepository = Depends(DecryptedXMLRepository)
 ) -> JSONResponse:
-    topology_config = running_config_service.get_configs_for_upload("")
+
+    topology_dict = decrypted_xml_repository.find_one({"_id": ObjectId(topology_id)})
+    topology_config = running_config_service.get_configs_for_upload(topology_dict)
 
     if not topology_config:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Topology was either empty or invalid.")
 
-    # save configs to database
-    return JSONResponse(content=topology_config, status_code=status.HTTP_200_OK)
+    topology_id = topology_repository.insert(topology_config)
+    response = {
+        "topology_id": topology_id
+    }
+    return JSONResponse(content=response, status_code=status.HTTP_200_OK)
