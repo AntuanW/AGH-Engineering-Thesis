@@ -1,13 +1,11 @@
 import logging
 from fastapi import Depends
-from pathlib import Path
 
 from ..models.topology import TopologyModel
 from .basic_config_extractor import BasicConfigExtractor
 from .util.device_config_types import DeviceConfigInfo
 from .exceptions.config_extraction_exceptions import (
-    XmlOpenException,
-    InvalidDecryptedCmlFormatException,
+    InvalidDecryptedXmlFormatException,
     DeviceJsonParseException
 )
 
@@ -21,11 +19,10 @@ class RunningConfigService:
 
         try:
             topology_config = self.extractor.get_topology_config_from_xml(decrypted_xml)
-        except (XmlOpenException, InvalidDecryptedCmlFormatException, DeviceJsonParseException) as exc:
+            logging.info(f"Successfully extracted and saved configs for {len(topology_config)} devices.")
+        except (InvalidDecryptedXmlFormatException, DeviceJsonParseException) as exc:
             logging.error(str(exc))
         except Exception as exc:
             logging.error(f"Error occurred while extracting configs from xml: {str(exc)}")
-
-        logging.info(f"Successfully extracted and saved configs for {len(topology_config)} devices.")
 
         return TopologyModel(topology=topology_config)

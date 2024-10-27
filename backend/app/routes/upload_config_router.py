@@ -1,3 +1,6 @@
+import logging
+
+from bson.errors import InvalidId
 from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends
 from fastapi.responses import FileResponse, JSONResponse
 from bson.objectid import ObjectId
@@ -77,11 +80,15 @@ async def extract_config(
         topology_repository: TopologyRepository = Depends(TopologyRepository),
         decrypted_xml_repository: DecryptedXMLRepository = Depends(DecryptedXMLRepository)
 ) -> JSONResponse:
+    try:
+        topology_id = ObjectId(topology_id)
+    except InvalidId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
 
     topology_dict = decrypted_xml_repository.find_one({"_id": ObjectId(topology_id)})
     topology_config = running_config_service.get_configs_for_upload(topology_dict)
 
-    if not topology_config:
+    if not topology_config.topology:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Topology was either empty or invalid.")
 
     topology_id = topology_repository.insert(topology_config)

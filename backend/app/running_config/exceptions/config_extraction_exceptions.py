@@ -1,7 +1,7 @@
 class XmlOpenException(Exception):
     pass
 
-class InvalidDecryptedCmlFormatException(Exception):
+class InvalidDecryptedXmlFormatException(Exception):
     pass
 
 class DeviceJsonParseException(Exception):

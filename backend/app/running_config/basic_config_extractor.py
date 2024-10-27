@@ -3,22 +3,25 @@ import json
 import re
 import logging
 from pathlib import Path
+from fastapi import Depends
+
 from .util.device_config_types import DeviceConfigInfo, DeviceType, XmlConfigConstants, DeviceLink
 from .exceptions.config_extraction_exceptions import (
     XmlOpenException,
-    InvalidDecryptedCmlFormatException,
+    InvalidDecryptedXmlFormatException,
     DeviceJsonParseException
 )
 
 
 class BasicConfigExtractor:
-    tags: XmlConfigConstants = XmlConfigConstants()
+    def __init__(self, tags: XmlConfigConstants = Depends(XmlConfigConstants)):
+        self.tags = tags
 
     def get_topology_config_from_xml(self, decrypted_xml: dict) -> list[DeviceConfigInfo]:
-        # packet_tracer_dict: dict = self._create_dict_from_xml(decrypted_xml_path)
         return self._get_devices_configs_info(decrypted_xml)
 
     def _create_dict_from_xml(self, decrypted_xml_path: str | Path) -> dict:
+        # TODO: relocate xml to dict conversion to other decryption related service
         try:
             with open(decrypted_xml_path, 'r', encoding='utf-8') as file:
                 xml = file.read()
@@ -56,7 +59,7 @@ class BasicConfigExtractor:
                                                         [self.tags.RUNNING_CONFIG_TAG]
                                                         [self.tags.LINE_TAG])
         except KeyError:
-            raise InvalidDecryptedCmlFormatException("Config extraction error - invalid format of decrypted xml.")
+            raise InvalidDecryptedXmlFormatException("Config extraction error - invalid format of decrypted xml.")
         return dev_running_config
 
     def _extract_device_type(self, device_dict: dict) -> DeviceType:
@@ -81,14 +84,14 @@ class BasicConfigExtractor:
                                         [self.tags.NAME_TAG]
                                         [self.tags.TEXT_TAG])
         except KeyError:
-            raise InvalidDecryptedCmlFormatException("Config extraction error - invalid format of decrypted xml.")
+            raise InvalidDecryptedXmlFormatException("Config extraction error - invalid format of decrypted xml.")
         return dev_name
 
     def _get_device_id(self, device_dict: dict) -> str:
         try:
             dev_id: str = device_dict[self.tags.ENGINE_TAG][self.tags.SAVE_REF_ID_TAG]
         except KeyError:
-            raise InvalidDecryptedCmlFormatException("Failed to extract device id from decrypted xml.")
+            raise InvalidDecryptedXmlFormatException("Failed to extract device id from decrypted xml.")
         return dev_id
 
     def _get_device_neighbours(self, dev_id: str, links: list[DeviceLink]) -> list[DeviceLink]:
