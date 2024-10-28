@@ -30,6 +30,9 @@ class BaseRepository(ABC):
     def find(self, query):
         return list(self.get_collection().find(query))
 
+    def find_one(self, query):
+        return self.get_collection().find_one(query)
+
     def update(self, query, update_values):
         result = self.get_collection().update_one(query, {"$set": update_values})
         return result.modified_count
