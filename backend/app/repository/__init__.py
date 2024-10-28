@@ -1,3 +1,3 @@
-from device_repository import DeviceRepository
+from .device_repository import DeviceRepository
 
 device_rep = DeviceRepository()
