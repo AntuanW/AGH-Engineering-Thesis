@@ -6,41 +6,19 @@ Faculty: Computer Science <br>
 Authors: Antoni Wójcik, Grzegorz Piśkorski, Zuzanna Olszówka, Bartłomiej Słupik <br>
 
 ### Stack
+- python
+- FastAPI
+- MongoDB
+- Java
+- React
 
 ### Requirements
+- python 2.12 or above
+- node.js
+- npm
 
 ### How to run backend
-- change directory to backend:
-```bash
-cd bakend
-```
-- make python interpreter with:
-```bash
-python3 -m venv .venv
-```
-- select created interpreter:
-```bash
-source .venv/bin/activate
-```
-- install all the requirements:
-```bash
-pip install -r requirements/basic.txt
-```
-- run main file:
-```bash
-uvicorn app.main:app --reload
-```
+**[CLICK HERE](/backend/README.md)**
 
-### How to run frontend (of course you need to have Node.js and npm installed)
-- change directory to backend:
-```bash
-cd frontend
-```
-- install all dependencies:
-```bash
-npm install
-```
-- start development server:
-```bash
-npm start
-```
+### How to run frontend:
+**[CLICK HERE](/frontend/README.md)**
