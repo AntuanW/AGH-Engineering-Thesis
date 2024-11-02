@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from pymongo import MongoClient
-from config import MONGODB_URI
+from pymongo.errors import ConnectionFailure
+from .config import MONGODB_URI
+from .exceptions.repository_exceptions import DatabaseException
 
 
 class BaseRepository(ABC):
@@ -9,8 +11,11 @@ class BaseRepository(ABC):
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(BaseRepository, cls).__new__(cls)
-            cls._instance.client = MongoClient(MONGODB_URI)
-            cls._instance.db = cls._instance.client.get_database('agh-thesis')
+            try:
+                cls._instance.client = MongoClient(MONGODB_URI)
+                cls._instance.db = cls._instance.client.get_database('agh-thesis')
+            except ConnectionFailure as e:
+                raise DatabaseException(f'Cannot establish database, reason: {e}')
         return cls._instance
 
     @abstractmethod
@@ -24,6 +29,9 @@ class BaseRepository(ABC):
 
     def find(self, query):
         return list(self.get_collection().find(query))
+
+    def find_one(self, query):
+        return self.get_collection().find_one(query)
 
     def update(self, query, update_values):
         result = self.get_collection().update_one(query, {"$set": update_values})

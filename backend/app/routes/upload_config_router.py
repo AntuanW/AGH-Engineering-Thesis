@@ -1,15 +1,22 @@
-from fastapi import APIRouter, File, UploadFile, status, HTTPException
-from fastapi.responses import FileResponse
-from backend.app.resources.FileService import FileService, FileType
-from backend.app.decryptor.DecryptorService import DecryptorService, PktDecryptor
+import logging
 
-router = APIRouter()
+from bson.errors import InvalidId
+from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends
+from fastapi.responses import FileResponse, JSONResponse
+from bson.objectid import ObjectId
+
+from app.resources.FileService import FileService, FileType
+from app.decryptor.decryptor_service import DecryptorService, PktDecryptor
+from app.running_config.running_config_service import RunningConfigService
+from app.repository.topology_repository import TopologyRepository
+from app.repository.decrypted_xml_repository import DecryptedXMLRepository
+
+
+router = APIRouter(prefix="/config_upload")
+
+# dependencies
 file_service = FileService()
 decryptor_service = DecryptorService(PktDecryptor(), file_service)
-
-@router.get("/")
-def read_root():
-    return {"Hello": "World"}
 
 
 @router.post("/upload_pkt")
@@ -64,3 +71,28 @@ def decrypt_pkt(name: str, force_overwrite: bool = False):
 
     xml_path = file_service.get_path(base_name, FileType.XML)
     return FileResponse(xml_path)
+
+
+@router.post("/extract_xml/{topology_id}")
+async def extract_config(
+        topology_id: str,
+        running_config_service: RunningConfigService = Depends(RunningConfigService),
+        topology_repository: TopologyRepository = Depends(TopologyRepository),
+        decrypted_xml_repository: DecryptedXMLRepository = Depends(DecryptedXMLRepository)
+) -> JSONResponse:
+    try:
+        topology_id = ObjectId(topology_id)
+    except InvalidId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
+
+    topology_dict = decrypted_xml_repository.find_one({"_id": ObjectId(topology_id)})
+    topology_config = running_config_service.get_configs_for_upload(topology_dict)
+
+    if not topology_config.topology:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Topology was either empty or invalid.")
+
+    topology_id = topology_repository.insert(topology_config)
+    response = {
+        "topology_id": topology_id
+    }
+    return JSONResponse(content=response, status_code=status.HTTP_200_OK)

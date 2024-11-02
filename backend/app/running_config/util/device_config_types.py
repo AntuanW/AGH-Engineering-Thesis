@@ -22,10 +22,10 @@ class XmlConfigConstants:
     SAVE_REF_ID_TAG: str = "SAVE_REF_ID"
 
 
-class DeviceType(Enum):
-    ROUTER = 1
-    SWITCH = 2
-    UNKNOWN = 3
+class DeviceType(str, Enum):
+    ROUTER = 'ROUTER'
+    SWITCH = 'SWITCH'
+    UNKNOWN = 'UNKNOWN'
 
 
 class DeviceLink(BaseModel):
