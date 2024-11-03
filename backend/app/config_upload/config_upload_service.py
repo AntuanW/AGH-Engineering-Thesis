@@ -1,4 +1,4 @@
-from app.config_upload.NetmikoConfigBuilder import NetmikoConfigBuilder
+from .netmiko_config_builder import NetmikoConfigBuilder
 
 
 class ConfigUploadService:

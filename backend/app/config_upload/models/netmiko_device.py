@@ -1,7 +1,7 @@
 from netmiko import ConnectHandler
 
 
-class Device:
+class NetmikoDevice:
     def __init__(self, device_type: str, host: str, username: str, password: str, config: list[str]):
         self.device_type = device_type
         self.host = host

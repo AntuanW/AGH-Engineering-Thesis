@@ -1,9 +1,9 @@
 import unittest
 from pathlib import Path
 
-from app.config_upload.NetmikoConfigBuilder import NetmikoConfigBuilder
-from app.running_config.BasicConfigExtractor import BasicConfigExtractor
-from app.running_config.util.DeviceConfigTypes import DeviceConfigInfo
+from app.config_upload.netmiko_config_builder import NetmikoConfigBuilder
+from app.running_config.basic_config_extractor import BasicConfigExtractor
+from app.running_config.util.device_config_types import DeviceConfigInfo
 
 RESOURCES_PATH = Path(__file__).parent
 
