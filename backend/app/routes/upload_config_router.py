@@ -10,6 +10,7 @@ from app.decryptor.decryptor_service import DecryptorService, PktDecryptor
 from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
 from app.repository.decrypted_xml_repository import DecryptedXMLRepository
+from app.config_upload.config_upload_service import ConfigUploadService
 
 
 router = APIRouter(prefix="/config_upload")
@@ -96,3 +97,23 @@ async def extract_config(
         "topology_id": topology_id
     }
     return JSONResponse(content=response, status_code=status.HTTP_200_OK)
+
+@router.post("/topologies/{topology_id}/configure-devices")
+async def configure_devices(
+        topology_id: str,
+        topology_repository: TopologyRepository = Depends(TopologyRepository),
+        config_upload_service: ConfigUploadService = Depends(ConfigUploadService)
+) -> JSONResponse:
+    try:
+        topology_id = ObjectId(topology_id)
+    except InvalidId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
+
+    topology = topology_repository.find_one({"_id": ObjectId(topology_id)})
+    if not topology:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topology not found")
+
+    devices = config_upload_service.build_netmiko_devices(topology.get('topology'))
+    config_upload_service.upload_configs(devices)
+
+    return JSONResponse(content="Config uploaded successfully", status_code=status.HTTP_200_OK)
