@@ -1,4 +1,4 @@
-from .netmiko_config_builder import NetmikoConfigBuilder
+from .netmiko_connection_config import NetmikoConnectionConfig
 from ..running_config.util.device_config_types import DeviceConfigInfo
 from .util.netmiko_device import NetmikoDevice
 from .exceptions.config_upload_exceptions import DeviceConfigError, DeviceConnectionError
@@ -7,14 +7,14 @@ from .exceptions.config_upload_exceptions import DeviceConfigError, DeviceConnec
 class ConfigUploadService:
     def build_netmiko_devices(self, topology_config: list[DeviceConfigInfo]):
         devices: list[NetmikoDevice] = []
-        netmiko_config_builder = NetmikoConfigBuilder()
+        netmiko_connection_config = NetmikoConnectionConfig()
         for device_config_info in topology_config:
             netmiko_device = NetmikoDevice(
-                device_type=netmiko_config_builder.get_device_type(),
-                host=netmiko_config_builder.get_host(),
-                username=netmiko_config_builder.get_username(),
-                password=netmiko_config_builder.get_password(),
-                config=netmiko_config_builder.get_config(device_config_info['dev_running_config'])
+                device_type=netmiko_connection_config.get_device_type(),
+                host=netmiko_connection_config.get_host(),
+                username=netmiko_connection_config.get_username(),
+                password=netmiko_connection_config.get_password(),
+                config=netmiko_connection_config.get_config(device_config_info['dev_running_config'])
             )
             devices.append(netmiko_device)
         return devices
