@@ -11,7 +11,8 @@ from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
 from app.repository.decrypted_xml_repository import DecryptedXMLRepository
 from app.config_upload.config_upload_service import ConfigUploadService
-
+from app.config_upload.exceptions.config_upload_exceptions import DeviceBuildError, DeviceConfigError, \
+    DeviceConnectionError
 
 router = APIRouter(prefix="/config_upload")
 
@@ -98,6 +99,7 @@ async def extract_config(
     }
     return JSONResponse(content=response, status_code=status.HTTP_200_OK)
 
+
 @router.post("/topologies/{topology_id}/configure-devices")
 async def configure_devices(
         topology_id: str,
@@ -113,7 +115,17 @@ async def configure_devices(
     if not topology:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topology not found")
 
-    devices = config_upload_service.build_netmiko_devices(topology.get('topology'))
-    config_upload_service.upload_configs(devices)
+    try:
+        devices = config_upload_service.build_netmiko_devices(topology.get('topology'))
+    except DeviceBuildError:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to build device")
+
+    try:
+        config_upload_service.upload_configs(devices)
+    except DeviceConnectionError:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="Connection error while configuring devices")
+    except DeviceConfigError:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send config to device")
 
     return JSONResponse(content="Config uploaded successfully", status_code=status.HTTP_200_OK)

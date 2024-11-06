@@ -25,3 +25,10 @@ class NetmikoDevice:
 
     def send_config_commands(self):
         self.connection.send_config_set(self.config)
+
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.disconnect()

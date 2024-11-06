@@ -1,6 +1,7 @@
 from .netmiko_config_builder import NetmikoConfigBuilder
 from ..running_config.util.device_config_types import DeviceConfigInfo
-from .models.netmiko_device import NetmikoDevice
+from .util.netmiko_device import NetmikoDevice
+from .exceptions.config_upload_exceptions import DeviceConfigError, DeviceConnectionError
 
 
 class ConfigUploadService:
@@ -20,6 +21,11 @@ class ConfigUploadService:
 
     def upload_configs(self, devices: list[NetmikoDevice]):
         for device in devices:
-            device.connect()
-            device.send_config_commands()
-            device.disconnect()
+            try:
+                with device:
+                    try:
+                        device.send_config_commands()
+                    except Exception as e:
+                        raise DeviceConfigError(f"Failed to send config to {device.host}. Error:{e}")
+            except Exception as e:
+                raise DeviceConnectionError(f"Failed to connect to {device.host}. Error:{e}")
