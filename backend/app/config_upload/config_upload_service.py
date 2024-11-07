@@ -2,6 +2,7 @@ from .netmiko_connection_config import NetmikoConnectionConfig
 from ..running_config.util.device_config_types import DeviceConfigInfo
 from .util.netmiko_device import NetmikoDevice
 from .exceptions.config_upload_exceptions import DeviceConfigError, DeviceConnectionError
+from netmiko import NetmikoTimeoutException, NetmikoAuthenticationException, ConfigInvalidException
 
 
 class ConfigUploadService:
@@ -23,9 +24,12 @@ class ConfigUploadService:
         for device in devices:
             try:
                 with device:
-                    try:
-                        device.send_config_commands()
-                    except Exception as e:
-                        raise DeviceConfigError(f"Failed to send config to {device.host}. Error:{e}")
+                    device.send_config_commands()
+            except NetmikoTimeoutException as e:
+                raise DeviceConnectionError(f"Failed to connect to {device.host}. Error: {e}")
+            except NetmikoAuthenticationException as e:
+                raise DeviceConnectionError(f"Failed to authenticate to {device.host}. Error: {e}")
+            except ConfigInvalidException as e:
+                raise DeviceConfigError(f"Invalid config for {device.host}. Error: {e}")
             except Exception as e:
-                raise DeviceConnectionError(f"Failed to connect to {device.host}. Error:{e}")
+                raise DeviceConfigError(f"Failed to send config to {device.host}. Error: {e}")

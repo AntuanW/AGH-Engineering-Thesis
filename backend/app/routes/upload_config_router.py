@@ -122,10 +122,10 @@ async def configure_devices(
 
     try:
         config_upload_service.upload_configs(devices)
-    except DeviceConnectionError:
+    except DeviceConnectionError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail="Connection error while configuring devices")
-    except DeviceConfigError:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send config to device")
+                            detail=f"Connection error while configuring devices. Error: {e}")
+    except DeviceConfigError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to send config to device. Error: {e}")
 
     return JSONResponse(content="Config uploaded successfully", status_code=status.HTTP_200_OK)
