@@ -1,0 +1,16 @@
+.page-container {
+    margin: 0 auto;
+    width: 50%;
+  }
+  
+  .section {
+    margin: 1.5em 0;
+  }
+  
+  .info-header {
+    margin-bottom: .2em;
+  }
+  
+  .func-list {
+    list-style: none;
+  }
