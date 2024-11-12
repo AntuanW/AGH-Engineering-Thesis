@@ -1,0 +1,2 @@
+class InstructionPdfGenerator:
+    pass
