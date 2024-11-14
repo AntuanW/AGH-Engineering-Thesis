@@ -1,6 +1,7 @@
 import unittest
 
-from app.instruction_export.util.instruction_pdf_generator import InstructionPdfGenerator
+from app.instruction_export.instruction_pdf_generator import InstructionPdfGenerator
+
 
 class TestInstructionPdfGenerator(unittest.TestCase):
     def test_generate_pdf(self):
