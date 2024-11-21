@@ -1,4 +1,7 @@
+import Image from "next/image";
+
 import "./homepage.css"
+import labImg from "../../../../public/network-lab.jpg";
 
 const HomepageContent = () => {
   return (
@@ -7,6 +10,11 @@ const HomepageContent = () => {
         <h1 className="info-header">
           Network laboratory supporter
         </h1>
+        <Image
+          src={labImg}
+          alt="Network lab"
+          className="lab-img"
+        />
         <p>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum officia nulla eveniet. Praesentium officia dicta vel voluptatem id eos quis porro facilis perferendis quo saepe, inventore a incidunt delectus numquam consequatur ea beatae, cupiditate doloribus nulla! Officiis fugiat quasi eaque ex asperiores debitis perferendis ipsum recusandae in! Autem, rerum laborum.
         </p>

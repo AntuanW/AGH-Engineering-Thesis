@@ -14,3 +14,7 @@
   .func-list {
     list-style: none;
   }
+
+  .lab-img {
+    max-width: 100%;
+  }
