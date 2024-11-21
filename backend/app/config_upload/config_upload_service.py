@@ -15,7 +15,7 @@ class ConfigUploadService:
                 host=netmiko_connection_config.get_host(),
                 username=netmiko_connection_config.get_username(),
                 password=netmiko_connection_config.get_password(),
-                config=netmiko_connection_config.get_config(device_config_info['dev_running_config'])
+                config=netmiko_connection_config.get_config(device_config_info.dev_running_config)
             )
             devices.append(netmiko_device)
         return devices
