@@ -13,6 +13,7 @@ from app.repository.decrypted_xml_repository import DecryptedXMLRepository
 from app.config_upload.config_upload_service import ConfigUploadService
 from app.config_upload.exceptions.config_upload_exceptions import DeviceBuildError, DeviceConfigError, \
     DeviceConnectionError
+from app.running_config.util.device_config_types import DeviceConfigInfo
 
 router = APIRouter(prefix="/config_upload")
 
@@ -111,12 +112,12 @@ async def configure_devices(
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
 
-    topology = topology_repository.find_one({"_id": ObjectId(topology_id)})
+    topology: list[DeviceConfigInfo] = topology_repository.find_by_id(topology_id)
     if not topology:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topology not found")
 
     try:
-        devices = config_upload_service.build_netmiko_devices(topology.get('topology'))
+        devices = config_upload_service.build_netmiko_devices(topology)
     except DeviceBuildError:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to build device")
 
