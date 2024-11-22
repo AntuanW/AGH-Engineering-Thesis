@@ -1,9 +1,8 @@
 import logging
-import xmltodict
 
 from bson.errors import InvalidId
 from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from bson.objectid import ObjectId
 
 from app.resources.FileService import FileService, FileType
@@ -27,12 +26,12 @@ async def upload_pkt(
         file: UploadFile = File(...),
         file_service: FileService = Depends(FileService)
         , force_overwrite: bool = False
-):
+) -> Response:
     """
     Uploads a PKT file to server. The file must have a .pkt extension.
     :param file: File object
     :param force_overwrite: Whether to overwrite an existing file with the same name
-    :return: None
+    :return: Response
     """
     if not file.filename.endswith(".pkt"):
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid file type")
@@ -40,17 +39,20 @@ async def upload_pkt(
     name = file_service.strip_name(file.filename)
 
     if file_service.check_file_exists(name, FileType.PKT) and not force_overwrite:
+        logging.error(f"File {name} already exists and force_overwrite was set to False")
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"File {name}.pkt already exists.")
 
     try:
         content = file.file.read()
         file_service.save_pkt(file.filename, content)
-
     except Exception as ex:
+        logging.error(f"An error occurred while trying to save the pkt file: {ex}")
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Error while reading file: {ex}")
 
     finally:
         await file.close()
+        logging.info(f"Successfully uploaded and saved {name}")
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get("/decrypt_pkt")
@@ -60,7 +62,7 @@ def decrypt_pkt(
         file_service: FileService = Depends(FileService),
         decryptor_service: DecryptorService = Depends(DecryptorService),
         force_overwrite: bool = False
-):
+) -> JSONResponse:
     """
     Decrypts a PKT file to XML and returns the content
     :param decrypted_xml_repository:
@@ -76,22 +78,22 @@ def decrypt_pkt(
     base_name = file_service.strip_name(name)
 
     if not file_service.check_file_exists(base_name, FileType.PKT):
+        logging.error(f"File {base_name} does not exist.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"File {name}.pkt does not exist.")
 
     if file_service.check_file_exists(base_name, FileType.XML) and not force_overwrite:
+        logging.error(f"File {name} already exists and force_overwrite was set to False")
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"File {name}.xml already exists.")
 
     decryptor_service.decrypt_pkt(base_name)
 
     xml_path = file_service.get_path(base_name, FileType.XML)
-    with open(xml_path, "r", encoding='utf-8') as file:
-        xml = file.read()
-
-    xml_dict = xmltodict.parse(xml)
-    xml_id = decrypted_xml_repository.insert(xml_dict)
+    xml_id = decryptor_service.save_xml_to_database(xml_path)
     response = {
         "xml_id": xml_id
     }
+
+    logging.info("Successfully decrypted XML and uploaded it do database.")
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
@@ -117,7 +119,7 @@ async def extract_config(
     response = {
         "topology_id": topology_id
     }
-    return JSONResponse(content=response, status_code=status.HTTP_200_OK)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
 @router.post("/topologies/{topology_id}/configure-devices")
