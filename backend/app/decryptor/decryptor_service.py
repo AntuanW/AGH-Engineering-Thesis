@@ -1,6 +1,7 @@
 from app.resources.FileService import *
 import os
 from pathlib import Path
+from fastapi import Depends
 
 
 class PktDecryptor:
@@ -23,7 +24,7 @@ class PktDecryptor:
 
 
 class DecryptorService:
-    def __init__(self, decryptor: PktDecryptor, file_service: FileService):
+    def __init__(self, decryptor: PktDecryptor = Depends(PktDecryptor), file_service: FileService = Depends(FileService)):
         self.decryptor = decryptor
         self.file_service = file_service
 
