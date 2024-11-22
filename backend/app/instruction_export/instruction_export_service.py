@@ -1,6 +1,7 @@
 from reportlab.platypus import Paragraph, Spacer, PageBreak
 from .instruction_pdf_generator import InstructionPdfGenerator
 from .util.pdf_styles import PdfStyles
+from app.models.connection import ConnectionModel
 
 
 class InstructionExportService:
@@ -29,7 +30,7 @@ class InstructionExportService:
     def filter_connections(self, devices, connections):
         filtered_connections = [
             connection for connection in connections
-            if connection[0] in devices or connection[2] in devices
+            if connection[0] in devices or connection[1] in devices
         ]
         return filtered_connections
 
