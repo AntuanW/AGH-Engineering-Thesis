@@ -8,6 +8,5 @@ def test_basic_connection():
 def test_find_all():
     repo = ConnectionRepository()
     connections = repo.find_all()
-    print(connections)
     assert len(connections) == 1
     assert type(connections[0]) is ConnectionModel
