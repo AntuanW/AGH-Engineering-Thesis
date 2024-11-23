@@ -1,7 +1,8 @@
 from pydantic import BaseModel
-from bson import ObjectId
+from .pydantic_object_id import PydanticObjectId
+
 
 class InUseDeviceModel(BaseModel):
-    device_id: ObjectId
+    device_id: PydanticObjectId
     name: str
     group: str
