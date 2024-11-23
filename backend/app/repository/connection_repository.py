@@ -4,7 +4,13 @@ from ..models.connection import ConnectionModel
 
 class ConnectionRepository(BaseRepository):
     def get_collection(self):
-        return self.db['connection']
+        return self.db['connections']
 
     def insert(self, connection: ConnectionModel):
         return super().insert(connection.model_dump())
+
+    def find_all(self):
+        connections = self.find()
+        if not connections:
+            return None
+        return list(D)
