@@ -9,8 +9,3 @@ class ConnectionRepository(BaseRepository):
     def insert(self, connection: ConnectionModel):
         return super().insert(connection.model_dump())
 
-    def find_all(self):
-        connections = self.find()
-        if not connections:
-            return None
-        return list(D)
