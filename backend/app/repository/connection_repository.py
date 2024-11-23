@@ -9,3 +9,9 @@ class ConnectionRepository(BaseRepository):
     def insert(self, connection: ConnectionModel):
         return super().insert(connection.model_dump())
 
+    def find_all(self) -> list[ConnectionModel] | None:
+        connections = self.find({})
+        if not connections:
+            return None
+        return [ConnectionModel(**connection.get('connection', {})) for connection in
+                connections]
