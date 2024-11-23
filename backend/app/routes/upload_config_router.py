@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse, Response
 from bson.objectid import ObjectId
 
 from app.resources.FileService import FileService, FileType
-from app.decryptor.decryptor_service import DecryptorService, PktDecryptor
+from app.decryptor.decryptor_service import DecryptorService
 from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
 from app.repository.decrypted_xml_repository import DecryptedXMLRepository
@@ -58,7 +58,6 @@ async def upload_pkt(
 @router.get("/decrypt_pkt")
 def decrypt_pkt(
         name: str,
-        decrypted_xml_repository: DecryptedXMLRepository = Depends(DecryptedXMLRepository),
         file_service: FileService = Depends(FileService),
         decryptor_service: DecryptorService = Depends(DecryptorService),
         force_overwrite: bool = False
