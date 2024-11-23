@@ -15,7 +15,6 @@ class DeviceRepository(BaseRepository):
 
     def find_by_id(self, device_id: ObjectId) -> DeviceModel | None:
         device_dict: dict = self.find_one({'_id': device_id})
-        print(device_dict)
         if not device_dict:
             return None
         return DeviceModel(**device_dict)
