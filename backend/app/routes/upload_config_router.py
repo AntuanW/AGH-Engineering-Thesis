@@ -24,8 +24,8 @@ router = APIRouter(prefix="/config_upload")
 @router.post("/upload_pkt")
 async def upload_pkt(
         file: UploadFile = File(...),
-        file_service: FileService = Depends(FileService)
-        , force_overwrite: bool = False
+        file_service: FileService = Depends(FileService),
+        force_overwrite: bool = False
 ) -> Response:
     """
     Uploads a PKT file to server. The file must have a .pkt extension.
@@ -64,15 +64,10 @@ def decrypt_pkt(
 ) -> JSONResponse:
     """
     Decrypts a PKT file to XML and returns the content
-    :param decrypted_xml_repository:
     :param name: Name of the target PKT file (must be previously uploaded!).
                  The prefix without '.pkt' is enough.
     :param force_overwrite: Whether to overwrite an existing XML file with the same name
-    :return: XML file
-
-    CAUTION: THIS ENDPOINT CRASHES THE SWAGGER INTERFACE!!!
-    The generated XMLs are huge, and it supposedly runs out of memory.
-    Please use CURL for testing.
+    :return: JSONResponse
     """
     base_name = file_service.strip_name(name)
 
