@@ -11,5 +11,4 @@ class ConnectionRepository(BaseRepository):
 
     def find_all(self) -> list[ConnectionModel] | None:
         connections = self.find({})
-        return [ConnectionModel(**connection.get('connection', {})) for connection in
-                connections]
+        return [ConnectionModel(**connection) for connection in connections]
