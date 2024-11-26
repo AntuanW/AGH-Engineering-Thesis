@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from .pydantic_object_id import PydanticObjectId
+from .rack import RackModel
 
 
 class LabGroupModel(BaseModel):
     group: int
-    rack_id: PydanticObjectId
+    rack: RackModel
