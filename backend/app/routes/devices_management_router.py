@@ -44,13 +44,13 @@ async def delete_device(
 ) -> Response:
     try:
         device_id = ObjectId(device_id)
-        affected_files: int = device_repository.delete({"_id": device_id})
+        n_affected: int = device_repository.delete({"_id": device_id})
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="device_id has invalid format.")
     except DatabaseException:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Something went wrong with database connection.")
 
-    if not affected_files:
+    if not n_affected:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"There is no device with id: {device_id} in database.")
 
     return Response(status_code=status.HTTP_200_OK)
