@@ -11,8 +11,6 @@ class InUseDeviceRepository(BaseRepository):
 
     def find_all(self) -> list[InUseDeviceModel] | None:
         in_use_devices = self.find({})
-        if not in_use_devices:
-            return None
         return [InUseDeviceModel(**in_use_device.get('in_use_device', {})) for in_use_device in
                 in_use_devices]
 
