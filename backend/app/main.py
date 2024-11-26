@@ -5,6 +5,7 @@ from app.routes import upload_config_router
 from app.logging_setup import setup_logging
 from pathlib import Path
 
+
 app = FastAPI()
 
 app.add_middleware(

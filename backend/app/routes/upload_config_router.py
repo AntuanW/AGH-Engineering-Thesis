@@ -5,7 +5,7 @@ from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends
 from fastapi.responses import JSONResponse, Response
 from bson.objectid import ObjectId
 
-from app.resources.FileService import FileService, FileType
+from decryptor.file_service import FileService
 from app.decryptor.decryptor_service import DecryptorService
 from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
@@ -36,22 +36,18 @@ async def upload_pkt(
     if not file.filename.endswith(".pkt"):
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid file type")
 
-    name = file_service.strip_name(file.filename)
-
-    if file_service.check_file_exists(name, FileType.PKT) and not force_overwrite:
-        logging.error(f"File {name} already exists and force_overwrite was set to False")
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"File {name}.pkt already exists.")
-
     try:
         content = file.file.read()
-        file_service.save_pkt(file.filename, content)
+        file_service.save_file(content, file.filename, force_overwrite=force_overwrite)
+    except FileExistsError as fee:
+        logging.error(fee)
+        raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
     except Exception as ex:
-        logging.error(f"An error occurred while trying to save the pkt file: {ex}")
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Error while reading file: {ex}")
-
+        logging.error(ex)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
     finally:
         await file.close()
-        logging.info(f"Successfully uploaded and saved {name}")
+        logging.info(f"Successfully uploaded and saved {file.filename}")
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -60,28 +56,19 @@ def decrypt_pkt(
         name: str,
         file_service: FileService = Depends(FileService),
         decryptor_service: DecryptorService = Depends(DecryptorService),
-        force_overwrite: bool = False
 ) -> JSONResponse:
     """
-    Decrypts a PKT file to XML and returns the content
+    Decrypts a PKT file to XML and saves the content to database
     :param name: Name of the target PKT file (must be previously uploaded!).
-                 The prefix without '.pkt' is enough.
-    :param force_overwrite: Whether to overwrite an existing XML file with the same name
     :return: JSONResponse
     """
-    base_name = file_service.strip_name(name)
 
-    if not file_service.check_file_exists(base_name, FileType.PKT):
-        logging.error(f"File {base_name} does not exist.")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"File {name}.pkt does not exist.")
+    if not file_service.check_file_exists(name):
+        logging.error(f"File {name} does not exist.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"File {name} does not exist.")
 
-    if file_service.check_file_exists(base_name, FileType.XML) and not force_overwrite:
-        logging.error(f"File {name} already exists and force_overwrite was set to False")
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"File {name}.xml already exists.")
+    xml_path = decryptor_service.decrypt_pkt(name)
 
-    decryptor_service.decrypt_pkt(base_name)
-
-    xml_path = file_service.get_path(base_name, FileType.XML)
     xml_id = decryptor_service.save_xml_to_database(xml_path)
     response = {
         "xml_id": xml_id
