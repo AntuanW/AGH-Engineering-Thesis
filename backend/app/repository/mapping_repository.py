@@ -16,8 +16,7 @@ class MappingRepository(BaseRepository):
         return super().insert(mapping.model_dump())
 
     def find_devices_by_group(self, lab_group: int):
-        collection = self.get_collection()
-        mapping = collection.find_one({'group': lab_group})
+        mapping: dict = self.find_one({'group': lab_group})
         if not mapping:
             return []
         mapped_devices = mapping.get('mapped_devices')
