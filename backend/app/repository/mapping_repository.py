@@ -1,5 +1,7 @@
 from .base_repository import BaseRepository
 from pymongo.collection import Collection
+
+from .exceptions.repository_exceptions import NotFoundException
 from ..models.mapping import MappingModel
 from ..models.mapped_device import MappedDeviceModel
 from pydantic.networks import IPvAnyAddress
@@ -18,8 +20,12 @@ class MappingRepository(BaseRepository):
     def find_devices_by_group(self, lab_group: int):
         mapping: dict = self.find_one({'group': lab_group})
         if not mapping:
-            return []
+            raise NotFoundException(f"Lab group {lab_group} not found.")
+
         mapped_devices = mapping.get('mapped_devices')
+        if not mapped_devices:
+            raise NotFoundException(f"No mapped devices found for lab group {lab_group}.")
+
         devices = []
         for device in mapped_devices:
             d = MappedDeviceModel(

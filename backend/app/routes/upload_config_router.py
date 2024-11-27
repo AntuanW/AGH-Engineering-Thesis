@@ -10,6 +10,8 @@ from app.decryptor.decryptor_service import DecryptorService, PktDecryptor
 from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
 from app.repository.decrypted_xml_repository import DecryptedXMLRepository
+from app.repository.mapping_repository import MappingRepository
+from app.repository.exceptions.repository_exceptions import NotFoundException
 from app.config_upload.config_upload_service import ConfigUploadService
 from app.config_upload.exceptions.config_upload_exceptions import DeviceBuildError, DeviceConfigError, \
     DeviceConnectionError
@@ -100,32 +102,29 @@ async def extract_config(
     return JSONResponse(content=response, status_code=status.HTTP_200_OK)
 
 
-@router.post("/topologies/{topology_id}/configure-devices")
+@router.post("/configure_devices/{lab_group}")
 async def configure_devices(
-        topology_id: str,
-        topology_repository: TopologyRepository = Depends(TopologyRepository),
+        lab_group: int,
+        mapping_repository: MappingRepository = Depends(MappingRepository),
         config_upload_service: ConfigUploadService = Depends(ConfigUploadService)
 ) -> JSONResponse:
     try:
-        topology_id = ObjectId(topology_id)
-    except InvalidId:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
-
-    topology = topology_repository.find_one({"_id": ObjectId(topology_id)})
-    if not topology:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topology not found")
+        mapped_devices = mapping_repository.find_devices_by_group(lab_group)
+    except NotFoundException as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Error: {e}")
 
     try:
-        devices = config_upload_service.build_netmiko_devices(topology.get('topology'))
+        netmiko_devices = config_upload_service.build_netmiko_devices(mapped_devices)
     except DeviceBuildError:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to build device")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to build device")
 
     try:
-        config_upload_service.upload_configs(devices)
+        config_upload_service.upload_configs(netmiko_devices)
     except DeviceConnectionError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Connection error while configuring devices. Error: {e}")
     except DeviceConfigError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to send config to device. Error: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Failed to send config to device. Error: {e}")
 
-    return JSONResponse(content="Config uploaded successfully", status_code=status.HTTP_200_OK)
+    return JSONResponse(content=f"Config for group {lab_group} uploaded successfully", status_code=status.HTTP_200_OK)
