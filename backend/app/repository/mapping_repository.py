@@ -31,3 +31,14 @@ class MappingRepository(BaseRepository):
                 mapped_config=device.get('mapped_config'))
             devices.append(d)
         return devices
+
+    def find_all(self):
+        mappings = self.find({})
+        if not mappings:
+            return []
+        result = []
+        for mapping in mappings:
+            lab_group = mapping.get('lab_group')
+            devices = self.find_devices_by_group(lab_group)
+            result.append(MappingModel(lab_group=lab_group, mapped_devices=devices))
+        return result
