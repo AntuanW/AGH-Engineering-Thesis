@@ -141,3 +141,4 @@ def get_device_mapping(topology_id: str,
         return JSONResponse(content=jsonable_encoder(mappings), status_code=status.HTTP_200_OK)
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
+

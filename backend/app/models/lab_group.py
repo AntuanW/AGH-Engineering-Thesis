@@ -3,5 +3,5 @@ from .rack import RackModel
 
 
 class LabGroupModel(BaseModel):
-    group_number: int
+    lab_group_number: int
     rack: RackModel

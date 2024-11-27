@@ -47,11 +47,18 @@ class BaseRepository(ABC, Generic[T]):
         return self.get_collection().find_one(query)
 
     def find_object(self, query) -> T | None:
-        return self._collection_type(**self.get_collection().find_one(query))
+        result = self.get_collection().find_one(query)
+        if result is None:
+            return None
+        return self._collection_type(**result)
 
     def update(self, query, update_values) -> int:
         result = self.get_collection().update_one(query, {"$set": update_values})
         return result.modified_count
+
+    def upsert(self, query, new_value) -> int:
+        result = self.get_collection().update_one(query, {"$set": new_value}, upsert=True)
+        return result.upserted_id
 
     def delete(self, query) -> int:
         result = self.get_collection().delete_many(query)
