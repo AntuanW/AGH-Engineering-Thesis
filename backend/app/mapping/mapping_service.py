@@ -22,7 +22,7 @@ class MappingService:
         self._device_repo = device_repo
         self._topology_repo = topology_repo
 
-    def get_device_mapping(self, topology_id: str, group_numbers: list[int]) -> list[MappingModel]:
+    def get_device_mappings(self, topology_id: str, group_numbers: list[int]) -> list[MappingModel]:
         topology_id = ObjectId(topology_id)
         topology = self._topology_repo.find_object({"_id": topology_id})
 
@@ -58,7 +58,6 @@ class MappingService:
             port = available_rack_ports.pop(-1)
 
             for available_device in available_rack_devices:
-                print(available_device.device_type, device_info.dev_type)
                 if available_device.device_type == device_info.dev_type:
                     available_rack_devices.remove(available_device)
                     break

@@ -136,7 +136,7 @@ async def configure_devices(
 @router.get("topologies/{topology_id}/mapping")
 def get_device_mapping(topology_id: str, mapping_service: MappingService = Depends(MappingService)):
     try:
-        mapping: MappingModel = mapping_service.get_device_mapping(topology_id)
+        mapping: MappingModel = mapping_service.get_device_mappings(topology_id)
         return JSONResponse(content=mapping.__dict__, status_code=status.HTTP_200_OK)
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")

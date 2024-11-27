@@ -41,7 +41,7 @@ class BaseRepository(ABC, Generic[T]):
         return list(self.get_collection().find(query))
 
     def find_objects(self, query) -> list[T]:
-        return [self._collection_type(**self.get_collection().find(query))]
+        return [self._collection_type(**x) for x in self.get_collection().find(query)]
 
     def find_one(self, query) -> dict:
         return self.get_collection().find_one(query)
