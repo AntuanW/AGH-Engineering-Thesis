@@ -1,12 +1,15 @@
 import logging
 
 from bson.errors import InvalidId
-from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends
+from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends, Query
 from fastapi.responses import JSONResponse, Response
+from fastapi.encoders import jsonable_encoder
 from bson.objectid import ObjectId
 
 from app.decryptor.file_service import FileService
 from app.decryptor.decryptor_service import DecryptorService
+from app.mapping.mapping_service import MappingService
+from app.models.mapping import MappingModel
 from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
 from app.repository.decrypted_xml_repository import DecryptedXMLRepository
@@ -132,3 +135,24 @@ async def configure_devices(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to send config to device. Error: {e}")
 
     return JSONResponse(content="Config uploaded successfully", status_code=status.HTTP_200_OK)
+
+@router.get("/topologies/{topology_id}/mapping")
+def get_device_mapping(topology_id: str,
+                       group_id: list[int] | None = Query(default=None),
+                       mapping_service: MappingService = Depends(MappingService)):
+    try:
+        mappings: list[MappingModel] = mapping_service.get_device_mappings(topology_id, group_id)
+        return JSONResponse(content=jsonable_encoder(mappings), status_code=status.HTTP_200_OK)
+    except InvalidId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
+    except Exception as ex:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@router.get("/topologies/{topology_id}/instructions")
+def get_mapping_instructions(topology_id: str,
+                             group_id: list[int] | None = Query(default=None),
+                             mapping_service: MappingService = Depends(MappingService)):
+
+    mappings = mapping_service.get_mappings_by_topology_id(topology_id, group_id)
+    instructions = mapping_service.get_setup_instructions(mappings)
+    return JSONResponse(content=jsonable_encoder(instructions), status_code=status.HTTP_200_OK)
