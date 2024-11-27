@@ -25,7 +25,7 @@ class BaseRepository(ABC):
     @abstractmethod
     def insert(self, document):
         result = self.get_collection().insert_one(document)
-        return str(result.inserted_id)
+        return result.inserted_id
 
     def find(self, query):
         return list(self.get_collection().find(query))
@@ -38,5 +38,9 @@ class BaseRepository(ABC):
         return result.modified_count
 
     def delete(self, query):
+        result = self.get_collection().delete_many(query)
+        return result.deleted_count
+
+    def delete_one(self, query):
         result = self.get_collection().delete_one(query)
         return result.deleted_count
