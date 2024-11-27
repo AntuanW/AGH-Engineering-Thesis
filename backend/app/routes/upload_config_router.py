@@ -5,7 +5,7 @@ from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends
 from fastapi.responses import JSONResponse, Response
 from bson.objectid import ObjectId
 
-from decryptor.file_service import FileService
+from app.decryptor.file_service import FileService
 from app.decryptor.decryptor_service import DecryptorService
 from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
