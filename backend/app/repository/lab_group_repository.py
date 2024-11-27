@@ -9,3 +9,6 @@ class LabGroupRepository(BaseRepository[LabGroupModel]):
 
     def insert(self, lab_group: LabGroupModel):
         return super().insert(lab_group.model_dump())
+
+    def get_all_group_ids(self) -> list[int]:
+        return [group.lab_group_number for group in self.find_objects({})]

@@ -24,12 +24,25 @@ class MappingService:
         self._topology_repo = topology_repo
         self._mapping_repo = mapping_repo
 
+    def get_mappings_by_topology_id(self, topology_id: str, group_numbers: list | None = None):
+        if group_numbers is None:
+            group_numbers = self._lab_group_repo.get_all_group_ids()
+
+        topology = self._topology_repo.find_object({"_id": ObjectId(topology_id)})
+        if topology is None:
+            raise KeyError(f"No topology with id {topology_id}.")
+
+        mappings = self._mapping_repo.find_objects({"topology_name": topology.name, "lab_group_number": {"$in": group_numbers}})
+        if len(mappings) == 0:
+            raise KeyError(f"No mappings found. Please generate them first.")
+        return mappings
+
     def get_device_mappings(self, topology_id: str, group_numbers: list[int] | None) -> list[MappingModel]:
         topology_id = ObjectId(topology_id)
         topology = self._topology_repo.find_object({"_id": topology_id})
 
         if group_numbers is None:
-            group_numbers = [group.lab_group_number for group in self._lab_group_repo.find_objects({})]
+            group_numbers = self._lab_group_repo.get_all_group_ids()
 
         mapping_list = []
         for group_number in group_numbers:
@@ -111,7 +124,7 @@ class MappingService:
             instructions[mapping.lab_group_number] = self.get_setup_instructions_for_mapping(mapping)
         return instructions
 
-    def get_setup_instructions_for_mapping(self, mapping: MappingModel) -> str:
+    def get_setup_instructions_for_mapping(self, mapping: MappingModel) -> list[str]:
         instructions = [f"SETUP GUIDE FOR GROUP #{mapping.lab_group_number}"]
         connections = set()
         for mapped_device in mapping.mapped_devices:
@@ -124,6 +137,6 @@ class MappingService:
         instructions.append(f"Find config ports with IP {ip}")
         for mapped_device in mapping.mapped_devices:
             instructions.append(f"Connect {mapped_device.name} to config port {mapped_device.port}")
-        return "\n".join(instructions)
+        return instructions
 
 
