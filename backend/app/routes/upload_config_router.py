@@ -13,6 +13,8 @@ from app.repository.decrypted_xml_repository import DecryptedXMLRepository
 from app.config_upload.config_upload_service import ConfigUploadService
 from app.config_upload.exceptions.config_upload_exceptions import DeviceBuildError, DeviceConfigError, \
     DeviceConnectionError
+from app.mapping.mapping_service import MappingService
+from app.models.mapping import MappingModel
 
 router = APIRouter(prefix="/config_upload")
 
@@ -129,3 +131,12 @@ async def configure_devices(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to send config to device. Error: {e}")
 
     return JSONResponse(content="Config uploaded successfully", status_code=status.HTTP_200_OK)
+
+
+@router.get("topologies/{topology_id}/mapping")
+def get_device_mapping(topology_id: str, mapping_service: MappingService = Depends(MappingService)):
+    try:
+        mapping: MappingModel = mapping_service.get_device_mapping(topology_id)
+        return JSONResponse(content=mapping.__dict__, status_code=status.HTTP_200_OK)
+    except InvalidId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
