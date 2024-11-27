@@ -37,20 +37,26 @@ class BaseRepository(ABC, Generic[T]):
         result = self.get_collection().insert_one(document)
         return result.inserted_id
 
-    def find(self, query) -> list[T]:
+    def find(self, query) -> list:
+        return list(self.get_collection().find(query))
+
+    def find_objects(self, query) -> list[T]:
         return [self._collection_type(**self.get_collection().find(query))]
 
-    def find_one(self, query) -> T | None:
+    def find_one(self, query) -> dict:
+        return self.get_collection().find_one(query)
+
+    def find_object(self, query) -> T | None:
         return self._collection_type(**self.get_collection().find_one(query))
 
-    def update(self, query, update_values):
+    def update(self, query, update_values) -> int:
         result = self.get_collection().update_one(query, {"$set": update_values})
         return result.modified_count
 
-    def delete(self, query):
+    def delete(self, query) -> int:
         result = self.get_collection().delete_many(query)
         return result.deleted_count
 
-    def delete_one(self, query):
+    def delete_one(self, query) -> int:
         result = self.get_collection().delete_one(query)
         return result.deleted_count

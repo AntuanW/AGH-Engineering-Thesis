@@ -24,7 +24,7 @@ class MappingService:
 
     def get_device_mapping(self, topology_id: str, group_numbers: list[int]) -> list[MappingModel]:
         topology_id = ObjectId(topology_id)
-        topology = TopologyModel(**self._topology_repo.find_one({"_id": topology_id}))
+        topology = self._topology_repo.find_object({"_id": topology_id})
 
         mapping_list = []
         for group_number in group_numbers:
@@ -37,7 +37,7 @@ class MappingService:
         return mapping_list
 
     def _get_device_mapping_for_lab_group(self, topology: TopologyModel, group_number: int) -> list[MappedDeviceModel]:
-        group = LabGroupModel(**self._lab_group_repo.find_one({"group_number": group_number}))
+        group = self._lab_group_repo.find_object({"group_number": group_number})
         if group is None:
             raise KeyError(f"Group {group} does not exist.")
 
@@ -50,7 +50,7 @@ class MappingService:
                                  topology: TopologyModel,
                                  rack: RackModel) -> dict[str, MappedDeviceModel]:
 
-        available_rack_devices: list[DeviceModel] = self._device_repo.find({"rack_id": rack.rack_id})
+        available_rack_devices: list[DeviceModel] = self._device_repo.find_objects({"rack_id": rack.rack_id})
         available_rack_ports = rack.config_ports[::-1]  # so that smallest ports are popped from end of list in O(1)
 
         mapped_devices = {}
