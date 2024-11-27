@@ -2,7 +2,7 @@ from .base_repository import BaseRepository
 from ..models.topology import TopologyModel
 
 
-class TopologyRepository(BaseRepository):
+class TopologyRepository(BaseRepository[TopologyModel]):
     def get_collection(self):
         return self.db['topology']
 
