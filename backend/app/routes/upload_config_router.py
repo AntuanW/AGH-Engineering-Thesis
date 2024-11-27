@@ -1,8 +1,7 @@
-import logging
-
 from bson.errors import InvalidId
-from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends
+from fastapi import APIRouter, File, UploadFile, status, HTTPException, Depends, Query
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.encoders import jsonable_encoder
 from bson.objectid import ObjectId
 
 from app.resources.FileService import FileService, FileType
@@ -133,10 +132,12 @@ async def configure_devices(
     return JSONResponse(content="Config uploaded successfully", status_code=status.HTTP_200_OK)
 
 
-@router.get("topologies/{topology_id}/mapping")
-def get_device_mapping(topology_id: str, mapping_service: MappingService = Depends(MappingService)):
+@router.get("/topologies/{topology_id}/mapping")
+def get_device_mapping(topology_id: str,
+                       group_id: list[int] | None = Query(default=None),
+                       mapping_service: MappingService = Depends(MappingService)):
     try:
-        mapping: MappingModel = mapping_service.get_device_mappings(topology_id)
-        return JSONResponse(content=mapping.__dict__, status_code=status.HTTP_200_OK)
+        mappings: list[MappingModel] = mapping_service.get_device_mappings(topology_id, group_id)
+        return JSONResponse(content=jsonable_encoder(mappings), status_code=status.HTTP_200_OK)
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")

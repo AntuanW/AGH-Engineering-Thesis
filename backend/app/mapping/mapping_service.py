@@ -22,9 +22,12 @@ class MappingService:
         self._device_repo = device_repo
         self._topology_repo = topology_repo
 
-    def get_device_mappings(self, topology_id: str, group_numbers: list[int]) -> list[MappingModel]:
+    def get_device_mappings(self, topology_id: str, group_numbers: list[int] | None) -> list[MappingModel]:
         topology_id = ObjectId(topology_id)
         topology = self._topology_repo.find_object({"_id": topology_id})
+
+        if group_numbers is None:
+            group_numbers = [group.group_number for group in self._lab_group_repo.find_objects({})]
 
         mapping_list = []
         for group_number in group_numbers:
