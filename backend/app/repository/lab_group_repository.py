@@ -1,6 +1,6 @@
 from .base_repository import BaseRepository
 from pymongo.collection import Collection
-from ..models.lab_group import LabGroupModel
+from app.models.lab_group import LabGroupModel
 
 
 class LabGroupRepository(BaseRepository):

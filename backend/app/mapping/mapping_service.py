@@ -10,6 +10,7 @@ from app.models.topology import TopologyModel
 from app.repository.device_repository import DeviceRepository
 from app.repository.lab_group_repository import LabGroupRepository
 from app.repository.topology_repository import TopologyRepository
+from app.models.device import DeviceModel
 
 
 class MappingService:
@@ -21,24 +22,24 @@ class MappingService:
         self._device_repo = device_repo
         self._topology_repo = topology_repo
 
-    def get_device_mapping(self, topology_id: str, lab_group_ids: list[int]) -> list[MappingModel]:
+    def get_device_mapping(self, topology_id: str, group_numbers: list[int]) -> list[MappingModel]:
         topology_id = ObjectId(topology_id)
-        topology = self._topology_repo.find_one({"_id": topology_id})
+        topology = TopologyModel(**self._topology_repo.find_one({"_id": topology_id}))
 
         mapping_list = []
-        for group_id in lab_group_ids:
-            mapped_devices = self._get_device_mapping_for_lab_group(topology, group_id)
+        for group_number in group_numbers:
+            mapped_devices = self._get_device_mapping_for_lab_group(topology, group_number)
             mapping_list.append(MappingModel(
-                lab_group=group_id,
+                lab_group=group_number,
                 mapped_devices=mapped_devices
             ))
 
         return mapping_list
 
-    def _get_device_mapping_for_lab_group(self, topology: TopologyModel, group_id: int) -> list[MappedDeviceModel]:
-        group = LabGroupModel(**self._lab_group_repo.find_one({"id": group_id}))
+    def _get_device_mapping_for_lab_group(self, topology: TopologyModel, group_number: int) -> list[MappedDeviceModel]:
+        group = LabGroupModel(**self._lab_group_repo.find_one({"group_number": group_number}))
         if group is None:
-            raise KeyError(f"Group with id {group_id} does not exist.")
+            raise KeyError(f"Group {group} does not exist.")
 
         mapped_devices = self._map_devices_by_criteria(topology, group.rack)
         mapped_devices = self._map_device_connections(topology, mapped_devices)
@@ -49,7 +50,7 @@ class MappingService:
                                  topology: TopologyModel,
                                  rack: RackModel) -> dict[str, MappedDeviceModel]:
 
-        available_rack_devices = rack.devices[:]
+        available_rack_devices: list[DeviceModel] = self._device_repo.find({"rack_id": rack.rack_id})
         available_rack_ports = rack.config_ports[::-1]  # so that smallest ports are popped from end of list in O(1)
 
         mapped_devices = {}
@@ -57,6 +58,7 @@ class MappingService:
             port = available_rack_ports.pop(-1)
 
             for available_device in available_rack_devices:
+                print(available_device.device_type, device_info.dev_type)
                 if available_device.device_type == device_info.dev_type:
                     available_rack_devices.remove(available_device)
                     break

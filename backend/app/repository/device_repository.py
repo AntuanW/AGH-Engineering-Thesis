@@ -1,7 +1,7 @@
 from bson import ObjectId
 
 from .base_repository import BaseRepository
-from ..models.device import DeviceModel
+from app.models.device import DeviceModel
 from pymongo.collection import Collection
 
 
