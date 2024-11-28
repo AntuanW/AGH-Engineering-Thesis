@@ -8,7 +8,7 @@ from datetime import datetime
 import os
 
 
-class InstructionPdfGenerator:
+class StudentInstructionPdfGenerator:
     def __init__(self):
         self.current_datetime = datetime.now()
         self.filename = f"instruction_{self.current_datetime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"

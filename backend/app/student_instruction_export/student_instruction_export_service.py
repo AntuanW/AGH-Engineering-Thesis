@@ -1,12 +1,12 @@
 from reportlab.platypus import Paragraph, Spacer, PageBreak
-from .student_instruction_pdf_generator import InstructionPdfGenerator
+from .student_instruction_pdf_generator import StudentInstructionPdfGenerator
 from .util.pdf_styles import PdfStyles
 from ..models.mapping import MappingModel
 
 
-class InstructionExportService:
+class StudentInstructionExportService:
     def __init__(self):
-        self.pdf_generator = InstructionPdfGenerator()
+        self.pdf_generator = StudentInstructionPdfGenerator()
         self.styles = PdfStyles()
 
     def export_instructions(self, mappings: list[MappingModel]):
