@@ -1,7 +1,6 @@
 from netmiko import ConnectHandler
 
-USERNAME = ''
-PASSWORD = ''
+
 
 
 class NetmikoDevice:
@@ -10,8 +9,6 @@ class NetmikoDevice:
         self.device_type = device_type
         self.ip = ip
         self.port = port
-        self.username = USERNAME
-        self.password = PASSWORD
         self.config = config
         self.connection = None
 
@@ -19,9 +16,7 @@ class NetmikoDevice:
         self.connection = ConnectHandler(
             device_type=self.device_type,
             ip=self.ip,
-            port=self.port,
-            username=self.username,
-            password=self.password
+            port=self.port
         )
 
     def disconnect(self):
