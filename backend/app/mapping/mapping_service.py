@@ -118,25 +118,5 @@ class MappingService:
 
         return mapped_devices
 
-    def get_setup_instructions(self, mapping_list: list[MappingModel]) -> dict[int, str]:
-        instructions = {}
-        for mapping in mapping_list:
-            instructions[mapping.lab_group_number] = self.get_setup_instructions_for_mapping(mapping)
-        return instructions
-
-    def get_setup_instructions_for_mapping(self, mapping: MappingModel) -> list[str]:
-        instructions = [f"SETUP GUIDE FOR GROUP #{mapping.lab_group_number}"]
-        connections = set()
-        for mapped_device in mapping.mapped_devices:
-            connections.update(mapped_device.neighbours)
-        for connection in connections:
-            instructions.append(f"Connect {connection.origin_name}:{connection.from_interface} "
-                                f"-> {connection.neighbour_name}:{connection.to_interface}")
-
-        ip = self._lab_group_repo.find_object({"lab_group_number": mapping.lab_group_number}).rack.config_port_ip_address
-        instructions.append(f"Find config ports with IP {ip}")
-        for mapped_device in mapping.mapped_devices:
-            instructions.append(f"Connect {mapped_device.name} to config port {mapped_device.port}")
-        return instructions
 
 

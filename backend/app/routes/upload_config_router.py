@@ -147,12 +147,3 @@ def get_device_mapping(topology_id: str,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
     except Exception as ex:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-@router.get("/topologies/{topology_id}/instructions")
-def get_mapping_instructions(topology_id: str,
-                             group_id: list[int] | None = Query(default=None),
-                             mapping_service: MappingService = Depends(MappingService)):
-
-    mappings = mapping_service.get_mappings_by_topology_id(topology_id, group_id)
-    instructions = mapping_service.get_setup_instructions(mappings)
-    return JSONResponse(content=jsonable_encoder(instructions), status_code=status.HTTP_200_OK)
