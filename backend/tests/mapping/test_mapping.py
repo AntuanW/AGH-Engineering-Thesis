@@ -12,7 +12,3 @@ class TestMapping:
 
         service = MappingService(LabGroupRepository(), DeviceRepository(), TopologyRepository(), MappingRepository())
         mappings = service.get_device_mappings(topology_id, [1, 2])
-
-        print(*service.get_setup_instructions(mappings).values(), sep="\n\n")
-
-
