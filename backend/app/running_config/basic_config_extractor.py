@@ -3,7 +3,8 @@ import re
 import logging
 from fastapi import Depends
 
-from .util.device_config_types import DeviceConfigInfo, DeviceType, XmlConfigConstants, DeviceLink
+from .utils.device_config_constants import XmlConfigConstants
+from .dto.topology_response_dto import DeviceConfigInfo, DeviceType, DeviceLink
 from .exceptions.config_extraction_exceptions import (
     InvalidDecryptedXmlFormatException,
     DeviceJsonParseException

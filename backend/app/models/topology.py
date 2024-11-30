@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from app.running_config.util.device_config_types import DeviceConfigInfo
+from app.running_config.dto.topology_response_dto import DeviceConfigInfo
 
 
 class TopologyModel(BaseModel):

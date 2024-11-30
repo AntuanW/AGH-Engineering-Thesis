@@ -2,7 +2,7 @@ from pathlib import Path
 import xmltodict
 from app.running_config.running_config_service import RunningConfigService
 from app.running_config.basic_config_extractor import BasicConfigExtractor
-from app.running_config.util.device_config_types import XmlConfigConstants
+from app.running_config.utils.device_config_constants import XmlConfigConstants
 from app.config_upload.config_upload_service import ConfigUploadService
 
 IP = '172.17.145.20'

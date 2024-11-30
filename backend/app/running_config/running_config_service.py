@@ -3,7 +3,7 @@ from fastapi import Depends
 
 from ..models.topology import TopologyModel
 from .basic_config_extractor import BasicConfigExtractor
-from .util.device_config_types import DeviceConfigInfo
+from .dto.topology_response_dto import DeviceConfigInfo
 from .exceptions.config_extraction_exceptions import (
     InvalidDecryptedXmlFormatException,
     DeviceJsonParseException

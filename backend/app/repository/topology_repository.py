@@ -2,7 +2,7 @@ from bson.objectid import ObjectId
 
 from .base_repository import BaseRepository
 from ..models.topology import TopologyModel
-from app.running_config.util.device_config_types import DeviceConfigInfo
+from app.running_config.dto.topology_response_dto import DeviceConfigInfo
 
 
 class TopologyRepository(BaseRepository[TopologyModel]):

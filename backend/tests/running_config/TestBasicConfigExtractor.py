@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 from app.running_config.basic_config_extractor import BasicConfigExtractor
-from app.running_config.util.device_config_types import DeviceConfigInfo, DeviceType
+from app.running_config.utils.device_config_constants import DeviceConfigInfo, DeviceType
 from app.running_config.exceptions.config_extraction_exceptions import XmlOpenException
 
 RESOURCES_PATH = Path(__file__).parent

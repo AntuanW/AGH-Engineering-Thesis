@@ -10,7 +10,7 @@ from app.repository.exceptions.repository_exceptions import DatabaseException
 from app.models.device import DeviceModel
 
 
-router = APIRouter(prefix="/devices_management")
+router = APIRouter(prefix="/devices-management")
 
 
 @router.get("/devices")

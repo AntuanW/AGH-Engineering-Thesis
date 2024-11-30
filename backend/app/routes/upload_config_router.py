@@ -19,12 +19,12 @@ from app.config_upload.exceptions.config_upload_exceptions import (
     DeviceConfigError,
     DeviceConnectionError
 )
-from app.running_config.util.device_config_types import DeviceConfigInfo
+from app.running_config.dto.topology_response_dto import DeviceConfigInfo
 
-router = APIRouter(prefix="/config_upload")
+router = APIRouter(prefix="/config-upload")
 
 
-@router.post("/upload_pkt")
+@router.post("/upload-pkt")
 async def upload_pkt(
         file: UploadFile = File(...),
         file_service: FileService = Depends(FileService),
@@ -54,7 +54,7 @@ async def upload_pkt(
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/decrypt_pkt")
+@router.get("/decrypt-pkt")
 def decrypt_pkt(
         name: str,
         file_service: FileService = Depends(FileService),
@@ -81,7 +81,7 @@ def decrypt_pkt(
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
-@router.post("/extract_xml/{xml_id}")
+@router.post("/extract-xml/{xml_id}")
 async def extract_config(
         xml_id: str,
         running_config_service: RunningConfigService = Depends(RunningConfigService),

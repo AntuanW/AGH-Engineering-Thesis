@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from app.running_config.util.device_config_types import DeviceType
+from app.running_config.utils.device_config_constants import DeviceType
 
 
 class DeviceModel(BaseModel):

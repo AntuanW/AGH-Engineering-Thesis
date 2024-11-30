@@ -1,5 +1,5 @@
 from .netmiko_connection_config import NetmikoConnectionConfig
-from ..running_config.util.device_config_types import DeviceConfigInfo
+from ..running_config.dto.topology_response_dto import DeviceConfigInfo
 from .util.netmiko_device import NetmikoDevice
 from .exceptions.config_upload_exceptions import DeviceConfigError, DeviceConnectionError
 from netmiko import NetmikoTimeoutException, NetmikoAuthenticationException, ConfigInvalidException
