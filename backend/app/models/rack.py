@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from pydantic.networks import IPvAnyAddress
 
 
 class RackModel(BaseModel):
-    ip_address: IPvAnyAddress
-    port_range: list[int]
+    rack_id: int
+    config_port_ip_address: str
+    config_ports: list[int]

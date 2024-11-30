@@ -5,7 +5,7 @@ from ..models.topology import TopologyModel
 from app.running_config.util.device_config_types import DeviceConfigInfo
 
 
-class TopologyRepository(BaseRepository):
+class TopologyRepository(BaseRepository[TopologyModel]):
     def get_collection(self):
         return self.db['topology']
 

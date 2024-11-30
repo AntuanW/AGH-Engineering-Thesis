@@ -1,12 +1,11 @@
 from bson import ObjectId
 
 from .base_repository import BaseRepository
-from ..models.device import DeviceModel
+from app.models.device import DeviceModel
 from pymongo.collection import Collection
 
 
-class DeviceRepository(BaseRepository):
-
+class DeviceRepository(BaseRepository[DeviceModel]):
     def get_collection(self) -> Collection:
         return self.db.get_collection('devices')
 

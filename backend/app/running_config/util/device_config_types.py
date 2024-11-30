@@ -1,6 +1,8 @@
 from enum import Enum
 from pydantic import BaseModel
 
+from app.config_upload.util.netmiko_types import NetmikoDeviceType
+
 
 class XmlConfigConstants:
     PACKET_TRACER_TAG: str = "PACKETTRACER5"
@@ -26,6 +28,9 @@ class DeviceType(str, Enum):
     ROUTER = 'ROUTER'
     SWITCH = 'SWITCH'
     UNKNOWN = 'UNKNOWN'
+
+    def to_netmiko_device_type(self):
+        return NetmikoDeviceType.CISCO_IOS if self.value != self.UNKNOWN else NetmikoDeviceType.UNKNOWN
 
 
 class DeviceLink(BaseModel):
