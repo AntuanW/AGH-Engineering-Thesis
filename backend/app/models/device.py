@@ -1,6 +1,10 @@
 from pydantic import BaseModel
+from app.running_config.util.device_config_types import DeviceType
+
 
 class DeviceModel(BaseModel):
     name: str
-    type: str
-    # TODO device model
+    device_type: DeviceType
+    interfaces: list[str]
+    commands: list[str]
+    rack_id: int

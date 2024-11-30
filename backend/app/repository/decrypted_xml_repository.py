@@ -1,7 +1,7 @@
 from .base_repository import BaseRepository
 
 
-class DecryptedXMLRepository(BaseRepository):
+class DecryptedXMLRepository(BaseRepository[dict]):
     def get_collection(self):
         return self.db['decrypted_xml']
 

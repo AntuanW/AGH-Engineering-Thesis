@@ -1,13 +1,10 @@
-import xmltodict
 import json
 import re
 import logging
-from pathlib import Path
 from fastapi import Depends
 
 from .util.device_config_types import DeviceConfigInfo, DeviceType, XmlConfigConstants, DeviceLink
 from .exceptions.config_extraction_exceptions import (
-    XmlOpenException,
     InvalidDecryptedXmlFormatException,
     DeviceJsonParseException
 )
@@ -19,16 +16,6 @@ class BasicConfigExtractor:
 
     def get_topology_config_from_xml(self, decrypted_xml: dict) -> list[DeviceConfigInfo]:
         return self._get_devices_configs_info(decrypted_xml)
-
-    def _create_dict_from_xml(self, decrypted_xml_path: str | Path) -> dict:
-        # TODO: relocate xml to dict conversion to other decryption related service
-        try:
-            with open(decrypted_xml_path, 'r', encoding='utf-8') as file:
-                xml = file.read()
-        except OSError as exc:
-            raise XmlOpenException(f"Failed to open/read {decrypted_xml_path} - {exc}")
-
-        return xmltodict.parse(xml)
 
     def _get_devices_configs_info(self, topology_dict: dict) -> list[DeviceConfigInfo]:
         devices_info = []
