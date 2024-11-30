@@ -14,10 +14,14 @@ class StudentInstructionPdfGenerator:
         self.filename = f"instruction_{self.current_datetime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
 
     def generate_pdf(self, content):
+        output_dir = "student_instruction_export/pdf_files"
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         pdfmetrics.registerFont(TTFont('Times New Roman', 'Times.ttf'))
         footer = FooterCanvas(self.current_datetime)
 
-        doc = BaseDocTemplate(os.path.join("pdf_files", self.filename), pagesize=A4)
+        doc = BaseDocTemplate(os.path.join(output_dir, self.filename), pagesize=A4)
 
         frame = Frame(inch, inch, doc.width, doc.height)
         footer_template = PageTemplate(id='header', frames=frame, onPage=footer.on_page)
