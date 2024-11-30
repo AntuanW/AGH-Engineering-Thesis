@@ -110,8 +110,8 @@ class MappingService:
                 ConnectionModel(
                     origin_name=mapped_devices[device_info.dev_id].name,
                     neighbour_name=mapped_devices[neighbour.to_id].name,
-                    from_interface=neighbour.from_if,
-                    to_interface=neighbour.to_if,
+                    from_interface=neighbour.from_iface,
+                    to_interface=neighbour.to_iface,
                 )
                 for neighbour in device_info.dev_neighbours
             ]

@@ -15,9 +15,9 @@ class DeviceType(str, Enum):
 
 class DeviceLink(BaseModel):
     from_id: str
-    from_if: str
+    from_iface: str
     to_id: str
-    to_if: str
+    to_iface: str
 
 
 class DeviceConfigInfo(BaseModel):
