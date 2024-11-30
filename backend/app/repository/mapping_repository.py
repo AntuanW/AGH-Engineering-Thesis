@@ -7,7 +7,7 @@ from ..models.connection import ConnectionModel
 from ..config_upload.util.netmiko_types import NetmikoDeviceType
 
 
-class MappingRepository(BaseRepository):
+class MappingRepository(BaseRepository[MappingModel]):
 
     def get_collection(self) -> Collection:
         return self.db.get_collection('mappings')
