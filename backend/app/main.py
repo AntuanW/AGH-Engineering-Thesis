@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import upload_config_router, devices_management_router
+from app.routes import upload_config_router, devices_management_router, file_export_router
 
 from app.logging_setup import setup_logging
 from pathlib import Path
+
 
 app = FastAPI()
 
@@ -17,6 +18,7 @@ app.add_middleware(
 
 app.include_router(upload_config_router.router)
 app.include_router(devices_management_router.router)
+app.include_router(file_export_router.router)
 
 
 LOG_CONFIG = Path(__file__).parent / 'logging.yaml'
