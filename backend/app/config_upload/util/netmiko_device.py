@@ -1,8 +1,6 @@
 from netmiko import ConnectHandler
 
 
-
-
 class NetmikoDevice:
     def __init__(self, device_type: str, ip: str, port: int, config: list[str]):
         self.ip_address = None
