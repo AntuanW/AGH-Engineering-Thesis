@@ -1,2 +1,8 @@
+from fastapi import Depends
+
+from .utils.file_system_utils import FileSystemUtils
+
+
 class ConfigDownloadService:
-    pass
+    def download_config(self):
+        pass

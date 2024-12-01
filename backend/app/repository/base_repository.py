@@ -1,7 +1,7 @@
 import types
 import typing
 from abc import ABC, abstractmethod
-from typing import TypeVar, Type, Generic
+from typing import TypeVar, Generic
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from .config import MONGODB_URI
