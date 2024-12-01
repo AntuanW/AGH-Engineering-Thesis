@@ -13,5 +13,6 @@ class TestConfigUploadService(unittest.TestCase):
 
         config_upload_service = ConfigUploadService()
         netmiko_devices = config_upload_service.build_netmiko_devices(mapped_devices)
+
         assert len(netmiko_devices) == 3, f"Expected 3 devices, got {len(netmiko_devices)}"
         assert isinstance(netmiko_devices[0], NetmikoDevice), f"Expected NetmikoDevice, got {type(netmiko_devices[0])}"

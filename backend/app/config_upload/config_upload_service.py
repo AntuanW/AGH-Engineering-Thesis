@@ -10,7 +10,7 @@ class ConfigUploadService:
         for device in devices:
             netmiko_device = NetmikoDevice(
                 device_type=device.netmiko_device_type.value,
-                ip=str(device.ip_address),
+                ip=device.ip_address,
                 port=device.port,
                 config=device.mapped_config
             )
