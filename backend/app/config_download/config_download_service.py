@@ -37,4 +37,4 @@ class ConfigDownloadService:
         config_filepath: str = os.path.join(tmpdir_path, config_filename)
         with open(config_filepath, 'w') as config_file:
             config_file.write(running_config)
-            zip_archive.write(config_filepath, os.path.basename(config_filepath))
+        zip_archive.write(config_filepath, os.path.basename(config_filepath))
