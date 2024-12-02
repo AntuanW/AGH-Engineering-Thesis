@@ -15,7 +15,14 @@ class SingleDeviceConfigDto(BaseModel):
     connections: list[Connection]
 
 
+class SingleDeviceConfigDtoV2(BaseModel):
+    name: str
+    ip: IPvAnyNetwork
+    port: int
+
+
 class DownloadConfigsDto(BaseModel):
     lab_name: str
     lab_group: int
-    devices: list[SingleDeviceConfigDto]
+    # TODO: change to final version after tests
+    devices: list[SingleDeviceConfigDtoV2]

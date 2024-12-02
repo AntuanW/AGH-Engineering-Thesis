@@ -2,7 +2,7 @@ from netmiko import BaseConnection, ConnectHandler, redispatch
 import time
 
 import app.config_download.utils.connection_constants as cc
-from .dto.download_request_dto import SingleDeviceConfigDto
+from .dto.download_request_dto import SingleDeviceConfigDto, SingleDeviceConfigDtoV2
 from .config import DEVICE_USERNAME, DEVICE_PASSWORD
 
 
@@ -11,8 +11,20 @@ class NetmikoClient:
     CONN_MODE = "generic_termserver_telnet"
     GLOBAL_DELAY_FACTOR_VALUE = 3.0
     RUNNING_CONFIG_CMD = "show running-config"
+    CDP_NEIGHBORS_CMD = "show cdp neighbors"
 
-    def download_config_from_device(self, device: SingleDeviceConfigDto) -> str:
+    # TODO: change back to SingleDeviceDto when confirmed in tests
+    def download_config_from_device(self, device: SingleDeviceConfigDtoV2) -> str:
+        running_config: str = self._exec_and_save_command(device, self.RUNNING_CONFIG_CMD)
+        return running_config
+
+    def get_device_neighbours(self, device: SingleDeviceConfigDtoV2) -> str:
+        cdp_neighbors: str = self._exec_and_save_command(device, self.CDP_NEIGHBORS_CMD)
+        # TODO: cdp neighbors feedback parsing
+        return cdp_neighbors
+
+
+    def _exec_and_save_command(self, device: SingleDeviceConfigDtoV2, cmd: str) -> str:
         connect_handler: BaseConnection = self._get_connection_handler(
             str(device.ip), device.port, DEVICE_USERNAME, DEVICE_PASSWORD
         )
@@ -28,8 +40,8 @@ class NetmikoClient:
             if not connect_handler.check_enable_mode():
                 connect_handler.enable()
 
-            running_config: str = connect_handler.send_command(self.RUNNING_CONFIG_CMD)
-        return running_config
+            cmd_result: str = connect_handler.send_command(cmd)
+        return cmd_result
 
     def _get_connection_handler(self, ip: str, port: int, uname: str, pwd: str) -> BaseConnection:
         handler_dict: dict = self._build_connection_dict(ip, port, uname, pwd)

@@ -5,20 +5,26 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import FileResponse
 
 from app.config_download.config_download_service import ConfigDownloadService
-from app.config_download.dto.download_request_dto import DownloadConfigsDto
+from app.config_download.dto.download_request_dto import DownloadConfigsDto, DownloadConfigsDto
 
 
 router = APIRouter(prefix="/config-download", tags=["config-download"])
+
+# @router.post("/")
+# async def download_config(
+#         configs_download_info: DownloadConfigsDto,
+#         config_download_service: ConfigDownloadService = Depends(ConfigDownloadService)
+# ) -> FileResponse:
+#     zip_archive_path = config_download_service.get_physical_configs(configs_download_info)
+#     zip_name = os.path.basename(zip_archive_path)
+#     return FileResponse(path=zip_archive_path, filename=zip_name, status_code=200)
 
 @router.post("/")
 async def download_config(
         configs_download_info: DownloadConfigsDto,
         config_download_service: ConfigDownloadService = Depends(ConfigDownloadService)
 ) -> FileResponse:
-    # TODO: exception handling and shit
-    zip_archive_path = config_download_service.get_physical_configs(configs_download_info)
-    zip_name = os.path.basename(zip_archive_path)
-    return FileResponse(path=zip_archive_path, filename=zip_name, status_code=200)
+    pass
 
 @router.get("/download")
 async def download_config():
