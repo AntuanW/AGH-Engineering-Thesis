@@ -57,7 +57,6 @@ class DecryptorService:
         try:
             with open(xml_path, "r") as file:
                 xml = file.read()
-                print(xml)
                 xml_dict: dict = xmltodict.parse(xml)
                 xml_id: str = self.decrypted_xml_repository.insert(xml_dict)
 
