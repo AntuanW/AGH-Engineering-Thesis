@@ -1,5 +1,3 @@
-from http.client import responses
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse, Response
 from bson.objectid import ObjectId
