@@ -13,7 +13,7 @@ Authors: Antoni Wójcik, Grzegorz Piśkorski, Zuzanna Olszówka, Bartłomiej Sł
 - React
 
 ### Requirements
-- python 2.12 or above
+- python 3.12 or above
 - node.js
 - npm
 
