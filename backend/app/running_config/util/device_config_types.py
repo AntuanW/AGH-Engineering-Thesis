@@ -13,6 +13,7 @@ class XmlConfigConstants:
     RUNNING_CONFIG_TAG: str = "RUNNINGCONFIG"
     LINE_TAG: str = "LINE"
     DEVICE_TYPE_TAG: str = "DEVICE_TYPE"
+    SYS_NAME_TAG: str = "SYS_NAME"
     NAME_TAG: str = "NAME"
     TEXT_TAG: str = "#text"
     LINKS_TAG: str = "LINKS"
@@ -27,6 +28,7 @@ class XmlConfigConstants:
 class DeviceType(str, Enum):
     ROUTER = 'ROUTER'
     SWITCH = 'SWITCH'
+    PC = 'PC'
     UNKNOWN = 'UNKNOWN'
 
     def to_netmiko_device_type(self):

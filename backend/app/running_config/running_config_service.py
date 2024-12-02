@@ -14,6 +14,7 @@ class RunningConfigService:
     def __init__(self, extractor: BasicConfigExtractor = Depends(BasicConfigExtractor)):
         self.extractor: BasicConfigExtractor = extractor
 
+    #TODO: Allow the user to provide a name for the topology as a parameter
     def get_configs_for_upload(self, decrypted_xml: dict) -> TopologyModel:
         topology_config: list[DeviceConfigInfo] = []
 
@@ -25,4 +26,4 @@ class RunningConfigService:
         except Exception as exc:
             logging.error(f"Error occurred while extracting configs from xml: {str(exc)}")
 
-        return TopologyModel(topology=topology_config)
+        return TopologyModel(topology=topology_config, name='')

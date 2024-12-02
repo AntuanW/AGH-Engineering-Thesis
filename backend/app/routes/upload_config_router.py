@@ -74,7 +74,7 @@ def decrypt_pkt(
 
     xml_id = decryptor_service.save_xml_to_database(xml_path)
     response = {
-        "xml_id": xml_id
+        "xml_id": str(xml_id)
     }
 
     logging.info("Successfully decrypted XML and uploaded it do database.")
@@ -101,7 +101,7 @@ async def extract_config(
 
     topology_id = topology_repository.insert(topology_config)
     response = {
-        "topology_id": topology_id
+        "topology_id": str(topology_id)
     }
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 

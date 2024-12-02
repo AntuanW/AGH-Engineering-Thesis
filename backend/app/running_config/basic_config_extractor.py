@@ -1,6 +1,7 @@
 import json
 import re
 import logging
+
 from fastapi import Depends
 
 from .util.device_config_types import DeviceConfigInfo, DeviceType, XmlConfigConstants, DeviceLink
@@ -30,10 +31,11 @@ class BasicConfigExtractor:
             dev_type: DeviceType = self._extract_device_type(device)
             if dev_type != DeviceType.UNKNOWN:
                 dev_id: str = self._get_device_id(device)
+                dev_running_config = [] if dev_type == DeviceType.PC else self._extract_running_config_details(device)
                 devices_info.append(DeviceConfigInfo(
                     dev_id=dev_id,
                     dev_type=dev_type,
-                    dev_running_config=self._extract_running_config_details(device),
+                    dev_running_config=dev_running_config,
                     dev_name=self._extract_device_name(device),
                     dev_neighbours=self._get_device_neighbours(dev_id, links)
                 ))
@@ -55,9 +57,8 @@ class BasicConfigExtractor:
         except (ValueError, TypeError) as exc:
             raise DeviceJsonParseException(f"Failed to parse dict to json - {exc}")
 
-        regex: str = r'"' + self.tags.DEVICE_TYPE_TAG + r'": "((\\"|[^"])*)"'
+        regex: str = r'"' + self.tags.SYS_NAME_TAG + r'": "((\\"|[^"])*)"'
         matches: list = re.findall(regex, dev_str)
-
         if len(matches) == 0:
             logging.debug("Undefined device type.")
             return DeviceType.UNKNOWN
