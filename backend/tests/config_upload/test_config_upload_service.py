@@ -1,16 +1,18 @@
 import unittest
-from bson.objectid import ObjectId
 
 from app.config_upload.config_upload_service import ConfigUploadService
-from app.repository.topology_repository import TopologyRepository
+from app.config_upload.util.netmiko_device import NetmikoDevice
+from app.repository.mapping_repository import MappingRepository
+
 
 class TestConfigUploadService(unittest.TestCase):
     def test_build_netmiko_devices(self):
-        topology_repository = TopologyRepository()
-        topology_id = ObjectId('671e6c7c15f4350cff3d7770')
-        topology = topology_repository.find_by_id(topology_id)
+        lab_group_number = 1
+        mapping_repository = MappingRepository()
+        mapped_devices = mapping_repository.find_devices_by_group(lab_group_number)
 
         config_upload_service = ConfigUploadService()
-        devices = config_upload_service.build_netmiko_devices(topology)
-        assert len(devices) == 9, f"Expected 9 devices, got {len(devices)}"
-        assert len(devices[0].config) == 31, f"Expected 31 commands, got {len(devices[0].config)}"
+        netmiko_devices = config_upload_service.build_netmiko_devices(mapped_devices)
+
+        assert len(netmiko_devices) == 3, f"Expected 3 devices, got {len(netmiko_devices)}"
+        assert isinstance(netmiko_devices[0], NetmikoDevice), f"Expected NetmikoDevice, got {type(netmiko_devices[0])}"
