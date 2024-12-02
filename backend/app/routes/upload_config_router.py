@@ -21,7 +21,7 @@ from app.config_upload.exceptions.config_upload_exceptions import (
 )
 from app.running_config.dto.topology_response_dto import DeviceConfigInfo
 
-router = APIRouter(prefix="/config-upload")
+router = APIRouter(prefix="/config-upload", tags=["config-upload"])
 
 
 @router.post("/upload-pkt")

@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse
 from app.config_download.config_download_service import ConfigDownloadService
 from app.config_download.dto.download_request_dto import DownloadConfigsDto
 
-router = APIRouter(prefix="/config-download")
+router = APIRouter(prefix="/config-download", tags=["config-download"])
 
 @router.post("/")
 async def download_config(

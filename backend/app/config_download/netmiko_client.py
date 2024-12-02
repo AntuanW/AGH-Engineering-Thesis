@@ -1,7 +1,7 @@
 from netmiko import BaseConnection, ConnectHandler, redispatch
 import time
 
-import utils.connection_constants as cc
+import app.config_download.utils.connection_constants as cc
 from .dto.download_request_dto import SingleDeviceConfigDto
 from .config import DEVICE_USERNAME, DEVICE_PASSWORD
 
