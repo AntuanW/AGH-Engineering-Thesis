@@ -1,10 +1,10 @@
-from typing import Set, List
 from reportlab.platypus import Paragraph, Spacer, PageBreak, Table
 from .student_instruction_pdf_generator import StudentInstructionPdfGenerator
 from .util.pdf_styles import PdfStyles
 from ..models.connection import ConnectionModel
 from ..models.mapped_device import MappedDeviceModel
 from ..models.mapping import MappingModel
+from ..visualization.topology_visualizer import TopologyVisualizer
 
 
 class StudentInstructionExportService:
@@ -39,6 +39,15 @@ class StudentInstructionExportService:
             content.append(Paragraph("Tabela połączeń:", self.styles.heading1_style))
             content.append(Spacer(1, 12))
             content.append(table)
+            content.append(PageBreak())
+
+            visualizer = TopologyVisualizer(devices_names, connections)
+            graph = visualizer.generate_graph()
+            image = visualizer.draw_graph(graph)
+            content.append(Paragraph(f"Grupa: {group}", self.styles.heading1_style))
+            content.append(Paragraph("Schemat:", self.styles.heading1_style))
+            content.append(Spacer(1, 12))
+            content.append(image)
 
             content.append(Spacer(1, 12))
             content.append(PageBreak())
@@ -46,11 +55,11 @@ class StudentInstructionExportService:
         self.pdf_generator.generate_pdf(content)
         return self.pdf_generator.filename
 
-    def _get_group_devices(self, devices: List[MappedDeviceModel]) -> List[str]:
+    def _get_group_devices(self, devices: list[MappedDeviceModel]) -> list[str]:
         return sorted([device.name for device in devices])
 
-    def _get_device_connections(self, devices: List[MappedDeviceModel]) -> List[ConnectionModel]:
-        connections: Set[ConnectionModel] = set()
+    def _get_device_connections(self, devices: list[MappedDeviceModel]) -> list[ConnectionModel]:
+        connections: set[ConnectionModel] = set()
         for device in devices:
             for connection in device.neighbours:
                 if connection not in connections:

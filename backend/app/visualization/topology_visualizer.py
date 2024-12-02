@@ -1,5 +1,8 @@
 import networkx as nx
-from PIL import Image
+from reportlab.platypus import Image
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import inch
+import PIL
 import matplotlib.pyplot as plt
 from io import BytesIO
 import os
@@ -16,8 +19,8 @@ class TopologyVisualizer:
             'router': os.path.join(os.path.dirname(__file__), "icons", "router.jpg")
         }
         self.images = {
-            'switch': Image.open(self.icons['switch']),
-            'router': Image.open(self.icons['router'])
+            'switch': PIL.Image.open(self.icons['switch']),
+            'router': PIL.Image.open(self.icons['router'])
         }
 
     def draw_graph(self, graph: nx.Graph) -> Image:
@@ -37,7 +40,6 @@ class TopologyVisualizer:
                 origin, neighbour = neighbours
                 x_origin, y_origin = pos[origin]
                 x_neighbour, y_neighbour = pos[neighbour]
-
                 pos[trap_node] = ((x_origin + x_neighbour) / 2, (y_origin + y_neighbour) / 2)
 
         fig, ax = plt.subplots(figsize=(10, 10))
@@ -68,10 +70,10 @@ class TopologyVisualizer:
         plt.close(fig)
         buffer.seek(0)
 
-        return Image.open(buffer)
+        return Image(buffer, width=A4[0]-2*inch, height=A4[0]-2*inch)
 
     # Add to mapped_device device type? ('SWITCH', 'ROUTER')
-    def _generate_graph(self):
+    def generate_graph(self) -> nx.Graph:
         graph = nx.Graph()
         for device in self.devices:
             if device[0] == 'S':
