@@ -16,11 +16,13 @@ class TopologyVisualizer:
         self.connections = connections
         self.icons = {
             'switch': os.path.join(os.path.dirname(__file__), "icons", "switch.jpg"),
-            'router': os.path.join(os.path.dirname(__file__), "icons", "router.jpg")
+            'router': os.path.join(os.path.dirname(__file__), "icons", "router.jpg"),
+            'pc': os.path.join(os.path.dirname(__file__), "icons", "pc.jpg")
         }
         self.images = {
             'switch': PIL.Image.open(self.icons['switch']),
-            'router': PIL.Image.open(self.icons['router'])
+            'router': PIL.Image.open(self.icons['router']),
+            'pc': PIL.Image.open(self.icons['pc'])
         }
 
     def draw_graph(self, graph: nx.Graph) -> Image:
@@ -78,8 +80,10 @@ class TopologyVisualizer:
         for device in self.devices:
             if device[0] == 'S':
                 graph.add_node(device, image=self.images['switch'])
-            else:
+            elif device[0] == 'R':
                 graph.add_node(device, image=self.images['router'])
+            else:
+                graph.add_node(device, image=self.images['pc'])
 
         for i, connection in enumerate(self.connections):
             from_interface = self._shorten_interface_name(connection.from_interface)

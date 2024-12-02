@@ -1,10 +1,22 @@
 import unittest
+import reportlab
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Spacer
 
 from app.visualization.topology_visualizer import TopologyVisualizer
 from app.models.connection import ConnectionModel
 
 
 class TestTopologyVisualizer(unittest.TestCase):
+    def generate_pdf_with_image(self, image):
+        pdf_file = "pdf_files/test_topology_visualization.pdf"
+        doc = SimpleDocTemplate(pdf_file, pagesize=A4)
+
+        content = []
+        content.append(image)
+        content.append(Spacer(1, 12))
+        doc.build(content)
+
     def test_draw_graph(self):
         devices = ['S11', 'S12', 'S13', 'R11', 'R12', 'R13', 'R14']
         connections = [
@@ -26,6 +38,27 @@ class TestTopologyVisualizer(unittest.TestCase):
         ]
 
         visualizer = TopologyVisualizer(devices, connections)
-        graph = visualizer._generate_graph()
+        graph = visualizer.generate_graph()
         image = visualizer.draw_graph(graph)
-        image.show()
+        self.generate_pdf_with_image(image)
+
+    def test_draw_graph_pc(self):
+        devices = ['S11', 'S12', 'S13', 'R11', 'K11', 'K12']
+
+        connections = [
+            ConnectionModel(origin_name='S11', neighbour_name='R11', from_interface='FastEthernet0/3',
+                            to_interface='GigabitEthernet0/0/0'),
+            ConnectionModel(origin_name='S11', neighbour_name='S12', from_interface='FastEthernet0/1',
+                            to_interface='FastEthernet0/1'),
+            ConnectionModel(origin_name='S11', neighbour_name='S13', from_interface='FastEthernet0/2',
+                            to_interface='FastEthernet0/1'),
+            ConnectionModel(origin_name='S12', neighbour_name='K11', from_interface='FastEthernet0/2',
+                            to_interface='FastEthernet0'),
+            ConnectionModel(origin_name='S13', neighbour_name='K12', from_interface='FastEthernet0/2',
+                            to_interface='FastEthernet0'),
+        ]
+
+        visualizer = TopologyVisualizer(devices, connections)
+        graph = visualizer.generate_graph()
+        image = visualizer.draw_graph(graph)
+        self.generate_pdf_with_image(image)
