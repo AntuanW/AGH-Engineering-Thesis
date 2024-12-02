@@ -8,8 +8,14 @@ class Connection(BaseModel):
     original_iface: str
 
 
-class ConfigDownloadDto(BaseModel):
+class SingleDeviceConfigDto(BaseModel):
     name: str
     ip: IPvAnyNetwork
     port: int
     connections: list[Connection]
+
+
+class DownloadConfigsDto(BaseModel):
+    lab_name: str
+    lab_group: int
+    devices: list[SingleDeviceConfigDto]

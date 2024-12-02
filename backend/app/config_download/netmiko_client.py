@@ -2,7 +2,7 @@ from netmiko import BaseConnection, ConnectHandler, redispatch
 import time
 
 import utils.connection_constants as cc
-from .dto.download_request_dto import ConfigDownloadDto
+from .dto.download_request_dto import SingleDeviceConfigDto
 from .config import DEVICE_USERNAME, DEVICE_PASSWORD
 
 
@@ -12,7 +12,7 @@ class NetmikoClient:
     GLOBAL_DELAY_FACTOR_VALUE = 3.0
     RUNNING_CONFIG_CMD = "show running-config"
 
-    def download_config_from_device(self, device: ConfigDownloadDto) -> str:
+    def download_config_from_device(self, device: SingleDeviceConfigDto) -> str:
         connect_handler: BaseConnection = self._get_connection_handler(
             str(device.ip), device.port, DEVICE_USERNAME, DEVICE_PASSWORD
         )
