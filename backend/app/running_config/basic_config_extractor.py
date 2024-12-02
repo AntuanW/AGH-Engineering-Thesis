@@ -2,6 +2,8 @@ import json
 import re
 import logging
 
+from fastapi import Depends
+
 from .util.device_config_types import DeviceConfigInfo, DeviceType, XmlConfigConstants, DeviceLink
 from .exceptions.config_extraction_exceptions import (
     InvalidDecryptedXmlFormatException,
@@ -10,7 +12,7 @@ from .exceptions.config_extraction_exceptions import (
 
 
 class BasicConfigExtractor:
-    def __init__(self, tags: XmlConfigConstants = XmlConfigConstants()):
+    def __init__(self, tags: XmlConfigConstants = Depends(XmlConfigConstants)):
         self.tags = tags
 
     def get_topology_config_from_xml(self, decrypted_xml: dict) -> list[DeviceConfigInfo]:
@@ -19,9 +21,9 @@ class BasicConfigExtractor:
     def _get_devices_configs_info(self, topology_dict: dict) -> list[DeviceConfigInfo]:
         devices_info = []
         devices = (topology_dict[self.tags.PACKET_TRACER_TAG]
-                                [self.tags.NETWORK_TAG]
-                                [self.tags.DEVICES_TAG]
-                                [self.tags.DEVICE_TAG])
+        [self.tags.NETWORK_TAG]
+        [self.tags.DEVICES_TAG]
+        [self.tags.DEVICE_TAG])
 
         links: list[DeviceLink] = self._get_all_links(topology_dict)
 
@@ -43,8 +45,8 @@ class BasicConfigExtractor:
     def _extract_running_config_details(self, device_dict: dict) -> list[str]:
         try:
             dev_running_config: list[str] = (device_dict[self.tags.ENGINE_TAG]
-                                                        [self.tags.RUNNING_CONFIG_TAG]
-                                                        [self.tags.LINE_TAG])
+            [self.tags.RUNNING_CONFIG_TAG]
+            [self.tags.LINE_TAG])
         except KeyError:
             raise InvalidDecryptedXmlFormatException("Config extraction error - invalid format of decrypted xml.")
         return dev_running_config
@@ -67,8 +69,8 @@ class BasicConfigExtractor:
     def _extract_device_name(self, device_dict: dict) -> str:
         try:
             dev_name: str = (device_dict[self.tags.ENGINE_TAG]
-                                        [self.tags.NAME_TAG]
-                                        [self.tags.TEXT_TAG])
+            [self.tags.NAME_TAG]
+            [self.tags.TEXT_TAG])
         except KeyError:
             raise InvalidDecryptedXmlFormatException("Config extraction error - invalid format of decrypted xml.")
         return dev_name
@@ -89,9 +91,9 @@ class BasicConfigExtractor:
 
     def _get_all_links(self, topology_dict: dict) -> list[DeviceLink]:
         links_dict: dict = (topology_dict[self.tags.PACKET_TRACER_TAG]
-                                         [self.tags.NETWORK_TAG]
-                                         [self.tags.LINKS_TAG]
-                                         [self.tags.LINK_TAG])
+        [self.tags.NETWORK_TAG]
+        [self.tags.LINKS_TAG]
+        [self.tags.LINK_TAG])
         links: list[DeviceLink] = []
         for link in links_dict:
             cable: dict = link[self.tags.CABLE_TAG]
