@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from app.config_upload.util.netmiko_types import NetmikoDeviceType
 
 
-class XmlConfigConstants:
+class XmlConfigConstants(BaseModel):
     PACKET_TRACER_TAG: str = "PACKETTRACER5"
     NETWORK_TAG: str = "NETWORK"
     DEVICES_TAG: str = "DEVICES"
@@ -13,6 +13,7 @@ class XmlConfigConstants:
     RUNNING_CONFIG_TAG: str = "RUNNINGCONFIG"
     LINE_TAG: str = "LINE"
     DEVICE_TYPE_TAG: str = "DEVICE_TYPE"
+    SYS_NAME_TAG: str = "SYS_NAME"
     NAME_TAG: str = "NAME"
     TEXT_TAG: str = "#text"
     LINKS_TAG: str = "LINKS"
