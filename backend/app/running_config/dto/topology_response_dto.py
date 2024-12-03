@@ -7,6 +7,7 @@ from app.config_upload.util.netmiko_types import NetmikoDeviceType
 class DeviceType(str, Enum):
     ROUTER = 'ROUTER'
     SWITCH = 'SWITCH'
+    PC = 'PC'
     UNKNOWN = 'UNKNOWN'
 
     def to_netmiko_device_type(self):

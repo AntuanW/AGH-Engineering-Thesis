@@ -1,7 +1,7 @@
 from pathlib import Path
 import xmltodict
 from app.running_config.running_config_service import RunningConfigService
-from app.running_config.basic_config_extractor import BasicConfigExtractor
+from app.running_config.config_extractor import ConfigExtractor
 from app.running_config.utils.device_config_constants import XmlConfigConstants
 from app.config_upload.config_upload_service import ConfigUploadService
 
@@ -13,7 +13,7 @@ XML_PATH = Path(__file__).parent.joinpath("lab-22_11_24.xml")
 xml_dict = xmltodict.parse(open(XML_PATH).read())
 
 constants = XmlConfigConstants()
-basic_config_extractor = BasicConfigExtractor(constants)
+basic_config_extractor = ConfigExtractor(constants)
 
 config_service = RunningConfigService(basic_config_extractor)
 configs = config_service.get_configs_for_upload(xml_dict)

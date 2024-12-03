@@ -14,17 +14,14 @@ class NetmikoClient:
     CDP_NEIGHBORS_CMD = "show cdp neighbors"
 
     # TODO: change back to SingleDeviceDto when confirmed in tests
-    def download_config_from_device(self, device: SingleDeviceConfigDtoV2) -> str:
-        running_config: str = self._exec_and_save_command(device, self.RUNNING_CONFIG_CMD)
-        return running_config
+    def download_config_from_device(self, device: SingleDeviceConfigDtoV2) -> tuple[str, str]:
+        running_config, neighbors_str = self._exec_and_save_command(device, self.RUNNING_CONFIG_CMD, self.CDP_NEIGHBORS_CMD)
+        return running_config, neighbors_str
 
-    def get_device_neighbours(self, device: SingleDeviceConfigDtoV2) -> str:
-        cdp_neighbors: str = self._exec_and_save_command(device, self.CDP_NEIGHBORS_CMD)
-        # TODO: cdp neighbors feedback parsing
-        return cdp_neighbors
-
-
-    def _exec_and_save_command(self, device: SingleDeviceConfigDtoV2, cmd: str) -> str:
+    def _exec_and_save_command(self,
+                               device: SingleDeviceConfigDtoV2,
+                               config_cmd: str,
+                               neighbors_cmd) -> tuple[str, str]:
         connect_handler: BaseConnection = self._get_connection_handler(
             str(device.ip), device.port, DEVICE_USERNAME, DEVICE_PASSWORD
         )
@@ -40,8 +37,10 @@ class NetmikoClient:
             if not connect_handler.check_enable_mode():
                 connect_handler.enable()
 
-            cmd_result: str = connect_handler.send_command(cmd)
-        return cmd_result
+            config_result: str = connect_handler.send_command(config_cmd)
+            neighbors_result: str = connect_handler.send_command(neighbors_cmd)
+
+        return config_result, neighbors_result
 
     def _get_connection_handler(self, ip: str, port: int, uname: str, pwd: str) -> BaseConnection:
         handler_dict: dict = self._build_connection_dict(ip, port, uname, pwd)
