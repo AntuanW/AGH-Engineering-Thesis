@@ -1,4 +1,3 @@
-from ..running_config.dto.topology_response_dto import DeviceConfigInfo
 from ..models.mapped_device import MappedDeviceModel
 from .util.netmiko_device import NetmikoDevice
 from .exceptions.config_upload_exceptions import DeviceConfigError, DeviceConnectionError

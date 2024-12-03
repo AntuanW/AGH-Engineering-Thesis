@@ -20,7 +20,6 @@ from app.config_upload.exceptions.config_upload_exceptions import (
     DeviceConfigError,
     DeviceConnectionError
 )
-from app.running_config.dto.topology_response_dto import DeviceConfigInfo
 
 router = APIRouter(prefix="/config-upload", tags=["config-upload"])
 
