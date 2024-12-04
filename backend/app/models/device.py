@@ -5,7 +5,7 @@ from app.running_config.util.device_config_types import DeviceType
 from enum import Enum
 
 
-class InterfaceType(Enum):
+class InterfaceType(str, Enum):
     GI = "Gi"
     FA = "Fa"
     SERIAL = "Serial"
@@ -16,9 +16,9 @@ class InterfaceType(Enum):
     ESE = "Embedded-Service-Engine"
 
     @staticmethod
-    def from_name(name: str) -> "InterfaceType":
+    def from_name(name: str) -> str:
         for if_type in InterfaceType:
-            if if_type.value in name:
+            if if_type in name:
                 return if_type
 
 
@@ -35,7 +35,6 @@ class Interface(BaseModel):
             if_name = re.findall("^[^0-9]*", name)[0]
             value = re.findall("(?:[0-9]+/)*[0-9]+", name)[0]
             type_ = InterfaceType.from_name(if_name)
-            print(value, type_)
             super().__init__(value=value, type=type_)
         except IndexError:
             raise ValueError(f"Invalid interface name: {name}")
@@ -51,7 +50,6 @@ class Interface(BaseModel):
     def prefix(self) -> str:
         """Returns interface value without port number, ex. 'Gi0/1/5' -> '0/1/' """
         return re.findall("(?:[0-9]/)+|$", self.value)[0]
-
 
 
 class DeviceModel(BaseModel):
