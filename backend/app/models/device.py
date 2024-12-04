@@ -21,6 +21,15 @@ class InterfaceType(str, Enum):
             if if_type in name:
                 return if_type
 
+    def compatible_types(self):
+        match self.value:
+            case InterfaceType.GI:
+                return (InterfaceType.FA,)
+            case InterfaceType.FA:
+                return (InterfaceType.GI,)
+            case _:
+                return ()
+
 
 class Interface(BaseModel):
     type: InterfaceType

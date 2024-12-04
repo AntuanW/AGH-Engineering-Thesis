@@ -131,11 +131,26 @@ class MappingService:
 
         raise ValueError(f"No valid mapping found for {requirements.dev_name} on rack {rack_id}.")
 
-    def _find_best_interface_replacement(self, interface: Interface, device: DeviceModel):
-        target_port = interface.port_number()
-        target_type = InterfaceType.GI if interface.type == InterfaceType.FA else InterfaceType.FA
+    def _find_best_interface_replacement(self, matched_interface: Interface, device: DeviceModel):
+        target_port = matched_interface.port_number()
+        # try the same type but different prefix
         for device_interface in device.interfaces:
-            if device_interface.type == target_type and device_interface.port_number() == target_port:
+            if device_interface.type == matched_interface.type and device_interface.port_number() == target_port:
+                return device_interface
+
+        # try the same type but different port
+        for device_interface in device.interfaces:
+            if device_interface.type == matched_interface.type:
+                return device_interface
+
+        # try another compatible type with same port
+        for device_interface in device.interfaces:
+            if device_interface.type in matched_interface.type.compatible_types() and device_interface.port_number() == target_port:
+                return device_interface
+
+        # try another compatible type with different port
+        for device_interface in device.interfaces:
+            if device_interface.type in matched_interface.type.compatible_types():
                 return device_interface
 
     def _map_device_connections(self,
