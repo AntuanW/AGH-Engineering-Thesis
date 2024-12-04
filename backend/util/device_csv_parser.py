@@ -4,7 +4,7 @@ https://docs.google.com/spreadsheets/d/1NQD9FikpNQElF-OhCDCEOAs8r089ZF-20Y2Koz7Q
 The database should be manually cleared before this operation.
 """
 
-import  csv, pathlib
+import csv, pathlib
 from app.models.device import Interface, DeviceModel
 from app.repository.device_repository import DeviceRepository
 from app.running_config.util.device_config_types import DeviceType

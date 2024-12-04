@@ -1,3 +1,6 @@
+import logging
+from collections import namedtuple
+
 from bson.objectid import ObjectId
 from fastapi import Depends
 
@@ -10,7 +13,11 @@ from app.repository.device_repository import DeviceRepository
 from app.repository.lab_group_repository import LabGroupRepository
 from app.repository.mapping_repository import MappingRepository
 from app.repository.topology_repository import TopologyRepository
-from app.models.device import DeviceModel
+from app.models.device import DeviceModel, Interface, InterfaceType
+from app.running_config.util.device_config_types import DeviceConfigInfo
+
+
+MapWithSubs = namedtuple("MapWithSubs", "mapped_device substitutions")
 
 
 class MappingService:
@@ -74,7 +81,7 @@ class MappingService:
 
     def _map_devices_by_criteria(self,
                                  topology: TopologyModel,
-                                 rack: RackModel) -> dict[str, MappedDeviceModel]:
+                                 rack: RackModel) -> dict[str, (MappedDeviceModel, dict)]:
 
         available_rack_devices: list[DeviceModel] = self._device_repo.find_objects({"rack_id": rack.rack_id})
         available_rack_ports = rack.config_ports[::-1]  # so that smallest ports are popped from end of list in O(1)
@@ -82,13 +89,7 @@ class MappingService:
         mapped_devices = {}
         for device_info in topology.topology:
             port = available_rack_ports.pop(-1)
-
-            for available_device in available_rack_devices:
-                if available_device.device_type == device_info.dev_type:
-                    available_rack_devices.remove(available_device)
-                    break
-            else:
-                raise ValueError(f"There is no device matching required criteria")
+            available_device, iface_substitutions = self._find_best_available_device(device_info, available_rack_devices, rack.rack_id)
 
             mapped_device = MappedDeviceModel(
                 name=available_device.name,
@@ -98,25 +99,60 @@ class MappingService:
                 neighbours=[],
                 mapped_config=device_info.dev_running_config,
             )
-            mapped_devices[device_info.dev_id] = mapped_device
+            mapped_devices[device_info.dev_id] = (mapped_device, iface_substitutions)
 
         return mapped_devices
 
+    def _find_best_available_device(self, requirements: DeviceConfigInfo, available_devices: list[DeviceModel], rack_id: int) -> MapWithSubs:
+        # Remove devices of wrong type
+        available_devices = [dev for dev in available_devices if dev.device_type == requirements.dev_type]
+        # Find devices with matching interfaces
+        available_matching_ifs = []
+        required_interfaces = set(Interface(conn.from_if) for conn in requirements.dev_neighbours)
+        for device in available_devices:
+            if required_interfaces.issubset(device.interfaces):
+                available_matching_ifs.append(device)
+        # Greedily pick one with the least other interfaces
+        if len(available_matching_ifs) > 0:
+            best_device =  min(available_matching_ifs, key=lambda dev: len(dev.interfaces))
+            return MapWithSubs(best_device, {})
+
+        # If there is none available, try substituting Gi and Fa
+        for device in available_devices:
+            missing_interfaces = required_interfaces.difference(device.interfaces)
+            for missing_iface in missing_interfaces:
+                if missing_iface.type not in (InterfaceType.GI, InterfaceType.FA):
+                    break
+            else:
+                # All missing are GI or FA, so the device can be substituted
+                substitutions = {iface: self._find_best_interface_replacement(iface, device) for iface in missing_interfaces}
+                logging.warn(f"No exact match for {requirements.dev_name} found on rack {rack_id}, but a Gi/Fa replacement was mapped.")
+                return MapWithSubs(device, substitutions)
+
+        raise ValueError(f"No valid mapping found for {requirements.dev_name} on rack {rack_id}.")
+
+    def _find_best_interface_replacement(self, interface: Interface, device: DeviceModel):
+        target_port = interface.port_number()
+        target_type = InterfaceType.GI if interface.type == InterfaceType.FA else InterfaceType.FA
+        for device_interface in device.interfaces:
+            if device_interface.type == target_type and device_interface.port_number() == target_port:
+                return device_interface
+
     def _map_device_connections(self,
                                 topology: TopologyModel,
-                                mapped_devices: dict[str, MappedDeviceModel]) -> dict[str, MappedDeviceModel]:
+                                mapped_devices: dict[str, MapWithSubs]) -> dict[str, MappedDeviceModel]:
         for device_info in topology.topology:
-            mapped_devices[device_info.dev_id].neighbours = [
+            mapped_devices[device_info.dev_id].mapped_device.neighbours = [
                 ConnectionModel(
-                    origin_name=mapped_devices[device_info.dev_id].name,
-                    neighbour_name=mapped_devices[neighbour.to_id].name,
-                    from_interface=neighbour.from_if,
-                    to_interface=neighbour.to_if,
+                    origin_name=mapped_devices[device_info.dev_id].mapped_device.name,
+                    neighbour_name=mapped_devices[neighbour.to_id].mapped_device.name,
+                    from_interface=mapped_devices[neighbour.from_id].substitutions.get(neighbour.from_if) or neighbour.from_if,
+                    to_interface=mapped_devices[neighbour.to_id].substitutions.get(neighbour.to_if) or neighbour.to_if
                 )
                 for neighbour in device_info.dev_neighbours
             ]
 
-        return mapped_devices
+        return {name: md.mapped_device for name, md in mapped_devices.items()}
 
 
 
