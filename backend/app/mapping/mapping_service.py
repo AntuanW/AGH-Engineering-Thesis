@@ -81,7 +81,7 @@ class MappingService:
 
     def _map_devices_by_criteria(self,
                                  topology: TopologyModel,
-                                 rack: RackModel) -> dict[str, (MappedDeviceModel, dict)]:
+                                 rack: RackModel) -> dict[str, MapWithSubs]:
 
         available_rack_devices: list[DeviceModel] = self._device_repo.find_objects({"rack_id": rack.rack_id})
         available_rack_ports = rack.config_ports[::-1]  # so that smallest ports are popped from end of list in O(1)
@@ -99,11 +99,11 @@ class MappingService:
                 neighbours=[],
                 mapped_config=device_info.dev_running_config,
             )
-            mapped_devices[device_info.dev_id] = (mapped_device, iface_substitutions)
+            mapped_devices[device_info.dev_id] = MapWithSubs(mapped_device, iface_substitutions)
 
         return mapped_devices
 
-    def _find_best_available_device(self, requirements: DeviceConfigInfo, available_devices: list[DeviceModel], rack_id: int) -> MapWithSubs:
+    def _find_best_available_device(self, requirements: DeviceConfigInfo, available_devices: list[DeviceModel], rack_id: int) -> tuple[DeviceModel, dict]:
         # Remove devices of wrong type
         available_devices = [dev for dev in available_devices if dev.device_type == requirements.dev_type]
         # Find devices with matching interfaces
@@ -142,15 +142,25 @@ class MappingService:
                                 topology: TopologyModel,
                                 mapped_devices: dict[str, MapWithSubs]) -> dict[str, MappedDeviceModel]:
         for device_info in topology.topology:
-            mapped_devices[device_info.dev_id].mapped_device.neighbours = [
-                ConnectionModel(
-                    origin_name=mapped_devices[device_info.dev_id].mapped_device.name,
-                    neighbour_name=mapped_devices[neighbour.to_id].mapped_device.name,
-                    from_interface=mapped_devices[neighbour.from_id].substitutions.get(neighbour.from_if) or neighbour.from_if,
-                    to_interface=mapped_devices[neighbour.to_id].substitutions.get(neighbour.to_if) or neighbour.to_if
-                )
-                for neighbour in device_info.dev_neighbours
-            ]
+            connections = []
+            for neighbour in device_info.dev_neighbours:
+                origin_name = mapped_devices[device_info.dev_id].mapped_device.name
+                neighbour_name = mapped_devices[neighbour.to_id].mapped_device.name
+                from_interface = mapped_devices[neighbour.from_id].substitutions.get(Interface(neighbour.from_if)) or neighbour.from_if
+                to_interface = mapped_devices[neighbour.to_id].substitutions.get(Interface(neighbour.to_if)) or neighbour.to_if
+
+                connections.append(ConnectionModel(origin_name=origin_name, neighbour_name=neighbour_name, from_interface=str(from_interface), to_interface=str(to_interface)))
+
+            mapped_devices[device_info.dev_id].mapped_device.neighbours = connections
+            # mapped_devices[device_info.dev_id].mapped_device.neighbours = [
+            #     ConnectionModel(
+            #         origin_name=mapped_devices[device_info.dev_id].mapped_device.name,
+            #         neighbour_name=mapped_devices[neighbour.to_id].mapped_device.name,
+            #         from_interface=mapped_devices[neighbour.from_id].substitutions.get(neighbour.from_if) or neighbour.from_if,
+            #         to_interface=mapped_devices[neighbour.to_id].substitutions.get(neighbour.to_if) or neighbour.to_if
+            #     )
+            #     for neighbour in device_info.dev_neighbours
+            # ]
 
         return {name: md.mapped_device for name, md in mapped_devices.items()}
 
