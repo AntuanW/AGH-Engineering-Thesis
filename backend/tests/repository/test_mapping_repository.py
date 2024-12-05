@@ -1,10 +1,5 @@
-from unittest.mock import MagicMock
-
-from app.config_upload.util.netmiko_types import NetmikoDeviceType
 from app.repository.mapping_repository import MappingRepository
 from app.models.mapped_device import MappedDeviceModel
-from app.models.connection import ConnectionModel
-from app.models.mapping import MappingModel
 
 
 def test_basic_connection():

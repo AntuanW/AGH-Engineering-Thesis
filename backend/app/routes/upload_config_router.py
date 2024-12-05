@@ -106,24 +106,20 @@ async def extract_config(
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
-@router.post("/configure-devices/{lab_group_number}")
+@router.post("/configure_devices/{lab_group_number}/{topology_id}")
 async def configure_devices(
         lab_group_number: int,
+        topology_id: str,
         mapping_repository: MappingRepository = Depends(MappingRepository),
         config_upload_service: ConfigUploadService = Depends(ConfigUploadService)
 ) -> JSONResponse:
-    mapped_devices = mapping_repository.find_devices_by_group(lab_group_number)
+    mapped_devices = mapping_repository.find_devices_by_group(lab_group_number, topology_id)
     if not mapped_devices:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Devices not found for group {lab_group_number}.")
 
     try:
-        netmiko_devices = config_upload_service.build_netmiko_devices(mapped_devices)
-    except DeviceBuildError:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to build netmiko device")
-
-    try:
-        config_upload_service.upload_configs(netmiko_devices)
+        config_upload_service.upload_configs(mapped_devices)
     except DeviceConnectionError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f"Connection error while configuring devices. Error: {e}")
