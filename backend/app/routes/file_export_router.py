@@ -7,7 +7,7 @@ from app.repository.mapping_repository import MappingRepository
 from app.student_instruction_export.student_instruction_export_service import StudentInstructionExportService
 import os
 
-router = APIRouter(prefix="/file_export")
+router = APIRouter(prefix="/file_export", tags=["pdf-export"])
 
 
 @router.get("/export_student_instructions/{topology_id}")

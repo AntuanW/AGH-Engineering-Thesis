@@ -16,12 +16,11 @@ from app.repository.topology_repository import TopologyRepository
 from app.repository.decrypted_xml_repository import DecryptedXMLRepository
 from app.config_upload.config_upload_service import ConfigUploadService
 from app.config_upload.exceptions.config_upload_exceptions import (
-    DeviceBuildError,
     DeviceConfigError,
     DeviceConnectionError
 )
 
-router = APIRouter(prefix="/config_upload")
+router = APIRouter(prefix="/config_upload", tags=["upload-config"])
 
 
 @router.post("/upload_pkt")
