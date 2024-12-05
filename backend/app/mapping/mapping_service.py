@@ -94,6 +94,7 @@ class MappingService:
         for device_info in topology.topology:
             port = available_rack_ports.pop(-1)
             available_device, iface_substitutions = self._find_best_available_device(device_info, available_rack_devices, rack.rack_id)
+            available_rack_devices.remove(available_device)
 
             mapped_device = MappedDeviceModel(
                 name=available_device.name,
