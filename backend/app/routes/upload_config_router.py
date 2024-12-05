@@ -106,13 +106,14 @@ async def extract_config(
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
-@router.post("/configure-devices/{lab_group_number}")
+@router.post("/configure-devices/{topology_id}/{lab_group_number}")
 async def configure_devices(
+        topology_id: str,
         lab_group_number: int,
         mapping_repository: MappingRepository = Depends(MappingRepository),
         config_upload_service: ConfigUploadService = Depends(ConfigUploadService)
 ) -> JSONResponse:
-    mapped_devices = mapping_repository.find_devices_by_group(lab_group_number)
+    mapped_devices = mapping_repository.find_devices_by_group(topology_id, lab_group_number)
     if not mapped_devices:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Devices not found for group {lab_group_number}.")

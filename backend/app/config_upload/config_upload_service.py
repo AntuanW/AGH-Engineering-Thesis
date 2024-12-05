@@ -20,8 +20,7 @@ class ConfigUploadService:
     def upload_configs(self, devices: list[NetmikoDevice]):
         for device in devices:
             try:
-                with device:
-                    device.send_config_commands()
+                device.send_config()
             except NetmikoTimeoutException as e:
                 raise DeviceConnectionError(f"Failed to connect to {device.ip}:{device.port}. Error: {e}")
             except NetmikoAuthenticationException as e:

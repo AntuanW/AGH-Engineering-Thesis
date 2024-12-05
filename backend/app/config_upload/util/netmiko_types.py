@@ -2,5 +2,5 @@ from enum import Enum
 
 
 class NetmikoDeviceType(str, Enum):
-    CISCO_IOS = 'cisco_ios'
+    CISCO_IOS = 'generic_termserver_telnet'
     UNKNOWN = 'UNKNOWN'

@@ -6,6 +6,8 @@ from pydantic.networks import IPvAnyAddress
 from ..models.connection import ConnectionModel
 from ..config_upload.util.netmiko_types import NetmikoDeviceType
 
+from bson.objectid import ObjectId
+
 
 class MappingRepository(BaseRepository[MappingModel]):
 
@@ -15,8 +17,8 @@ class MappingRepository(BaseRepository[MappingModel]):
     def insert(self, mapping: MappingModel):
         return super().insert(mapping.model_dump())
 
-    def find_devices_by_group(self, lab_group_number: int):
-        mapping: MappingModel = self.find_object({'lab_group_number': lab_group_number})
+    def find_devices_by_group(self, topology_id: str, lab_group_number: int):
+        mapping: MappingModel = self.find_object({'topology_id': topology_id, 'lab_group_number': lab_group_number})
         if not mapping:
             return []
         devices = mapping.mapped_devices
