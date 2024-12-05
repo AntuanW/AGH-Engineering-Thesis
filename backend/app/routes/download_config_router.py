@@ -24,7 +24,9 @@ async def download_config(
         configs_download_info: DownloadConfigsDto,
         config_download_service: ConfigDownloadService = Depends(ConfigDownloadService)
 ) -> FileResponse:
-    pass
+    zip_archive_path = config_download_service.get_physical_configs(configs_download_info)
+    zip_name = os.path.basename(zip_archive_path)
+    return FileResponse(path=zip_archive_path, filename=zip_name, status_code=200)
 
 @router.get("/download")
 async def download_config():
