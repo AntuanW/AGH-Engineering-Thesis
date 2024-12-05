@@ -1,9 +1,8 @@
 from netmiko import BaseConnection, ConnectHandler, redispatch
 import time
-from pydantic import BaseModel
 
 from .config import DEVICE_USERNAME, DEVICE_PASSWORD
-import netmiko_constants as nc
+import app.common.netmiko.netmiko_constants as nc
 from app.models.mapped_device import MappedDeviceModel
 from .netmiko_action import NetmikoAction
 from .netmiko_device import NetmikoDevice
