@@ -58,14 +58,14 @@ class MappingService:
         for group_number in group_numbers:
             mapped_devices = self._get_device_mapping_for_lab_group(topology, group_number)
             mapping_list.append(MappingModel(
-                topology_name=topology.name,
+                topology_id=str(topology_id),
                 lab_group_number=group_number,
                 mapped_devices=mapped_devices
             ))
 
         for mapping in mapping_list:
             self._mapping_repo.upsert({
-                "topology_name": topology.name,
+                "topology_id": topology_id,
                 "lab_group_number": mapping.lab_group_number
             },
             mapping.model_dump())

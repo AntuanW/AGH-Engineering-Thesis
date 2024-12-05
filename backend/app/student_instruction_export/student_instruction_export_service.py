@@ -6,10 +6,18 @@ from ..models.connection import ConnectionModel
 from ..models.mapped_device import MappedDeviceModel
 from ..models.mapping import MappingModel
 
+from fastapi import Depends
+from bson import ObjectId
+
+from ..repository.topology_repository import TopologyRepository
+
 
 class StudentInstructionExportService:
-    def __init__(self):
-        self.pdf_generator = StudentInstructionPdfGenerator()
+    def __init__(self,
+                 topology_repo = Depends(TopologyRepository),
+                 pdf_generator= Depends(StudentInstructionPdfGenerator)):
+        self.topology_repo: TopologyRepository = topology_repo
+        self.pdf_generator: StudentInstructionPdfGenerator = pdf_generator
         self.styles = PdfStyles()
 
     def export_instructions(self, mappings: list[MappingModel]):
@@ -18,8 +26,10 @@ class StudentInstructionExportService:
             group = mapping.lab_group_number
             devices = mapping.mapped_devices
             devices_names = self._get_group_devices(devices)
+            topology_name = self.topology_repo.find_object({"_id": ObjectId(mapping.topology_id)}).name
+
             content.append(Paragraph("Instrukcja", self.styles.title_style))
-            content.append(Paragraph(f"{mapping.topology_name}", self.styles.italics_style))
+            content.append(Paragraph(f"{topology_name}", self.styles.italics_style))
             content.append(Spacer(1, 12))
 
             content.append(Paragraph(f"Grupa: {group}", self.styles.heading1_style))

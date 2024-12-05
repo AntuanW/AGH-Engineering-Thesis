@@ -93,8 +93,8 @@ async def extract_config(
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
 
-    topology_dict = decrypted_xml_repository.find_one({"_id": ObjectId(topology_id)})
-    topology_config = running_config_service.get_configs_for_upload(topology_dict)
+    xml_model = decrypted_xml_repository.find_object({"_id": ObjectId(topology_id)})
+    topology_config = running_config_service.get_configs_for_upload(xml_model)
 
     if not topology_config.topology:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Topology was either empty or invalid.")
