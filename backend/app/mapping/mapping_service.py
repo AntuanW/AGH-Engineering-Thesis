@@ -14,7 +14,7 @@ from app.repository.lab_group_repository import LabGroupRepository
 from app.repository.mapping_repository import MappingRepository
 from app.repository.topology_repository import TopologyRepository
 from app.models.device import DeviceModel, Interface, InterfaceType
-from app.running_config.util.device_config_types import DeviceConfigInfo
+from app.running_config.util.device_config_types import DeviceConfigInfo, DeviceType
 
 
 class MapWithSubs(NamedTuple):
@@ -97,6 +97,7 @@ class MappingService:
 
             mapped_device = MappedDeviceModel(
                 name=available_device.name,
+                device_type=device_info.dev_type,
                 netmiko_device_type=device_info.dev_type.to_netmiko_device_type(),
                 ip_address=rack.config_port_ip_address,
                 port=port,
@@ -110,6 +111,16 @@ class MappingService:
     def _find_best_available_device(self, requirements: DeviceConfigInfo, available_devices: list[DeviceModel], rack_id: int) -> MapWithSubs:
         # Remove devices of wrong type
         available_devices = [dev for dev in available_devices if dev.device_type == requirements.dev_type]
+
+        if requirements.dev_type == DeviceType.PC:
+            try:
+                return MapWithSubs(
+                    available_devices[0],
+                    {Interface(requirements.dev_neighbours[0].from_if): available_devices[0].interfaces[0]}
+                )
+            except IndexError:
+                raise ValueError(f"No available PCs on rack {rack_id} or any available has no matching interfaces")
+
         # Find devices with matching interfaces
         available_matching_ifs = []
         required_interfaces = set(Interface(conn.from_if) for conn in requirements.dev_neighbours)
