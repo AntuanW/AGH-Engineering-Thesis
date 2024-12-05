@@ -14,6 +14,7 @@ class InterfaceType(str, Enum):
     ATM = "ATM"
     UCSEL = "ucsel"
     ESE = "Embedded-Service-Engine"
+    PC = "PC"
 
     @staticmethod
     def from_name(name: str) -> str:

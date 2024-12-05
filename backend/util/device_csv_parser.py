@@ -27,30 +27,53 @@ def parse_ifaces(interface_names: list[str]):
     return parsed_ifaces
 
 
-filename = pathlib.Path(__file__).parent.joinpath("devices.csv")
-with open(filename) as file:
-    dr = csv.DictReader(file)
-    models = []
+def insert_devices_from_csv(filename: str | pathlib.Path):
+    with open(filename) as file:
+        dr = csv.DictReader(file)
+        models = []
 
-    for device in dr:
-        ifaces = device["interfaces"].split(",")
-        ifaces = [x.strip() for x in ifaces if x != ""]
-        ifaces = parse_ifaces(ifaces.copy())
+        for device in dr:
+            ifaces = device["interfaces"].split(",")
+            ifaces = [x.strip() for x in ifaces if x != ""]
+            ifaces = parse_ifaces(ifaces.copy())
 
-        device_model = DeviceModel(
-            name=device["name"],
-            rack_id=device["rack_id"],
-            device_type=DeviceType(device["device_type"]),
-            interfaces=ifaces,
-            commands=[]
-        )
-        models.append(device_model)
+            device_model = DeviceModel(
+                name=device["name"],
+                rack_id=device["rack_id"],
+                device_type=DeviceType(device["device_type"]),
+                interfaces=ifaces,
+                commands=[]
+            )
+            models.append(device_model)
 
-    print("Inserting to database...")
+        print("Inserting to database...")
+        repo = DeviceRepository()
+        for device in models:
+            print(f"{device.name:10}{device.interfaces}")
+            repo.insert(device)
+
+def insert_pcs():
+    pc_numbers = []
+    for g in range(1, 7):
+        pc_numbers.extend((10*g + 2, 10*g + 3, 10*g + 4))
+
+    pc_devices = [DeviceModel(
+        name="K" + str(number),
+        device_type=DeviceType.PC,
+        interfaces=[Interface("PC0")],
+        commands=[],
+        rack_id=number // 10
+    ) for number in pc_numbers]
+
     repo = DeviceRepository()
-    for device in models:
-        print(f"{device.name:10}{device.interfaces}")
-        repo.insert(device)
+    for pc in pc_devices:
+        print(pc)
+        repo.insert(pc)
+
+if __name__ == '__main__':
+    ...
+    # insert_pcs()
+    # insert_devices_from_csv(filename = pathlib.Path(__file__).parent.joinpath("devices.csv"))
 
 
 

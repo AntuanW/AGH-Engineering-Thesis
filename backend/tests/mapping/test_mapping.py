@@ -20,3 +20,10 @@ class TestMapping:
         gi_3x_switch_mappings = service.get_device_mappings(topology_id, [1])
         assert "interface GigabitEthernet0/0/1" not in gi_3x_switch_mappings[0].mapped_devices[1].mapped_config
         assert "interface GigabitEthernet0/1" in gi_3x_switch_mappings[0].mapped_devices[1].mapped_config
+
+    def test_pc_mapping(self):
+        topology_id = "674dc9e90fa37090ceb638c6"
+
+        service = MappingService(LabGroupRepository(), DeviceRepository(), TopologyRepository(), MappingRepository())
+        mappings = service.get_device_mappings(topology_id, [1])
+        print(*mappings, sep="\n")
