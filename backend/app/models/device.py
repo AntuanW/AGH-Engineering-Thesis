@@ -6,10 +6,10 @@ from enum import Enum
 
 
 class InterfaceType(str, Enum):
-    GI = "Gi"
-    FA = "Fa"
+    GI = "GigabitEthernet"
+    FA = "FastEthernet"
+    TE = "TenGigabitEthernet"
     SERIAL = "Serial"
-    TEL = "Te"
     VLAN = "Vlan"
     ATM = "ATM"
     UCSEL = "ucsel"
@@ -18,15 +18,17 @@ class InterfaceType(str, Enum):
     @staticmethod
     def from_name(name: str) -> str:
         for if_type in InterfaceType:
-            if if_type in name:
+            if if_type[:2] in name:
                 return if_type
 
     def compatible_types(self):
         match self.value:
             case InterfaceType.GI:
-                return (InterfaceType.FA,)
+                return InterfaceType.FA, InterfaceType.TE
             case InterfaceType.FA:
-                return (InterfaceType.GI,)
+                return InterfaceType.GI, InterfaceType.TE
+            case InterfaceType.TE:
+                return InterfaceType.FA, InterfaceType.GI
             case _:
                 return ()
 

@@ -1,5 +1,5 @@
 import logging
-from collections import namedtuple
+from typing import NamedTuple
 
 from bson.objectid import ObjectId
 from fastapi import Depends
@@ -17,7 +17,10 @@ from app.models.device import DeviceModel, Interface, InterfaceType
 from app.running_config.util.device_config_types import DeviceConfigInfo
 
 
-MapWithSubs = namedtuple("MapWithSubs", "mapped_device substitutions")
+class MapWithSubs(NamedTuple):
+    mapped_device: MappedDeviceModel
+    substitutions: dict[Interface, Interface]
+
 
 
 class MappingService:
@@ -76,8 +79,9 @@ class MappingService:
 
         mapped_devices = self._map_devices_by_criteria(topology, group.rack)
         mapped_devices = self._map_device_connections(topology, mapped_devices)
+        mapped_devices = self._substitute_running_configs(mapped_devices)
 
-        return list(mapped_devices.values())
+        return [md.mapped_device for name, md in mapped_devices.items()]
 
     def _map_devices_by_criteria(self,
                                  topology: TopologyModel,
@@ -103,7 +107,7 @@ class MappingService:
 
         return mapped_devices
 
-    def _find_best_available_device(self, requirements: DeviceConfigInfo, available_devices: list[DeviceModel], rack_id: int) -> tuple[DeviceModel, dict]:
+    def _find_best_available_device(self, requirements: DeviceConfigInfo, available_devices: list[DeviceModel], rack_id: int) -> MapWithSubs:
         # Remove devices of wrong type
         available_devices = [dev for dev in available_devices if dev.device_type == requirements.dev_type]
         # Find devices with matching interfaces
@@ -131,7 +135,7 @@ class MappingService:
 
         raise ValueError(f"No valid mapping found for {requirements.dev_name} on rack {rack_id}.")
 
-    def _find_best_interface_replacement(self, matched_interface: Interface, device: DeviceModel):
+    def _find_best_interface_replacement(self, matched_interface: Interface, device: DeviceModel) -> Interface:
         target_port = matched_interface.port_number()
         # try the same type but different prefix
         for device_interface in device.interfaces:
@@ -155,7 +159,9 @@ class MappingService:
 
     def _map_device_connections(self,
                                 topology: TopologyModel,
-                                mapped_devices: dict[str, MapWithSubs]) -> dict[str, MappedDeviceModel]:
+                                mapped_devices: dict[str, MapWithSubs]) -> dict[str, MapWithSubs]:
+
+        # TODO: Despaghettify code
         for device_info in topology.topology:
             connections = []
             for neighbour in device_info.dev_neighbours:
@@ -177,7 +183,15 @@ class MappingService:
             #     for neighbour in device_info.dev_neighbours
             # ]
 
-        return {name: md.mapped_device for name, md in mapped_devices.items()}
+        return mapped_devices
 
+    def _substitute_running_configs(self, mapped_devices: dict[str, MapWithSubs]) -> dict[str, MapWithSubs]:
+        for map_with_subs in mapped_devices.values():
+            for sub_from, sub_to in map_with_subs.substitutions.items():
+                running_config = map_with_subs.mapped_device.mapped_config
+                f = str(sub_from)
+                t = str(sub_to)
+                for i in range(len(running_config)):
+                    running_config[i] = running_config[i].replace(f, t)
 
-
+        return mapped_devices
