@@ -14,8 +14,8 @@ from ..repository.topology_repository import TopologyRepository
 
 class StudentInstructionExportService:
     def __init__(self,
-                 topology_repo = Depends(TopologyRepository),
-                 pdf_generator= Depends(StudentInstructionPdfGenerator)):
+                 topology_repo=Depends(TopologyRepository),
+                 pdf_generator=Depends(StudentInstructionPdfGenerator)):
         self.topology_repo: TopologyRepository = topology_repo
         self.pdf_generator: StudentInstructionPdfGenerator = pdf_generator
         self.styles = PdfStyles()
@@ -51,7 +51,8 @@ class StudentInstructionExportService:
             content.append(table)
             content.append(PageBreak())
 
-            visualizer = TopologyVisualizer(devices_names, connections)
+            devices_types = self._get_device_name_to_type_dict(devices)
+            visualizer = TopologyVisualizer(devices_types, connections)
             graph = visualizer.generate_graph()
             image = visualizer.draw_graph(graph)
             content.append(Paragraph(f"Grupa: {group}", self.styles.heading1_style))
@@ -67,6 +68,9 @@ class StudentInstructionExportService:
 
     def _get_group_devices(self, devices: list[MappedDeviceModel]) -> list[str]:
         return sorted([device.name for device in devices])
+
+    def _get_device_name_to_type_dict(self, devices: list[MappedDeviceModel]) -> dict:
+        return {device.name: device.device_type for device in devices}
 
     def _get_device_connections(self, devices: list[MappedDeviceModel]) -> list[ConnectionModel]:
         connections: set[ConnectionModel] = set()

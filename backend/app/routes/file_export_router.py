@@ -12,9 +12,9 @@ router = APIRouter(prefix="/file_export")
 
 @router.get("/export_student_instructions/{topology_id}")
 async def export_instructions(topology_id: str,
-                                mapping_repository: MappingRepository = Depends(MappingRepository),
-                                instruction_export_service: StudentInstructionExportService = Depends(
-                                StudentInstructionExportService)):
+                              mapping_repository: MappingRepository = Depends(MappingRepository),
+                              instruction_export_service: StudentInstructionExportService = Depends(
+                                  StudentInstructionExportService)):
     """
     Returns a PDF file with instructions on how to connect devices in laboratory room.
     :return: PDF file

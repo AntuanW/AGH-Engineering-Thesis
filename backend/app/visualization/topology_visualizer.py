@@ -8,10 +8,22 @@ from io import BytesIO
 import os
 
 from app.models.connection import ConnectionModel
+from app.running_config.util.device_config_types import DeviceType
+
+
+def shorten_interface_name(interface_name: str) -> str:
+    if interface_name.startswith("GigabitEthernet"):
+        return "GE" + interface_name[15:]
+    elif interface_name.startswith("FastEthernet"):
+        return "FE" + interface_name[12:]
+    elif interface_name.startswith("TenGigabitEthernet"):
+        return "TE" + interface_name[18:]
+    else:
+        return interface_name
 
 
 class TopologyVisualizer:
-    def __init__(self, devices: list[str], connections: list[ConnectionModel]):
+    def __init__(self, devices: dict, connections: list[ConnectionModel]):
         self.devices = devices
         self.connections = connections
         self.icons = {
@@ -19,11 +31,13 @@ class TopologyVisualizer:
             'router': os.path.join(os.path.dirname(__file__), "icons", "router.jpg"),
             'pc': os.path.join(os.path.dirname(__file__), "icons", "pc.jpg")
         }
-        self.images = {
-            'switch': PIL.Image.open(self.icons['switch']),
-            'router': PIL.Image.open(self.icons['router']),
-            'pc': PIL.Image.open(self.icons['pc'])
-        }
+        self.images = {}
+        try:
+            self.images['switch'] = PIL.Image.open(self.icons['switch'])
+            self.images['router'] = PIL.Image.open(self.icons['router'])
+            self.images['pc'] = PIL.Image.open(self.icons['pc'])
+        except Exception as e:
+            raise FileNotFoundError("One or more device images could not be loaded.")
 
     def draw_graph(self, graph: nx.Graph) -> Image:
         pos = nx.kamada_kawai_layout(graph)
@@ -72,22 +86,21 @@ class TopologyVisualizer:
         plt.close(fig)
         buffer.seek(0)
 
-        return Image(buffer, width=A4[0]-2*inch, height=A4[0]-2*inch)
+        return Image(buffer, width=A4[0] - 2 * inch, height=A4[0] - 2 * inch)
 
-    # Add to mapped_device device type? ('SWITCH', 'ROUTER')
     def generate_graph(self) -> nx.Graph:
         graph = nx.Graph()
-        for device in self.devices:
-            if device[0] == 'S':
-                graph.add_node(device, image=self.images['switch'])
-            elif device[0] == 'R':
-                graph.add_node(device, image=self.images['router'])
+        for device_name, device_type in self.devices.items():
+            if device_type == DeviceType.SWITCH:
+                graph.add_node(device_name, image=self.images['switch'])
+            elif device_type == DeviceType.ROUTER:
+                graph.add_node(device_name, image=self.images['router'])
             else:
-                graph.add_node(device, image=self.images['pc'])
+                graph.add_node(device_name, image=self.images['pc'])
 
         for i, connection in enumerate(self.connections):
-            from_interface = self._shorten_interface_name(connection.from_interface)
-            to_interface = self._shorten_interface_name(connection.to_interface)
+            from_interface = shorten_interface_name(connection.from_interface)
+            to_interface = shorten_interface_name(connection.to_interface)
 
             new_node = f"link_{i}"
             graph.add_node(new_node, image=None)
@@ -96,11 +109,3 @@ class TopologyVisualizer:
             graph.add_edge(new_node, connection.neighbour_name, label=to_interface)
 
         return graph
-
-    def _shorten_interface_name(self, interface_name: str) -> str:
-        if interface_name.startswith("GigabitEthernet"):
-            return "GE" + interface_name[15:]
-        elif interface_name.startswith("FastEthernet"):
-            return "FE" + interface_name[12:]
-        else:
-            return interface_name
