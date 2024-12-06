@@ -1,7 +1,7 @@
 from typing import Set, List
 from reportlab.platypus import Paragraph, Spacer, PageBreak, Table
-from .student_instruction_pdf_generator import StudentInstructionPdfGenerator
-from .util.pdf_styles import PdfStyles
+from ..pdf_generator.pdf_generator import PdfGenerator
+from ..pdf_generator.util.pdf_styles import PdfStyles
 from ..models.connection import ConnectionModel
 from ..models.mapped_device import MappedDeviceModel
 from ..models.mapping import MappingModel
@@ -9,7 +9,7 @@ from ..models.mapping import MappingModel
 
 class StudentInstructionExportService:
     def __init__(self):
-        self.pdf_generator = StudentInstructionPdfGenerator()
+        self.pdf_generator = PdfGenerator(output_dir="instructions", name="instruction")
         self.styles = PdfStyles()
 
     def export_instructions(self, mappings: list[MappingModel]):

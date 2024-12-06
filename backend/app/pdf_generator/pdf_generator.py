@@ -6,22 +6,28 @@ from reportlab.pdfbase.ttfonts import TTFont
 from .util.footer_canvas import FooterCanvas
 from datetime import datetime
 import os
+import tempfile
+from pathlib import Path
 
 
-class StudentInstructionPdfGenerator:
-    def __init__(self):
+class PdfGenerator:
+    TEMP_PATH = Path(tempfile.gettempdir())
+
+    def __init__(self, output_dir, name, group=None):
+        self.output_dir = self.TEMP_PATH.joinpath("pdf", output_dir)
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+
         self.current_datetime = datetime.now()
-        self.filename = f"instruction_{self.current_datetime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+        if group:
+            self.filename = f"{name}_group{group}_{self.current_datetime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+        self.filename = f"{name}_{self.current_datetime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
 
     def generate_pdf(self, content):
-        output_dir = "student_instruction_export/pdf_files"
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
         pdfmetrics.registerFont(TTFont('Times New Roman', 'Times.ttf'))
         footer = FooterCanvas(self.current_datetime)
 
-        doc = BaseDocTemplate(os.path.join(output_dir, self.filename), pagesize=A4)
+        doc = BaseDocTemplate(os.path.join(self.output_dir, self.filename), pagesize=A4)
 
         frame = Frame(inch, inch, doc.width, doc.height)
         footer_template = PageTemplate(id='header', frames=frame, onPage=footer.on_page)
