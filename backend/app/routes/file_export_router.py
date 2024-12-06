@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.responses import FileResponse
+from bson import ObjectId
 
 from app.repository.exceptions.repository_exceptions import DatabaseException
 from app.repository.mapping_repository import MappingRepository
@@ -9,16 +10,17 @@ import os
 router = APIRouter(prefix="/file_export")
 
 
-@router.get("/export_student_instructions")
-async def export_instructions(mapping_repository: MappingRepository = Depends(MappingRepository),
-                              instruction_export_service: StudentInstructionExportService = Depends(
-                                  StudentInstructionExportService)):
+@router.get("/export_student_instructions/{topology_id}")
+async def export_instructions(topology_id: str,
+                                mapping_repository: MappingRepository = Depends(MappingRepository),
+                                instruction_export_service: StudentInstructionExportService = Depends(
+                                StudentInstructionExportService)):
     """
     Returns a PDF file with instructions on how to connect devices in laboratory room.
     :return: PDF file
     """
     try:
-        mappings: list = mapping_repository.find_objects({})
+        mappings: list = mapping_repository.find_objects({"topology_id": topology_id})
         if not mappings:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There are no mappings in the database.")
     except DatabaseException:

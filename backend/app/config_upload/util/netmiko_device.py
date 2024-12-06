@@ -2,20 +2,19 @@ from netmiko import ConnectHandler
 
 
 class NetmikoDevice:
-    def __init__(self, device_type: str, host: str, username: str, password: str, config: list[str]):
+    def __init__(self, device_type: str, ip: str, port: int, config: list[str]):
+        self.ip_address = None
         self.device_type = device_type
-        self.host = host
-        self.username = username
-        self.password = password
+        self.ip = ip
+        self.port = port
         self.config = config
         self.connection = None
 
     def connect(self):
         self.connection = ConnectHandler(
             device_type=self.device_type,
-            host=self.host,
-            username=self.username,
-            password=self.password
+            ip=self.ip,
+            port=self.port
         )
 
     def disconnect(self):
