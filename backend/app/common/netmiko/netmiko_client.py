@@ -14,6 +14,9 @@ class NetmikoClient:
     GLOBAL_DELAY_FACTOR_VALUE = 3.0
     RUNNING_CONFIG_CMD = "show running-config"
     CDP_NEIGHBORS_CMD = "show cdp neighbors"
+    SET_HOSTNAME = "hostname {}"
+    CDP_TIMER = "cdp timer {}"
+    CDP_HOLDTIME = "cdp holdtime {}"
 
     def upload_config_to_device(self, device: MappedDeviceModel):
         self._exec_netmiko_action(device, NetmikoAction.UPLOAD_COMMAND_SET)
@@ -21,6 +24,9 @@ class NetmikoClient:
     def download_config_from_device(self, device: NetmikoDevice) -> tuple[str, str]:
         running_config, neighbors_str = self._exec_netmiko_action(device, NetmikoAction.DOWNLOAD_RUNNING_CONFIG)
         return running_config, neighbors_str
+
+    def set_hostname_and_cdp_timers(self, device: NetmikoDevice):
+        self._exec_netmiko_action(device, NetmikoAction.SET_HOSTNAME_AND_CDP_TIMERS)
 
     def _exec_netmiko_action(self, device: NetmikoDevice | MappedDeviceModel, action: NetmikoAction):
         connect_handler: BaseConnection = self._get_connection_handler(
@@ -43,6 +49,8 @@ class NetmikoClient:
                     result = self._exec_download_commands(connect_handler)
                 case NetmikoAction.UPLOAD_COMMAND_SET:
                     result = self._exec_upload_command(connect_handler, device.mapped_config)
+                case NetmikoAction.SET_HOSTNAME_AND_CDP_TIMERS:
+                    result = self._exec_hostname_and_cdp_commands(connect_handler, device.name)
 
         return result
 
@@ -67,3 +75,11 @@ class NetmikoClient:
 
     def _exec_upload_command(self, connect_handler: BaseConnection, running_config: list[str]):
         return connect_handler.send_config_set(running_config)
+
+    def _exec_hostname_and_cdp_commands(self, connect_handler: BaseConnection, name: str, timer=5, holdtime=10):
+        command_set = [
+            self.SET_HOSTNAME.format(name),
+            self.CDP_TIMER.format(timer),
+            self.CDP_HOLDTIME.format(holdtime)
+        ]
+        return connect_handler.send_config_set(command_set)
