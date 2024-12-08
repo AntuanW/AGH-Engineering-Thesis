@@ -1,8 +1,9 @@
 from netmiko import BaseConnection, ConnectHandler, redispatch
+from fastapi import Depends
 import time
 
 from .config import DEVICE_USERNAME, DEVICE_PASSWORD
-import app.common.netmiko.netmiko_constants as nc
+from .netmiko_constants import NetmikoConstants
 from app.models.mapped_device import MappedDeviceModel
 from .netmiko_action import NetmikoAction
 from .netmiko_device import NetmikoDevice
@@ -17,6 +18,9 @@ class NetmikoClient:
     SET_HOSTNAME = "hostname {}"
     CDP_TIMER = "cdp timer {}"
     CDP_HOLDTIME = "cdp holdtime {}"
+
+    def __init__(self, netmiko_constants: NetmikoConstants = Depends(NetmikoConstants)):
+        self.netmiko_constants = netmiko_constants
 
     def upload_config_to_device(self, device: MappedDeviceModel):
         self._exec_netmiko_action(device, NetmikoAction.UPLOAD_COMMAND_SET)
@@ -60,12 +64,12 @@ class NetmikoClient:
 
     def _build_connection_dict(self, ip: str, port: int, uname: str, pwd: str) -> dict:
         return {
-            nc.IP: ip,
-            nc.PORT: port,
-            nc.USERNAME: uname,
-            nc.PASSWORD: pwd,
-            nc.DEVICE_TYPE: self.CONN_MODE,
-            nc.GLOBAL_DELAY_FACTOR: self.GLOBAL_DELAY_FACTOR_VALUE
+            self.netmiko_constants.IP: ip,
+            self.netmiko_constants.PORT: port,
+            self.netmiko_constants.USERNAME: uname,
+            self.netmiko_constants.PASSWORD: pwd,
+            self.netmiko_constants.DEVICE_TYPE: self.CONN_MODE,
+            self.netmiko_constants.GLOBAL_DELAY_FACTOR: self.GLOBAL_DELAY_FACTOR_VALUE
         }
 
     def _exec_download_commands(self, connect_handler: BaseConnection):

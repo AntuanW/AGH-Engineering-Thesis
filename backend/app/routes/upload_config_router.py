@@ -105,10 +105,10 @@ async def extract_config(
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
-@router.post("/configure_devices/{lab_group_number}/{topology_id}")
+@router.post("/configure_devices/{topology_id}/{lab_group_number}")
 async def configure_devices(
-        lab_group_number: int,
         topology_id: str,
+        lab_group_number: int,
         mapping_repository: MappingRepository = Depends(MappingRepository),
         config_upload_service: ConfigUploadService = Depends(ConfigUploadService)
 ) -> JSONResponse:
