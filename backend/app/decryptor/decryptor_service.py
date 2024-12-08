@@ -1,5 +1,6 @@
+from app.models.xml import XMLModel
 from app.repository.decrypted_xml_repository import DecryptedXMLRepository
-from decryptor.file_service import *
+from app.decryptor.file_service import *
 import os
 import logging
 import xmltodict
@@ -58,7 +59,11 @@ class DecryptorService:
             with open(xml_path, "r") as file:
                 xml = file.read()
                 xml_dict: dict = xmltodict.parse(xml)
-                xml_id: str = self.decrypted_xml_repository.insert(xml_dict)
+                xml_model = XMLModel(
+                    name=xml_path.name.replace(".xml", ""),
+                    xml=xml_dict
+                )
+                xml_id: str = self.decrypted_xml_repository.insert(xml_model)
 
             pkt_path = str(xml_path).replace(".xml", ".pkt")
             os.remove(xml_path)
