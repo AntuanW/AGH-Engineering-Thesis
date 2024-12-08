@@ -1,5 +1,4 @@
 import unittest
-import reportlab
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Spacer
 
@@ -12,13 +11,11 @@ class TestTopologyVisualizer(unittest.TestCase):
         pdf_file = "pdf_files/test_topology_visualization.pdf"
         doc = SimpleDocTemplate(pdf_file, pagesize=A4)
 
-        content = []
-        content.append(image)
-        content.append(Spacer(1, 12))
+        content = [image, Spacer(1, 12)]
         doc.build(content)
 
     def test_draw_graph(self):
-        devices = ['S11', 'S12', 'S13', 'R11', 'R12', 'R13', 'R14']
+        devices = {'S11': 'SWITCH', 'S12': 'SWITCH', 'S13': 'SWITCH', 'R11': 'ROUTER', 'R12': 'ROUTER', 'R13': 'ROUTER', 'R14': 'ROUTER'}
         connections = [
             ConnectionModel(origin_name='S11', neighbour_name='R11', from_interface='FastEthernet0/0',
                             to_interface='GigabitEthernet0/1/1'),
@@ -43,7 +40,7 @@ class TestTopologyVisualizer(unittest.TestCase):
         self.generate_pdf_with_image(image)
 
     def test_draw_graph_pc(self):
-        devices = ['S11', 'S12', 'S13', 'R11', 'K11', 'K12']
+        devices = {'S11': 'SWITCH', 'S12': 'SWITCH', 'S13': 'SWITCH', 'R11': 'ROUTER', 'K11': 'PC', 'K12': 'PC'}
 
         connections = [
             ConnectionModel(origin_name='S11', neighbour_name='R11', from_interface='FastEthernet0/3',
@@ -53,9 +50,9 @@ class TestTopologyVisualizer(unittest.TestCase):
             ConnectionModel(origin_name='S11', neighbour_name='S13', from_interface='FastEthernet0/2',
                             to_interface='FastEthernet0/1'),
             ConnectionModel(origin_name='S12', neighbour_name='K11', from_interface='FastEthernet0/2',
-                            to_interface='FastEthernet0'),
+                            to_interface='PC0'),
             ConnectionModel(origin_name='S13', neighbour_name='K12', from_interface='FastEthernet0/2',
-                            to_interface='FastEthernet0'),
+                            to_interface='PC0'),
         ]
 
         visualizer = TopologyVisualizer(devices, connections)
