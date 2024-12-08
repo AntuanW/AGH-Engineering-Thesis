@@ -10,3 +10,4 @@ python-multipart
 reportlab
 networkx
 matplotlib
+scipy
