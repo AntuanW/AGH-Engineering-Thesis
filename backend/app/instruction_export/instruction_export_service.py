@@ -1,10 +1,10 @@
-from typing import Set, List
 from reportlab.platypus import Paragraph, Spacer, PageBreak, Table
-from .student_instruction_pdf_generator import StudentInstructionPdfGenerator
-from .util.pdf_styles import PdfStyles
+from app.pdf_generator.pdf_generator import PdfGenerator
+from app.pdf_generator.util.pdf_styles import PdfStyles
 from ..models.connection import ConnectionModel
 from ..models.mapped_device import MappedDeviceModel
 from ..models.mapping import MappingModel
+from ..visualization.topology_visualizer import TopologyVisualizer
 
 from fastapi import Depends
 from bson import ObjectId
@@ -12,12 +12,12 @@ from bson import ObjectId
 from ..repository.topology_repository import TopologyRepository
 
 
-class StudentInstructionExportService:
+class InstructionExportService:
     def __init__(self,
-                 topology_repo = Depends(TopologyRepository),
-                 pdf_generator= Depends(StudentInstructionPdfGenerator)):
+                 topology_repo=Depends(TopologyRepository),
+                 pdf_generator=Depends(PdfGenerator)):
         self.topology_repo: TopologyRepository = topology_repo
-        self.pdf_generator: StudentInstructionPdfGenerator = pdf_generator
+        self.pdf_generator: PdfGenerator = pdf_generator
         self.styles = PdfStyles()
 
     def export_instructions(self, mappings: list[MappingModel]):
@@ -49,18 +49,31 @@ class StudentInstructionExportService:
             content.append(Paragraph("Tabela połączeń:", self.styles.heading1_style))
             content.append(Spacer(1, 12))
             content.append(table)
+            content.append(PageBreak())
+
+            devices_types = self._get_device_name_to_type_dict(devices)
+            visualizer = TopologyVisualizer(devices_types, connections)
+            graph = visualizer.generate_graph()
+            image = visualizer.draw_graph(graph)
+            content.append(Paragraph(f"Grupa: {group}", self.styles.heading1_style))
+            content.append(Paragraph("Schemat:", self.styles.heading1_style))
+            content.append(Spacer(1, 12))
+            content.append(image)
 
             content.append(Spacer(1, 12))
             content.append(PageBreak())
 
-        self.pdf_generator.generate_pdf(content)
-        return self.pdf_generator.filename
+        filename = self.pdf_generator.generate_student_instruction(content)
+        return filename
 
-    def _get_group_devices(self, devices: List[MappedDeviceModel]) -> List[str]:
+    def _get_group_devices(self, devices: list[MappedDeviceModel]) -> list[str]:
         return sorted([device.name for device in devices])
 
-    def _get_device_connections(self, devices: List[MappedDeviceModel]) -> List[ConnectionModel]:
-        connections: Set[ConnectionModel] = set()
+    def _get_device_name_to_type_dict(self, devices: list[MappedDeviceModel]) -> dict:
+        return {device.name: device.device_type for device in devices}
+
+    def _get_device_connections(self, devices: list[MappedDeviceModel]) -> list[ConnectionModel]:
+        connections: set[ConnectionModel] = set()
         for device in devices:
             for connection in device.neighbours:
                 if connection not in connections:
