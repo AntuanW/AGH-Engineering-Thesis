@@ -10,6 +10,7 @@ from app.decryptor.file_service import FileService
 from app.decryptor.decryptor_service import DecryptorService
 from app.mapping.mapping_service import MappingService
 from app.models.mapping import MappingModel
+from app.repository.lab_group_repository import LabGroupRepository
 from app.repository.mapping_repository import MappingRepository
 from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
@@ -28,6 +29,18 @@ router = APIRouter(prefix="/config_upload")
 def list_xml_names(xml_repo: DecryptedXMLRepository = Depends(DecryptedXMLRepository)):
     names = xml_repo.list_names()
     return JSONResponse(content=names)
+
+
+@router.get("/list_topology_names")
+def list_topology_names(topo_repo: TopologyRepository = Depends(TopologyRepository)):
+    names = topo_repo.list_names()
+    return JSONResponse(content=names)
+
+@router.get("/list_group_names")
+def list_topology_names(group_repo: LabGroupRepository = Depends(LabGroupRepository)):
+    names = group_repo.list_names()
+    return JSONResponse(content=names)
+
 
 @router.post("/upload_pkt")
 async def upload_pkt(
@@ -93,36 +106,36 @@ async def extract_config(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Topology was either empty or invalid.")
 
     topology_id = topology_repository.insert(topology_config)
-    response = {
-        "topology_id": str(topology_id)
-    }
+    response = topology_repository.list_names()
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
-@router.post("/configure-devices/{lab_group_number}")
+@router.post("/topologies/{topology_id}/configure")
 async def configure_devices(
-        lab_group_number: int,
+        group_id: list[int] | None = Query(default=None),
         mapping_repository: MappingRepository = Depends(MappingRepository),
         config_upload_service: ConfigUploadService = Depends(ConfigUploadService)
 ) -> JSONResponse:
-    mapped_devices = mapping_repository.find_devices_by_group(lab_group_number)
-    if not mapped_devices:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Devices not found for group {lab_group_number}.")
 
-    try:
-        netmiko_devices = config_upload_service.build_netmiko_devices(mapped_devices)
-    except DeviceBuildError:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to build netmiko device")
+    for lab_group_number in group_id:
+        mapped_devices = mapping_repository.find_devices_by_group(lab_group_number)
+        if not mapped_devices:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"Devices not found for group {lab_group_number}.")
 
-    try:
-        config_upload_service.upload_configs(netmiko_devices)
-    except DeviceConnectionError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail=f"Connection error while configuring devices. Error: {e}")
-    except DeviceConfigError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail=f"Failed to send config to device. Error: {e}")
+        try:
+            netmiko_devices = config_upload_service.build_netmiko_devices(mapped_devices)
+        except DeviceBuildError:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to build netmiko device")
+
+        try:
+            config_upload_service.upload_configs(netmiko_devices)
+        except DeviceConnectionError as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=f"Connection error while configuring devices. Error: {e}")
+        except DeviceConfigError as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=f"Failed to send config to device. Error: {e}")
 
     return JSONResponse(content="Config uploaded successfully", status_code=status.HTTP_200_OK)
 
@@ -136,5 +149,3 @@ def get_device_mapping(topology_id: str,
         return JSONResponse(content=jsonable_encoder(mappings), status_code=status.HTTP_200_OK)
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
-    except Exception as ex:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

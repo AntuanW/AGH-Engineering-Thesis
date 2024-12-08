@@ -31,22 +31,40 @@
             <h1>2. Extract configuration</h1>
             <form onsubmit="onSubmitExtractConfig()" method="GET" id="extract-form" target="iframe-build-config">
                 <select form="extract-form" name="select" id="extract-form-select"></select> <br />
-                <input type="submit"></input>
+                <input type="submit" />
             </form>
         </div>
-
-
 
 
 
         <iframe name="iframe-create-mapping" style="display:none;"></iframe>
         <div class="operation-block" id="div-create-mapping">
             <h1>3. Assign laboratory devices</h1>
+            <form id="mapping-form" onsubmit="onSubmitGetMapping()"  target="iframe-create-mapping">
+                <select name="select" form="mapping-form" id="mapping-form-select"></select> <br />
+
+                Groups:
+                <span id="mapping-form-groups"></span><br />
+
+                <input type="submit" />
+            </form>
         </div>
+
+
 
         <iframe name="iframe-upload-config" style="display:none;"></iframe>
         <div class="operation-block" id="div-upload-config">
             <h1>4. Upload configuration to devices</h1>
+
+            <form id="config-upload-form" onsubmit="onSubmitUploadConfig()"  target="iframe-upload-config">
+                <select name="select" form="config-upload-form" id="config-upload-form-select"></select> <br />
+
+                Groups:
+                <span id="config-upload-form-groups"></span><br />
+
+                <input type="submit" />
+            </form>
+
         </div>
     </div>
 
@@ -57,6 +75,8 @@
 
 <script>
 getXMLNames();
+getTopologyNames();
+getGroupNames();
 </script>
 
 </body>
