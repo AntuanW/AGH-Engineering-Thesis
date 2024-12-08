@@ -30,6 +30,8 @@ async def export_instructions(topology_id: str,
         filename = instruction_export_service.export_instructions(mappings)
     except FileNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Failed to generate the PDF file. Error: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to generate the PDF file. Error: {e}")
 
     path = os.path.join("instruction_export/pdf_files", filename)
     if not os.path.exists(path):

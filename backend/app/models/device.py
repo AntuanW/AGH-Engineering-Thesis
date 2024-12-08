@@ -62,13 +62,27 @@ class Interface(BaseModel):
         return self.__str__().__hash__()
 
     def port_number(self) -> int:
-        """Returns the last number in interface value, ex Gi0/1/16 -> 16"""
+        """Returns the last number in interface value, ex. Gi0/1/16 -> 16"""
         return int(self.value.split("/")[-1])
 
     def prefix(self) -> str:
         """Returns interface value without port number, ex. 'Gi0/1/5' -> '0/1/' """
         return re.findall("(?:[0-9]/)+|$", self.value)[0]
 
+    def short_name(self) -> str:
+        """Returns interface short name, ex. GigabitEthernet0/1/1 -> Gi0/1/1"""
+        type_mapping = {
+            InterfaceType.GI: "Gi",
+            InterfaceType.FA: "Fa",
+            InterfaceType.TE: "Te",
+            InterfaceType.SERIAL: "Se",
+            InterfaceType.VLAN: "Vlan",
+            InterfaceType.ATM: "ATM",
+            InterfaceType.UCSEL: "ucsel",
+            InterfaceType.ESE: "ESE",
+            InterfaceType.PC: "PC"
+        }
+        return type_mapping[self.type] + self.value
 
 class DeviceModel(BaseModel):
     name: str

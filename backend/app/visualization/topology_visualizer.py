@@ -9,7 +9,7 @@ import os
 
 from app.models.connection import ConnectionModel
 from app.running_config.util.device_config_types import DeviceType
-from .util.interface import Interface
+from app.models.device import Interface
 
 class TopologyVisualizer:
     def __init__(self, devices: dict, connections: list[ConnectionModel]):
@@ -68,7 +68,7 @@ class TopologyVisualizer:
                    bbox=dict(facecolor='white', edgecolor='none', boxstyle='square'))
 
         edge_labels = nx.get_edge_attributes(graph, 'label')
-        nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, label_pos=0.65, font_size=8, ax=ax)
+        nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, label_pos=0.65, font_size=9, ax=ax)
 
         buffer = BytesIO()
         plt.savefig(buffer, format="png", bbox_inches="tight")
@@ -94,7 +94,7 @@ class TopologyVisualizer:
             new_node = f"link_{i}"
             graph.add_node(new_node, image=None)
 
-            graph.add_edge(connection.origin_name, new_node, label=from_interface.get_short_name())
-            graph.add_edge(new_node, connection.neighbour_name, label=to_interface.get_short_name())
+            graph.add_edge(connection.origin_name, new_node, label=from_interface.short_name())
+            graph.add_edge(new_node, connection.neighbour_name, label=to_interface.short_name())
 
         return graph
