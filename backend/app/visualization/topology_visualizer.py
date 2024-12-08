@@ -9,18 +9,7 @@ import os
 
 from app.models.connection import ConnectionModel
 from app.running_config.util.device_config_types import DeviceType
-
-
-def shorten_interface_name(interface_name: str) -> str:
-    if interface_name.startswith("GigabitEthernet"):
-        return "GE" + interface_name[15:]
-    elif interface_name.startswith("FastEthernet"):
-        return "FE" + interface_name[12:]
-    elif interface_name.startswith("TenGigabitEthernet"):
-        return "TE" + interface_name[18:]
-    else:
-        return interface_name
-
+from .util.interface import Interface
 
 class TopologyVisualizer:
     def __init__(self, devices: dict, connections: list[ConnectionModel]):
@@ -36,7 +25,7 @@ class TopologyVisualizer:
             self.images['switch'] = PIL.Image.open(self.icons['switch'])
             self.images['router'] = PIL.Image.open(self.icons['router'])
             self.images['pc'] = PIL.Image.open(self.icons['pc'])
-        except Exception as e:
+        except FileNotFoundError:
             raise FileNotFoundError("One or more device images could not be loaded.")
 
     def draw_graph(self, graph: nx.Graph) -> Image:
@@ -99,13 +88,13 @@ class TopologyVisualizer:
                 graph.add_node(device_name, image=self.images['pc'])
 
         for i, connection in enumerate(self.connections):
-            from_interface = shorten_interface_name(connection.from_interface)
-            to_interface = shorten_interface_name(connection.to_interface)
+            from_interface = Interface(connection.from_interface)
+            to_interface = Interface(connection.to_interface)
 
             new_node = f"link_{i}"
             graph.add_node(new_node, image=None)
 
-            graph.add_edge(connection.origin_name, new_node, label=from_interface)
-            graph.add_edge(new_node, connection.neighbour_name, label=to_interface)
+            graph.add_edge(connection.origin_name, new_node, label=from_interface.get_short_name())
+            graph.add_edge(new_node, connection.neighbour_name, label=to_interface.get_short_name())
 
         return graph

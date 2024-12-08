@@ -1,7 +1,7 @@
 import unittest
 
 from app.repository.mapping_repository import MappingRepository
-from app.student_instruction_export.student_instruction_export_service import StudentInstructionExportService
+from app.student_instruction_export.instruction_export_service import StudentInstructionExportService
 
 
 class TestStudentInstructionExportService(unittest.TestCase):

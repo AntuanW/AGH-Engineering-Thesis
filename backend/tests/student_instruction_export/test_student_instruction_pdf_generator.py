@@ -1,6 +1,6 @@
 import unittest
 
-from app.student_instruction_export.student_instruction_pdf_generator import StudentInstructionPdfGenerator
+from app.pdf_generator.pdf_generator import StudentInstructionPdfGenerator
 from reportlab.platypus import Paragraph
 
 

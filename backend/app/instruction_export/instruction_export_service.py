@@ -1,6 +1,6 @@
 from reportlab.platypus import Paragraph, Spacer, PageBreak, Table
-from .student_instruction_pdf_generator import StudentInstructionPdfGenerator
-from .util.pdf_styles import PdfStyles
+from app.pdf_generator.pdf_generator import PdfGenerator
+from app.pdf_generator.util.pdf_styles import PdfStyles
 from ..models.connection import ConnectionModel
 from ..models.mapped_device import MappedDeviceModel
 from ..models.mapping import MappingModel
@@ -12,12 +12,12 @@ from bson import ObjectId
 from ..repository.topology_repository import TopologyRepository
 
 
-class StudentInstructionExportService:
+class InstructionExportService:
     def __init__(self,
                  topology_repo=Depends(TopologyRepository),
-                 pdf_generator=Depends(StudentInstructionPdfGenerator)):
+                 pdf_generator=Depends(PdfGenerator)):
         self.topology_repo: TopologyRepository = topology_repo
-        self.pdf_generator: StudentInstructionPdfGenerator = pdf_generator
+        self.pdf_generator: PdfGenerator = pdf_generator
         self.styles = PdfStyles()
 
     def export_instructions(self, mappings: list[MappingModel]):
@@ -63,8 +63,8 @@ class StudentInstructionExportService:
             content.append(Spacer(1, 12))
             content.append(PageBreak())
 
-        self.pdf_generator.generate_pdf(content)
-        return self.pdf_generator.filename
+        filename = self.pdf_generator.generate_student_instruction(content)
+        return filename
 
     def _get_group_devices(self, devices: list[MappedDeviceModel]) -> list[str]:
         return sorted([device.name for device in devices])
