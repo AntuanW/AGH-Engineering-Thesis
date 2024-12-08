@@ -13,15 +13,18 @@ T = TypeVar("T")
 
 class BaseRepository(ABC, Generic[T]):
     _instance = None
+    _db = None
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(BaseRepository, cls).__new__(cls)
             try:
                 cls._instance.client = MongoClient(MONGODB_URI)
-                cls._instance.db = cls._instance.client.get_database('agh-thesis')
+                BaseRepository._db = cls._instance.client.get_database('agh-thesis')
             except ConnectionFailure as e:
                 raise DatabaseException(f'Cannot establish database, reason: {e}')
+
+        cls._instance.db = BaseRepository._db
 
         # Retrieve the type variable used in the deriving class
         bases = types.get_original_bases(cls)

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="index.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="index.js"></script>
+    <title>Witamy w 4.31!</title>
+</head>
+<body>
+<div class="page-container">
+    <div class="side-margin">
+    </div>
+
+    <div class="main">
+        <iframe name="iframe-upload-pkt" style="display:none;"></iframe>
+        <div class="operation-block" id="div-upload-pkt">
+            <h1>1. Upload a .PKT file</h1>
+            <form id="pkt-form" onsubmit="onSubmitUploadPkt()" method="POST" enctype='multipart/form-data' target="iframe-upload-pkt">
+                <input type="file" id="pkt_input" name="file" /> <br />
+                Overwrite existing file?
+                <input type="checkbox" value="true" name="force_overwrite" id="force-overwrite-input"> <br />
+                <input type="submit" />
+            </form>
+        </div>
+
+
+
+        <iframe name="iframe-build-config" style="display:none;"></iframe>
+        <div class="operation-block" id="div-extract-config">
+            <h1>2. Extract configuration</h1>
+            <form onsubmit="onSubmitExtractConfig()" method="GET" id="extract-form" target="iframe-build-config">
+                <select form="extract-form" name="select" id="extract-form-select"></select> <br />
+                <input type="submit"></input>
+            </form>
+        </div>
+
+
+
+
+
+        <iframe name="iframe-create-mapping" style="display:none;"></iframe>
+        <div class="operation-block" id="div-create-mapping">
+            <h1>3. Assign laboratory devices</h1>
+        </div>
+
+        <iframe name="iframe-upload-config" style="display:none;"></iframe>
+        <div class="operation-block" id="div-upload-config">
+            <h1>4. Upload configuration to devices</h1>
+        </div>
+    </div>
+
+    <div class="side-margin">
+    </div>
+</div>
+
+
+<script>
+getXMLNames();
+</script>
+
+</body>
+</html>

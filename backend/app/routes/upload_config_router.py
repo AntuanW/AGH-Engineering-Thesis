@@ -24,18 +24,25 @@ from app.config_upload.exceptions.config_upload_exceptions import (
 router = APIRouter(prefix="/config_upload")
 
 
+@router.get("/list_xml_names")
+def list_xml_names(xml_repo: DecryptedXMLRepository = Depends(DecryptedXMLRepository)):
+    names = xml_repo.list_names()
+    return JSONResponse(content=names)
+
 @router.post("/upload_pkt")
 async def upload_pkt(
         file: UploadFile = File(...),
+        force_overwrite: bool = False,
         file_service: FileService = Depends(FileService),
-        force_overwrite: bool = False
-) -> Response:
+        decryptor_service: DecryptorService = Depends(DecryptorService),
+        xml_repo: DecryptedXMLRepository = Depends(DecryptedXMLRepository)
+) -> JSONResponse:
     """
-    Uploads a PKT file to server. The file must have a .pkt extension.
-    :param file: File object
-    :param force_overwrite: Whether to overwrite an existing file with the same name
-    :return: Response
+    Decrypts a PKT file to XML and saves the content to database
+    :return: JSONResponse
     """
+
+    # Upload
     if not file.filename.endswith(".pkt"):
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid file type")
 
@@ -50,38 +57,24 @@ async def upload_pkt(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
     finally:
         await file.close()
-        logging.info(f"Successfully uploaded and saved {file.filename}")
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/decrypt_pkt")
-def decrypt_pkt(
-        name: str,
-        file_service: FileService = Depends(FileService),
-        decryptor_service: DecryptorService = Depends(DecryptorService),
-) -> JSONResponse:
-    """
-    Decrypts a PKT file to XML and saves the content to database
-    :param name: Name of the target PKT file (must be previously uploaded!).
-    :return: JSONResponse
-    """
+    # Decrypt
+    if not file_service.check_file_exists(file.filename):
+        logging.error(f"File {file.filename} does not exist.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"File {file.filename} does not exist.")
 
-    if not file_service.check_file_exists(name):
-        logging.error(f"File {name} does not exist.")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"File {name} does not exist.")
+    xml_path = decryptor_service.decrypt_pkt(file.filename)
 
-    xml_path = decryptor_service.decrypt_pkt(name)
-
+    # TODO fix force_overwrite
     xml_id = decryptor_service.save_xml_to_database(xml_path)
-    response = {
-        "xml_id": str(xml_id)
-    }
+    response = xml_repo.list_names()
 
     logging.info("Successfully decrypted XML and uploaded it do database.")
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
-@router.post("/extract_xml/{xml_id}")
+@router.get("/extract_xml/{xml_id}")
 async def extract_config(
         xml_id: str,
         running_config_service: RunningConfigService = Depends(RunningConfigService),

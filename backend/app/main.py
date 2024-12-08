@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.routes import upload_config_router, devices_management_router, file_export_router
 
 from app.logging_setup import setup_logging
@@ -16,9 +17,12 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+app.mount("/client", StaticFiles(directory="client", html=True), name="client")
+
 app.include_router(upload_config_router.router)
 app.include_router(devices_management_router.router)
 app.include_router(file_export_router.router)
+
 
 
 LOG_CONFIG = Path(__file__).parent / 'logging.yaml'
