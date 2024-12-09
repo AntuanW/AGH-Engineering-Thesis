@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 from app.repository.device_repository import DeviceRepository
 from app.models.device import DeviceModel
+from app.running_config.util.device_config_types import DeviceType
 
 def test_basic_connection():
     repo = DeviceRepository()
@@ -14,7 +15,10 @@ def test_find_by_id():
     mock_device_data = {
         '_id': mock_device_id,
         'name': 'test_name',
-        'type': 'test_type'
+        'device_type': DeviceType.SWITCH,
+        'interfaces': [],
+        'commands': [],
+        'rack_id': 1
     }
     expected_device = DeviceModel(**mock_device_data)
 
