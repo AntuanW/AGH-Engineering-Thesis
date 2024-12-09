@@ -24,9 +24,9 @@ from app.config_upload.exceptions.config_upload_exceptions import (
 router = APIRouter(prefix="/config_upload", tags=["upload-config"])
 
 
-@router.get("/list_names")
-def list_names(dto_service: DTOService = Depends(DTOService)):
-    return dto_service.list_names()
+@router.get("/index_dto")
+def index_dto(dto_service: DTOService = Depends(DTOService)):
+    return dto_service.create_index_dto()
 
 
 @router.post("/upload_pkt")
@@ -35,7 +35,6 @@ async def upload_pkt(
         force_overwrite: bool = False,
         file_service: FileService = Depends(FileService),
         decryptor_service: DecryptorService = Depends(DecryptorService),
-        xml_repo: DecryptedXMLRepository = Depends(DecryptedXMLRepository)
 ) -> JSONResponse:
     """
     Decrypts a PKT file to XML and saves the content to database

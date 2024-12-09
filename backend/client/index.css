@@ -47,7 +47,7 @@ input {
     margin: 10px;
 }
 
-input[type="submit"] {
+.button {
     width: 90px;
     height: 40px;
     padding: 5px;
@@ -58,10 +58,22 @@ input[type="submit"] {
     font-weight: bold;
 }
 
+.button.add-button {
+    background: orange;
+}
+
+
 select {
     width: 200px;
     height: 30px;
     border-radius: 5px;
+}
+
+input[type="text"] {
+    width: 150px;
+    height: 26px;
+    border-radius: 5px;
+    border: 1px solid gray;
 }
 
 ::file-selector-button {
@@ -84,4 +96,9 @@ input[type="checkbox"] {
     vertical-align: middle;
     position: relative;
     bottom: 2px;
+}
+
+.page-footer {
+    height: 200px;
+    margin: 50px;
 }

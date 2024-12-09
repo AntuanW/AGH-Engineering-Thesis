@@ -27,11 +27,11 @@ class DTOService:
             {"_id": {"$in": mapping_topo_ids}}, {"name": 1}))
         return [{"name": obj["name"], "_id": str(obj["_id"])} for obj in topologies_with_mappings]
 
-    def list_names(self):
+    def create_index_dto(self):
         return {
             "XMLs": self.xml_repo.list_names(),
             "topologies": self.topo_repo.list_names(),
-            "groups": self.group_repo.list_names(),
+            "groups": self.group_repo.get_all_groups(),
             "mappings": self._list_mapping_names(),
         }
 

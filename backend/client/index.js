@@ -2,15 +2,18 @@ function getObjectNames() {
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
-        response = JSON.parse(xhr.responseText)
+        window.localStorage.setItem("model", xhr.responseText);
+        response = JSON.parse(xhr.responseText);
         populateXMLSelects(response);
         populateTopologySelects(response);
         populateMappingSelects(response);
-        populateGroupPickers(response);
+        populateGroupCheckboxes(response);
+        populateGroupSelects(response);
+        refreshDownloadDynamicDevices();
       }
     };
 
-    xhr.open("GET", "/config_upload/list_names", true);
+    xhr.open("GET", "/config_upload/index_dto", true);
     xhr.send();
 }
 
@@ -49,17 +52,77 @@ function populateMappingSelects(response) {
     }
 }
 
-function populateGroupPickers(response) {
+function populateGroupCheckboxes(response) {
     ss = ""
     for (group of response.groups) {
-        ss += `<span>${group.name}</span><input type="checkbox" value="${group.name}" name="group">  `;
+        ss += `<span>${group.lab_group_number}</span><input type="checkbox" value="${group.lab_group_number}" name="group">  `;
     }
 
-    spans = document.getElementsByClassName("__group_select");
+    spans = document.getElementsByClassName("__group_checkboxes");
     for (span of spans) {
         span.innerHTML = ss;
     }
 }
+
+function populateGroupSelects(response) {
+    selects = document.getElementsByClassName("__group_select")
+    ss = ""
+    for (const group of response.groups) {
+        ss += `<option value="${group.lab_group_number}">${group.lab_group_number}</option>\n`
+    }
+    for (select of selects) {
+        select.innerHTML = ss;
+    }
+}
+
+function getModel() {
+    return JSON.parse(window.localStorage.getItem("model"));
+}
+
+function getDownloadGroupInfo() {
+    group_number = document.getElementById("download-form-select").value;
+    model = getModel();
+    group = model.groups.find(el => el.lab_group_number == group_number);
+    return group;
+}
+
+function refreshDownloadDynamicDevices() {
+    dynamic_devices_table = document.getElementById("download-dynamic-devices");
+    dynamic_devices_table.innerHTML = `
+    <thead>
+    <tr>
+    <td>IP</td>
+    <td>Port</td>
+    <td>Device Name</td>
+    <tr>
+    </thead>`
+
+    addDownloadDynamicDevice();
+}
+
+function addDownloadDynamicDevice() {
+    group = getDownloadGroupInfo();
+    ip = group.rack.config_port_ip_address;
+    ports = group.rack.config_ports;
+    dynamic_devices_table = document.getElementById("download-dynamic-devices");
+
+    row = dynamic_devices_table.insertRow(-1);
+    cell1 = row.insertCell(0);
+    cell1.innerHTML = `<input name="ip_address" type="text" value="${ip}" />`;
+
+    cell2 = row.insertCell(1);
+    html = `<select name="port" form="download-form">`;
+    for (port of ports) {
+        html += `<option value=${port}>${port}</option>`;
+    }
+    html += "</select>"
+    cell2.innerHTML = html;
+
+    cell3 = row.insertCell(2);
+    cell3.innerHTML = `<input name="name" type="text" />`;
+}
+
+
 
 
 
@@ -173,4 +236,36 @@ function onSubmitGeneratePDF() {
     xhr.open("GET", `/file_export/export_student_instructions/${topo_id}`, true);
     xhr.responseType = "blob";
     xhr.send();
+}
+
+function onSubmitDownloadConfig() {
+    function processRow(row) {
+        let inputs = Array.from(row.querySelectorAll("input, select"));
+        return {
+            ip_address: inputs.find(e => e.name == "ip_address").value,
+            port: inputs.find(e => e.name == "port").value,
+            name: inputs.find(e => e.name == "name").value
+        }
+    }
+
+    form = document.getElementById("download-form");
+    lab_name = form.lab_name.value;
+    lab_group = form.lab_group.value;
+    dynamic_devices_table = document.getElementById("download-dynamic-devices");
+    rows = dynamic_devices_table.querySelectorAll("tr");
+
+    payload = {
+        lab_name: lab_name,
+        lab_group: lab_group,
+        devices: []
+    }
+    for (row of rows) {
+        payload.devices.push(processRow(row));
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `/config_download/download_configs`, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify(payload));
+
 }
