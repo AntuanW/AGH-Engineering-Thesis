@@ -1,14 +1,11 @@
-from pydantic import BaseModel
 from .device import DeviceType
 from .connection import ConnectionModel
-from ..config_upload.util.netmiko_types import NetmikoDeviceType
+from app.common.netmiko.netmiko_device_type import NetmikoDeviceType
+from ..common.netmiko.netmiko_device import NetmikoDevice
 
 
-class MappedDeviceModel(BaseModel):
-    name: str
+class MappedDeviceModel(NetmikoDevice):
     device_type: DeviceType
     netmiko_device_type: NetmikoDeviceType
-    ip_address: str
-    port: int
     neighbours: list[ConnectionModel]
     mapped_config: list[str]
