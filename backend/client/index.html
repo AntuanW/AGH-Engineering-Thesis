@@ -85,10 +85,13 @@
         <div class="operation-block">
             <h1>6. Download configuration from devices</h1>
             <form id="download-form" onsubmit="onSubmitDownloadConfig()" target="iframe-instruction">
-                <span>Group: </span>
-                <select class="__group_select" onchange="refreshDownloadDynamicDevices()" name="lab_group" form="download-form" id="download-form-select"></select> <br />
-                <span>Config Name</span>
-                <input type="text" name="lab_name"/>
+                <div style="margin-left: auto; margin-right: 0;">
+                    <span>Group: </span>
+                    <select class="__group_select" onchange="refreshDownloadDynamicDevices()" name="lab_group" form="download-form" id="download-form-select"></select> <br />
+                    <span>Config Name</span>
+                    <input type="text" name="lab_name"/>
+                </div>
+
 
                 <div style="margin: auto; width: 600px; margin-top: 20px;">
                     <table id="download-dynamic-devices">

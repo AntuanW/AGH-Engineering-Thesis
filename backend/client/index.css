@@ -7,10 +7,6 @@ html, body {
     height: 100%;
 }
 
-h1 {
-    font-family: 'Times New Roman';
-}
-
 .page-container {
     display: flex;
     height: 100%;
@@ -59,7 +55,7 @@ input {
 }
 
 .button.add-button {
-    background: orange;
+    background: #ffc14d;
 }
 
 
@@ -67,6 +63,8 @@ select {
     width: 200px;
     height: 30px;
     border-radius: 5px;
+    padding-left: 6px;
+    margin: 5px;
 }
 
 input[type="text"] {
