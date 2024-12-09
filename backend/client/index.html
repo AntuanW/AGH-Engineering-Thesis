@@ -18,7 +18,7 @@
             <h1>1. Upload a .PKT file</h1>
             <form id="pkt-form" onsubmit="onSubmitUploadPkt()" method="POST" enctype='multipart/form-data' target="iframe-upload-pkt">
                 <input type="file" id="pkt_input" name="file" /> <br />
-                Overwrite existing file?
+                <span>Overwrite existing file?</span>
                 <input type="checkbox" value="true" name="force_overwrite" id="force-overwrite-input"> <br />
                 <input type="submit" />
             </form>
@@ -43,8 +43,11 @@
             <form id="mapping-form" onsubmit="onSubmitGetMapping()"  target="iframe-create-mapping">
                 <select name="select" form="mapping-form" id="mapping-form-select"></select> <br />
 
-                Groups:
-                <span id="mapping-form-groups"></span><br />
+                <div class="group-picker">
+                    <span>Groups:</span>
+                    <span id="mapping-form-groups"></span><br />
+                </div>
+
 
                 <input type="submit" />
             </form>
@@ -74,9 +77,7 @@
 
 
 <script>
-getXMLNames();
-getTopologyNames();
-getGroupNames();
+getObjectNames();
 </script>
 
 </body>

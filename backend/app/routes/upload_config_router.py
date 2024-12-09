@@ -24,21 +24,17 @@ from app.config_upload.exceptions.config_upload_exceptions import (
 router = APIRouter(prefix="/config_upload", tags=["upload-config"])
 
 
-@router.get("/list_xml_names")
-def list_xml_names(xml_repo: DecryptedXMLRepository = Depends(DecryptedXMLRepository)):
-    names = xml_repo.list_names()
-    return JSONResponse(content=names)
-
-
-@router.get("/list_topology_names")
-def list_topology_names(topo_repo: TopologyRepository = Depends(TopologyRepository)):
-    names = topo_repo.list_names()
-    return JSONResponse(content=names)
-
-@router.get("/list_group_names")
-def list_topology_names(group_repo: LabGroupRepository = Depends(LabGroupRepository)):
-    names = group_repo.list_names()
-    return JSONResponse(content=names)
+@router.get("/list_names")
+def list_names(
+    xml_repo: DecryptedXMLRepository = Depends(DecryptedXMLRepository),
+    topo_repo: TopologyRepository = Depends(TopologyRepository),
+    group_repo: LabGroupRepository = Depends(LabGroupRepository)
+):
+    return JSONResponse(content={
+        "XMLs": xml_repo.list_names(),
+        "topologies": topo_repo.list_names(),
+        "groups": group_repo.list_names()
+    })
 
 
 @router.post("/upload_pkt")

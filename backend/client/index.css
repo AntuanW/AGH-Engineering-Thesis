@@ -1,5 +1,16 @@
+@import url('https://fonts.cdnfonts.com/css/century-schoolbook');
+
+:root {
+    --accent: #66e5a6;
+    --accent-light: #92edbf;
+}
+
 html, body {
     height: 100%;
+}
+
+h1 {
+    font-family: 'Times New Roman';
 }
 
 .page-container {
@@ -11,7 +22,7 @@ html, body {
     height: 100%;
     display: table-cell;
     flex-grow: 1;
-    background-color: #EEE;
+    background-color: white;
 }
 
 .main {
@@ -30,16 +41,49 @@ html, body {
     horizontal-align: middle;
 }
 
+.group-picker {
+    margin: 5px;
+}
+
 input {
     margin: 10px;
 }
 
 input[type="submit"] {
-    width: 80px;
-    height: 30px;
+    width: 90px;
+    height: 40px;
     padding: 5px;
     border-radius: 5px;
     border: none;
-    background: DarkSeaGreen;
+    background: var(--accent);
+    font-size: 16px;
+    font-weight: bold;
 }
 
+select {
+    width: 200px;
+    height: 30px;
+    border-radius: 5px;
+}
+
+::file-selector-button {
+  border: 2px solid #aaaaaa;
+  height: 30px;
+  width: 90px;
+  padding: 4px;
+  border-radius: 5px;
+  background-color: #f8f8f8;
+  transition: 0.15s;
+}
+
+::file-selector-button:hover {
+  background-color: var(--accent-light);
+}
+
+input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    position: relative;
+    bottom: 2px;
+}
