@@ -146,11 +146,19 @@ function onSubmitGeneratePDF() {
     const xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-
-      }
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var downloadUrl = URL.createObjectURL(xhr.response);
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+            a.href = downloadUrl;
+            a.download = "";
+            a.click();  // https://stackoverflow.com/questions/32623731/how-to-make-browser-download-file-from-xhr-request
+            a.remove(); // what a pile of garbage that is
+        }
     };
 
     xhr.open("GET", `/file_export/export_student_instructions/${topo_id}`, true);
+    xhr.responseType = "blob";
     xhr.send();
 }
