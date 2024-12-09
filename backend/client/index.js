@@ -95,7 +95,7 @@ function refreshDownloadDynamicDevices() {
     <td>Port</td>
     <td>Device Name</td>
     <tr>
-    </thead>`
+    </thead><tbody id="download-dynamic-devices-body"></tbody>`
 
     addDownloadDynamicDevice();
 }
@@ -104,7 +104,7 @@ function addDownloadDynamicDevice() {
     group = getDownloadGroupInfo();
     ip = group.rack.config_port_ip_address;
     ports = group.rack.config_ports;
-    dynamic_devices_table = document.getElementById("download-dynamic-devices");
+    dynamic_devices_table = document.getElementById("download-dynamic-devices-body");
 
     row = dynamic_devices_table.insertRow(-1);
     cell1 = row.insertCell(0);
@@ -134,7 +134,8 @@ function onSubmitUploadPkt() {
 
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
-        populateExtractConfigSelect(JSON.parse(xhr.responseText));
+        // TODO update only the following step
+        getObjectNames();
       }
     };
 
@@ -154,8 +155,7 @@ function onSubmitExtractConfig() {
 
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
-        populateMappingSelect(JSON.parse(xhr.responseText));
-        populateConfigUploadSelect(JSON.parse(xhr.responseText));
+        getObjectNames();
       }
     };
 
@@ -180,7 +180,7 @@ function onSubmitGetMapping() {
 
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
-
+        getObjectNames();
       }
     };
 
@@ -241,6 +241,8 @@ function onSubmitGeneratePDF() {
 function onSubmitDownloadConfig() {
     function processRow(row) {
         let inputs = Array.from(row.querySelectorAll("input, select"));
+        console.log(row.querySelectorAll("input, select"));
+        console.log(inputs);
         return {
             ip_address: inputs.find(e => e.name == "ip_address").value,
             port: inputs.find(e => e.name == "port").value,
@@ -251,7 +253,7 @@ function onSubmitDownloadConfig() {
     form = document.getElementById("download-form");
     lab_name = form.lab_name.value;
     lab_group = form.lab_group.value;
-    dynamic_devices_table = document.getElementById("download-dynamic-devices");
+    dynamic_devices_table = document.getElementById("download-dynamic-devices-body");
     rows = dynamic_devices_table.querySelectorAll("tr");
 
     payload = {
