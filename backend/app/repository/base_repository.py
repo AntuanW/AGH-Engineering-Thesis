@@ -40,14 +40,14 @@ class BaseRepository(ABC, Generic[T]):
         result = self.get_collection().insert_one(document)
         return result.inserted_id
 
-    def find(self, query) -> list:
-        return list(self.get_collection().find(query))
+    def find(self, *args, **kwargs) -> list:
+        return list(self.get_collection().find(*args, **kwargs))
 
     def find_objects(self, query) -> list[T]:
         return [self._collection_type(**x) for x in self.get_collection().find(query)]
 
-    def find_one(self, query) -> dict:
-        return self.get_collection().find_one(query)
+    def find_one(self, *args, **kwargs) -> dict:
+        return self.get_collection().find_one(*args, **kwargs)
 
     def find_object(self, query) -> T | None:
         result = self.get_collection().find_one(query)

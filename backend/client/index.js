@@ -5,6 +5,7 @@ function getObjectNames() {
         response = JSON.parse(xhr.responseText)
         populateXMLSelects(response);
         populateTopologySelects(response);
+        populateMappingSelects(response);
         populateGroupPickers(response);
       }
     };
@@ -30,6 +31,17 @@ function populateTopologySelects(response) {
     selects = document.getElementsByClassName("__topo_select")
     ss = ""
     for (const obj of response.topologies) {
+        ss += `<option value="${obj._id}">${obj.name}</option>\n`
+    }
+    for (select of selects) {
+        select.innerHTML = ss;
+    }
+}
+
+function populateMappingSelects(response) {
+    selects = document.getElementsByClassName("__mapping_select")
+    ss = ""
+    for (const obj of response.mappings) {
         ss += `<option value="${obj._id}">${obj.name}</option>\n`
     }
     for (select of selects) {

@@ -10,7 +10,7 @@ from app.decryptor.file_service import FileService
 from app.decryptor.decryptor_service import DecryptorService
 from app.mapping.mapping_service import MappingService
 from app.models.mapping import MappingModel
-from app.repository.lab_group_repository import LabGroupRepository
+from app.repository.dto_service import DTOService
 from app.repository.mapping_repository import MappingRepository
 from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
@@ -25,16 +25,8 @@ router = APIRouter(prefix="/config_upload", tags=["upload-config"])
 
 
 @router.get("/list_names")
-def list_names(
-    xml_repo: DecryptedXMLRepository = Depends(DecryptedXMLRepository),
-    topo_repo: TopologyRepository = Depends(TopologyRepository),
-    group_repo: LabGroupRepository = Depends(LabGroupRepository)
-):
-    return JSONResponse(content={
-        "XMLs": xml_repo.list_names(),
-        "topologies": topo_repo.list_names(),
-        "groups": group_repo.list_names()
-    })
+def list_names(dto_service: DTOService = Depends(DTOService)):
+    return dto_service.list_names()
 
 
 @router.post("/upload_pkt")
