@@ -30,7 +30,7 @@
         <div class="operation-block" id="div-extract-config">
             <h1>2. Extract configuration</h1>
             <form onsubmit="onSubmitExtractConfig()" method="GET" id="extract-form" target="iframe-build-config">
-                <select form="extract-form" name="select" id="extract-form-select"></select> <br />
+                <select class="__xml_select" form="extract-form" name="select" id="extract-form-select"></select> <br />
                 <input type="submit" />
             </form>
         </div>
@@ -41,13 +41,12 @@
         <div class="operation-block" id="div-create-mapping">
             <h1>3. Assign laboratory devices</h1>
             <form id="mapping-form" onsubmit="onSubmitGetMapping()"  target="iframe-create-mapping">
-                <select name="select" form="mapping-form" id="mapping-form-select"></select> <br />
+                <select class="__topo_select" name="select" form="mapping-form" id="mapping-form-select"></select> <br />
 
                 <div class="group-picker">
                     <span>Groups:</span>
-                    <span id="mapping-form-groups"></span><br />
+                    <span class="__group_select" id="mapping-form-groups"></span><br />
                 </div>
-
 
                 <input type="submit" />
             </form>
@@ -60,15 +59,28 @@
             <h1>4. Upload configuration to devices</h1>
 
             <form id="config-upload-form" onsubmit="onSubmitUploadConfig()"  target="iframe-upload-config">
-                <select name="select" form="config-upload-form" id="config-upload-form-select"></select> <br />
+                <select class="__topo_select" name="select" form="config-upload-form" id="config-upload-form-select"></select> <br />
 
                 Groups:
-                <span id="config-upload-form-groups"></span><br />
+                <span class="__group_select" id="config-upload-form-groups"></span><br />
 
+                <input type="submit" />
+            </form>
+        </div>
+
+
+
+        <iframe name="iframe-instruction" style="display:none;"></iframe>
+        <div class="operation-block" id="div-instruction">
+            <h1>5. Generate PDF instructions</h1>
+
+            <form id="instruction-form" onsubmit="onSubmitGeneratePDF()" target="iframe-instruction">
+                <select class="__topo_select" name="select" form="instruction-form" id="instruction-form-select"></select> <br />
                 <input type="submit" />
             </form>
 
         </div>
+
     </div>
 
     <div class="side-margin">

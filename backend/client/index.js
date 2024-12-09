@@ -1,14 +1,11 @@
-
 function getObjectNames() {
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
         response = JSON.parse(xhr.responseText)
-        populateExtractConfigSelect(response.XMLs);
-        populateConfigUploadSelect(response.topologies);
-        populateConfigUploadFormGroups(response.groups);
-        populateMappingSelect(response.topologies);
-        populateMappingFormGroups(response.groups);
+        populateXMLSelects(response);
+        populateTopologySelects(response);
+        populateGroupPickers(response);
       }
     };
 
@@ -17,50 +14,43 @@ function getObjectNames() {
 }
 
 
-function populateExtractConfigSelect(response) {
-    select = document.getElementById("extract-form-select");
-    select.innerHTML = "";
-    for (const obj of response) {
-        select.innerHTML += `<option value="${obj._id}">${obj.name}</option>\n`
+
+function populateXMLSelects(response) {
+    selects = document.getElementsByClassName("__xml_select");
+    ss = "";
+    for (const obj of response.XMLs) {
+        ss += `<option value="${obj._id}">${obj.name}</option>\n`;
+    }
+    for (select of selects) {
+        select.innerHTML = ss;
     }
 }
 
-
-function populateMappingSelect(response) {
-    select = document.getElementById("mapping-form-select");
+function populateTopologySelects(response) {
+    selects = document.getElementsByClassName("__topo_select")
     ss = ""
-    for (const obj of response) {
+    for (const obj of response.topologies) {
         ss += `<option value="${obj._id}">${obj.name}</option>\n`
     }
-    select.innerHTML = ss;
+    for (select of selects) {
+        select.innerHTML = ss;
+    }
 }
 
-function populateMappingFormGroups(response) {
-    span = document.getElementById("mapping-form-groups");
+function populateGroupPickers(response) {
     ss = ""
-    for (group of response) {
+    for (group of response.groups) {
         ss += `<span>${group.name}</span><input type="checkbox" value="${group.name}" name="group">  `;
     }
-    span.innerHTML = ss;
+
+    spans = document.getElementsByClassName("__group_select");
+    for (span of spans) {
+        span.innerHTML = ss;
+    }
 }
 
-function populateConfigUploadSelect(response) {
-    select = document.getElementById("config-upload-form-select");
-    ss = ""
-    for (const obj of response) {
-        ss += `<option value="${obj._id}">${obj.name}</option>\n`
-    }
-    select.innerHTML = ss;
-}
 
-function populateConfigUploadFormGroups(response) {
-    span = document.getElementById("config-upload-form-groups");
-    ss = ""
-    for (group of response) {
-        ss += `<span>${group.name}</span><input type="checkbox" value="${group.name}" name="group">  `;
-    }
-    span.innerHTML = ss;
-}
+
 
 
 function onSubmitUploadPkt() {
@@ -123,6 +113,7 @@ function onSubmitGetMapping() {
     xhr.send();
 }
 
+
 function onSubmitUploadConfig() {
     form = document.getElementById("config-upload-form");
     topo_id = form.select.value;
@@ -144,5 +135,22 @@ function onSubmitUploadConfig() {
     };
 
     xhr.open("POST", `/config_upload/topologies/${topo_id}/configure/${group_ids_url}`, true);
+    xhr.send();
+}
+
+
+function onSubmitGeneratePDF() {
+    form = document.getElementById("instruction-form");
+    topo_id = form.select.value;
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+
+      }
+    };
+
+    xhr.open("GET", `/file_export/export_student_instructions/${topo_id}`, true);
     xhr.send();
 }

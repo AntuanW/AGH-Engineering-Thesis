@@ -1,6 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.responses import FileResponse
-from bson import ObjectId
 
 from app.repository.exceptions.repository_exceptions import DatabaseException
 from app.repository.mapping_repository import MappingRepository
