@@ -12,9 +12,3 @@ class DecryptedXMLRepository(BaseRepository[XMLModel]):
     def list_names(self):
         return [{"name": obj["name"], "_id": str(obj["_id"])}
             for obj in self.get_collection().find({}, {"name": 1})]
-
-    def upsert(self, query, new_value) -> int:
-        names = [x["name"] for x in self.list_names()]
-        if new_value["name"] in names:
-            return -1
-        super().insert(new_value)

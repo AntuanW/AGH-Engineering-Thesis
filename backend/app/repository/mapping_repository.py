@@ -12,6 +12,9 @@ class MappingRepository(BaseRepository[MappingModel]):
         return super().insert(mapping.model_dump())
 
     def find_topology_ids(self):
+        """
+        Returns topology IDs for which a mapping exists
+        """
         return [ObjectId(x["topology_id"]) for x in self.get_collection().find(
             {}, {"topology_id": 1, "_id": 0})]
 

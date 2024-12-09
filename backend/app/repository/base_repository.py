@@ -1,7 +1,7 @@
 import types
 import typing
 from abc import ABC, abstractmethod
-from typing import TypeVar, Type, Generic
+from typing import TypeVar, Generic
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from .config import MONGODB_URI
@@ -19,8 +19,8 @@ class BaseRepository(ABC, Generic[T]):
         if cls._instance is None:
             cls._instance = super(BaseRepository, cls).__new__(cls)
             try:
-                cls._instance.client = MongoClient(MONGODB_URI)
-                BaseRepository._db = cls._instance.client.get_database('agh-thesis')
+                client = MongoClient(MONGODB_URI)
+                BaseRepository._db = client.get_database('agh-thesis')
             except ConnectionFailure as e:
                 raise DatabaseException(f'Cannot establish database, reason: {e}')
 
