@@ -17,12 +17,11 @@ from app.repository.topology_repository import TopologyRepository
 from app.repository.decrypted_xml_repository import DecryptedXMLRepository
 from app.config_upload.config_upload_service import ConfigUploadService
 from app.config_upload.exceptions.config_upload_exceptions import (
-    DeviceBuildError,
     DeviceConfigError,
     DeviceConnectionError
 )
 
-router = APIRouter(prefix="/config_upload")
+router = APIRouter(prefix="/config_upload", tags=["upload-config"])
 
 
 @router.get("/list_xml_names")
@@ -81,7 +80,9 @@ async def upload_pkt(
 
     # TODO fix force_overwrite
     xml_id = decryptor_service.save_xml_to_database(xml_path)
-    response = xml_repo.list_names()
+    response = {
+        "xml_id": str(xml_id)
+    }
 
     logging.info("Successfully decrypted XML and uploaded it do database.")
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
@@ -112,24 +113,19 @@ async def extract_config(
 
 @router.post("/topologies/{topology_id}/configure")
 async def configure_devices(
+        topology_id: str,
         group_id: list[int] | None = Query(default=None),
         mapping_repository: MappingRepository = Depends(MappingRepository),
         config_upload_service: ConfigUploadService = Depends(ConfigUploadService)
 ) -> JSONResponse:
-
     for lab_group_number in group_id:
-        mapped_devices = mapping_repository.find_devices_by_group(lab_group_number)
+        mapped_devices = mapping_repository.find_devices_by_group(lab_group_number, topology_id)
         if not mapped_devices:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Devices not found for group {lab_group_number}.")
 
         try:
-            netmiko_devices = config_upload_service.build_netmiko_devices(mapped_devices)
-        except DeviceBuildError:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to build netmiko device")
-
-        try:
-            config_upload_service.upload_configs(netmiko_devices)
+            config_upload_service.upload_configs(mapped_devices)
         except DeviceConnectionError as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail=f"Connection error while configuring devices. Error: {e}")

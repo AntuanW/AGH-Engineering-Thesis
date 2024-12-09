@@ -1,7 +1,7 @@
 from enum import Enum
 from pydantic import BaseModel
 
-from app.config_upload.util.netmiko_types import NetmikoDeviceType
+from app.common.netmiko.netmiko_device_type import NetmikoDeviceType
 
 
 class XmlConfigConstants:

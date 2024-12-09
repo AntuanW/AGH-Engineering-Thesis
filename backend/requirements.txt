@@ -8,3 +8,6 @@ pydantic
 pytest
 python-multipart
 reportlab
+networkx
+matplotlib
+scipy
