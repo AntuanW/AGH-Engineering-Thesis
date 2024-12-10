@@ -10,6 +10,7 @@ from app.decryptor.file_service import FileService
 from app.decryptor.decryptor_service import DecryptorService
 from app.mapping.mapping_service import MappingService
 from app.models.mapping import MappingModel
+from app.repository.dto_service import DTOService
 from app.repository.mapping_repository import MappingRepository
 from app.running_config.running_config_service import RunningConfigService
 from app.repository.topology_repository import TopologyRepository
@@ -23,18 +24,24 @@ from app.config_upload.exceptions.config_upload_exceptions import (
 router = APIRouter(prefix="/config_upload", tags=["upload-config"])
 
 
+@router.get("/index_dto")
+def index_dto(dto_service: DTOService = Depends(DTOService)):
+    return dto_service.create_index_dto()
+
+
 @router.post("/upload_pkt")
 async def upload_pkt(
         file: UploadFile = File(...),
+        force_overwrite: bool = False,
         file_service: FileService = Depends(FileService),
-        force_overwrite: bool = False
-) -> Response:
+        decryptor_service: DecryptorService = Depends(DecryptorService),
+) -> JSONResponse:
     """
-    Uploads a PKT file to server. The file must have a .pkt extension.
-    :param file: File object
-    :param force_overwrite: Whether to overwrite an existing file with the same name
-    :return: Response
+    Decrypts a PKT file to XML and saves the content to database
+    :return: JSONResponse
     """
+
+    # Upload
     if not file.filename.endswith(".pkt"):
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid file type")
 
@@ -49,28 +56,16 @@ async def upload_pkt(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
     finally:
         await file.close()
-        logging.info(f"Successfully uploaded and saved {file.filename}")
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/decrypt_pkt")
-def decrypt_pkt(
-        name: str,
-        file_service: FileService = Depends(FileService),
-        decryptor_service: DecryptorService = Depends(DecryptorService),
-) -> JSONResponse:
-    """
-    Decrypts a PKT file to XML and saves the content to database
-    :param name: Name of the target PKT file (must be previously uploaded!).
-    :return: JSONResponse
-    """
+    # Decrypt
+    if not file_service.check_file_exists(file.filename):
+        logging.error(f"File {file.filename} does not exist.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"File {file.filename} does not exist.")
 
-    if not file_service.check_file_exists(name):
-        logging.error(f"File {name} does not exist.")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"File {name} does not exist.")
+    xml_path = decryptor_service.decrypt_pkt(file.filename)
 
-    xml_path = decryptor_service.decrypt_pkt(name)
-
+    # TODO fix force_overwrite
     xml_id = decryptor_service.save_xml_to_database(xml_path)
     response = {
         "xml_id": str(xml_id)
@@ -80,7 +75,7 @@ def decrypt_pkt(
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
-@router.post("/extract_xml/{xml_id}")
+@router.get("/extract_xml/{xml_id}")
 async def extract_config(
         xml_id: str,
         running_config_service: RunningConfigService = Depends(RunningConfigService),
@@ -99,32 +94,31 @@ async def extract_config(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Topology was either empty or invalid.")
 
     topology_id = topology_repository.insert(topology_config)
-    response = {
-        "topology_id": str(topology_id)
-    }
+    response = topology_repository.list_names()
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
-@router.post("/configure_devices/{topology_id}/{lab_group_number}")
+@router.post("/topologies/{topology_id}/configure")
 async def configure_devices(
         topology_id: str,
-        lab_group_number: int,
+        group_id: list[int] | None = Query(default=None),
         mapping_repository: MappingRepository = Depends(MappingRepository),
         config_upload_service: ConfigUploadService = Depends(ConfigUploadService)
 ) -> JSONResponse:
-    mapped_devices = mapping_repository.find_devices_by_group(lab_group_number, topology_id)
-    if not mapped_devices:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Devices not found for group {lab_group_number}.")
+    for lab_group_number in group_id:
+        mapped_devices = mapping_repository.find_devices_by_group(lab_group_number, topology_id)
+        if not mapped_devices:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"Devices not found for group {lab_group_number}.")
 
-    try:
-        config_upload_service.upload_configs(mapped_devices)
-    except DeviceConnectionError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail=f"Connection error while configuring devices. Error: {e}")
-    except DeviceConfigError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail=f"Failed to send config to device. Error: {e}")
+        try:
+            config_upload_service.upload_configs(mapped_devices)
+        except DeviceConnectionError as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=f"Connection error while configuring devices. Error: {e}")
+        except DeviceConfigError as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=f"Failed to send config to device. Error: {e}")
 
     return JSONResponse(content="Config uploaded successfully", status_code=status.HTTP_200_OK)
 
@@ -138,5 +132,3 @@ def get_device_mapping(topology_id: str,
         return JSONResponse(content=jsonable_encoder(mappings), status_code=status.HTTP_200_OK)
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
-    except Exception as ex:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
