@@ -16,14 +16,21 @@ class BaseRepository(ABC, Generic[T]):
     _db = None
 
     def __new__(cls):
+        # `cls` is the deriving class
+        # If no instance of cls has been created yet, create it.
+        # Otherwise, return that previous instance
         if cls._instance is None:
             cls._instance = super(BaseRepository, cls).__new__(cls)
-            try:
-                client = MongoClient(MONGODB_URI)
-                BaseRepository._db = client.get_database('agh-thesis')
-            except ConnectionFailure as e:
-                raise DatabaseException(f'Cannot establish database, reason: {e}')
 
+            # If it's the first repository to be created, connect to the database
+            if BaseRepository._db is None:
+                try:
+                    client = MongoClient(MONGODB_URI)
+                    BaseRepository._db = client.get_database('agh-thesis')
+                except ConnectionFailure as e:
+                    raise DatabaseException(f'Cannot establish database, reason: {e}')
+
+        # Add a pointer to DB connection to the instance of subclass
         cls._instance.db = BaseRepository._db
 
         # Retrieve the type variable used in the deriving class
