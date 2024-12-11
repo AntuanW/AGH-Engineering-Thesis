@@ -25,7 +25,8 @@ class InstructionExportService:
         for mapping in mappings:
             group = mapping.lab_group_number
             devices = mapping.mapped_devices
-            devices_names = self._get_group_devices(devices)
+            ip_address = mapping.mapped_devices[0].ip_address
+            group_devices = self._get_group_devices(devices)
             topology_name = self.topology_repo.find_object({"_id": ObjectId(mapping.topology_id)}).name
 
             content.append(Paragraph("Instrukcja", self.styles.title_style))
@@ -33,8 +34,15 @@ class InstructionExportService:
             content.append(Spacer(1, 12))
 
             content.append(Paragraph(f"Grupa: {group}", self.styles.heading1_style))
-            content.append(Paragraph(f"Urządzenia: {', '.join(devices_names)}", self.styles.heading2_style))
             content.append(Spacer(1, 12))
+
+            content.append(Paragraph(f"Aby wgrać konfigurację, podłącz urządzenia do portów na adresie IP {ip_address}:", self.styles.main_style))
+            content.append(Spacer(1, 6))
+            for device_name, port in group_devices:
+                content.append(Paragraph(f"{device_name} - port {port}", self.styles.main_style))
+                content.append(Spacer(1, 6))
+            content.append(Spacer(1, 12))
+
 
             data = [["Urządzenie 1", "Interfejs 1", "Urządzenie 2", "Interfejs 2"]]
             connections = self._get_device_connections(devices)
@@ -66,8 +74,8 @@ class InstructionExportService:
         filename = self.pdf_generator.generate_student_instruction(content)
         return filename
 
-    def _get_group_devices(self, devices: list[MappedDeviceModel]) -> list[str]:
-        return sorted([device.name for device in devices])
+    def _get_group_devices(self, devices: list[MappedDeviceModel]) -> list[tuple[str, int]]:
+        return [(device.name, device.port) for device in devices]
 
     def _get_device_name_to_type_dict(self, devices: list[MappedDeviceModel]) -> dict:
         return {device.name: device.device_type for device in devices}
