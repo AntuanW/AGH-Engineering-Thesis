@@ -5,21 +5,24 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from app.pdf_generator.util.footer_canvas import FooterCanvas
 from datetime import datetime
-import os
+import tempfile
+from pathlib import Path
 
 
 class PdfGenerator:
+    TEMP_PATH = Path(tempfile.gettempdir())
     def generate_student_instruction(self, content):
         current_datatime = datetime.now()
         filename = f"instruction_{current_datatime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
-        output_dir = "instruction_export/pdf_files"
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        output_dir = self.TEMP_PATH / "pdf_files"
+
+        if not output_dir.exists():
+            output_dir.mkdir(parents=True)
 
         pdfmetrics.registerFont(TTFont('Times New Roman', 'Times.ttf'))
         footer = FooterCanvas(current_datatime)
 
-        doc = BaseDocTemplate(os.path.join(output_dir, filename), pagesize=A4)
+        doc = BaseDocTemplate(str(output_dir / filename), pagesize=A4)
 
         frame = Frame(inch, inch, doc.width, doc.height)
         footer_template = PageTemplate(id='header', frames=frame, onPage=footer.on_page)

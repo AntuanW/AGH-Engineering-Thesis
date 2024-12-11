@@ -1,3 +1,6 @@
+import tempfile
+from pathlib import Path
+
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.responses import FileResponse
 
@@ -32,7 +35,7 @@ async def export_instructions(topology_id: str,
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to generate the PDF file. Error: {e}")
 
-    path = os.path.join("instruction_export/pdf_files", filename)
+    path = Path(tempfile.gettempdir()) / "pdf_files" / filename
     if not os.path.exists(path):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Failed to generate the PDF file.")
 
