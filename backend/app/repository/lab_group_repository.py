@@ -12,3 +12,6 @@ class LabGroupRepository(BaseRepository[LabGroupModel]):
 
     def get_all_group_ids(self) -> list[int]:
         return [group.lab_group_number for group in self.find_objects({})]
+
+    def get_all_groups(self):
+        return list(self.find_objects({}))
