@@ -9,9 +9,9 @@ import os
 
 
 class PdfGenerator:
-    def generate_student_instruction(self, content):
+    def generate_instruction(self, content, instruction_type):
         current_datatime = datetime.now()
-        filename = f"instruction_{current_datatime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+        filename = f"{instruction_type}_instruction_{current_datatime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
         output_dir = "instruction_export/pdf_files"
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -27,3 +27,9 @@ class PdfGenerator:
 
         doc.build(content)
         return filename
+
+    def generate_lab_instruction(self, content):
+        return self.generate_instruction(content, "lab")
+    def generate_home_instruction(self, content):
+        return self.generate_instruction(content, "home")
+

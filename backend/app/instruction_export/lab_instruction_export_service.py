@@ -12,7 +12,7 @@ from bson import ObjectId
 from ..repository.topology_repository import TopologyRepository
 
 
-class InstructionExportService:
+class LabInstructionExportService:
     def __init__(self,
                  topology_repo=Depends(TopologyRepository),
                  pdf_generator=Depends(PdfGenerator)):
@@ -59,11 +59,9 @@ class InstructionExportService:
             content.append(Paragraph("Schemat:", self.styles.heading1_style))
             content.append(Spacer(1, 12))
             content.append(image)
-
-            content.append(Spacer(1, 12))
             content.append(PageBreak())
 
-        filename = self.pdf_generator.generate_student_instruction(content)
+        filename = self.pdf_generator.generate_lab_instruction(content)
         return filename
 
     def _get_group_devices(self, devices: list[MappedDeviceModel]) -> list[str]:
