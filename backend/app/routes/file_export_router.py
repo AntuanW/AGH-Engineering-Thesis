@@ -9,6 +9,8 @@ from app.repository.mapping_repository import MappingRepository
 from app.instruction_export.instruction_export_service import InstructionExportService
 import os
 
+from app.pdf_generator.pdf_generator import PdfGenerator
+
 router = APIRouter(prefix="/file_export", tags=["pdf-export"])
 
 
@@ -35,7 +37,7 @@ async def export_instructions(topology_id: str,
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to generate the PDF file. Error: {e}")
 
-    path = Path(tempfile.gettempdir()) / "pdf_files" / filename
+    path = Path(tempfile.gettempdir()) / PdfGenerator.PDF_OUTPUT_DIR / filename
     if not os.path.exists(path):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Failed to generate the PDF file.")
 

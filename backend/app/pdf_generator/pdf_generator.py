@@ -11,10 +11,12 @@ from pathlib import Path
 
 class PdfGenerator:
     TEMP_PATH = Path(tempfile.gettempdir())
+    PDF_OUTPUT_DIR = "pdf_files"
+
     def generate_student_instruction(self, content):
         current_datatime = datetime.now()
         filename = f"instruction_{current_datatime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
-        output_dir = self.TEMP_PATH / "pdf_files"
+        output_dir = self.TEMP_PATH / self.PDF_OUTPUT_DIR
 
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
