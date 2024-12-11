@@ -39,6 +39,6 @@ async def export_instructions(topology_id: str,
 
     path = Path(tempfile.gettempdir()) / PdfGenerator.PDF_OUTPUT_DIR / filename
     if not os.path.exists(path):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Failed to generate the PDF file.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PDF file not found.")
 
     return FileResponse(path, media_type='application/pdf', filename=filename)
