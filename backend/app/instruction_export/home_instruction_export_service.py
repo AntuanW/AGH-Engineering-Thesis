@@ -16,12 +16,14 @@ class HomeInstructionExportService:
 
     def export_configurations(self, devices: list[DownloadedConfig]) -> str:
         content = []
-        content.append(Paragraph("Konfiguracje urządzeń", self.styles.title_style))
+        content.append(Paragraph("Running config urządzeń", self.styles.title_style))
         content.append(Spacer(1, 12))
         for device in devices:
-            content.append(Paragraph(f"{device.name} - {device.device_type.value}", self.styles.heading1_style))
+            content.append(Paragraph(f"{device.name} - {device.device_type.value}", self.styles.heading2_style))
             content.append(Spacer(1, 12))
-            content.append(Paragraph(f"{device.config}", self.styles.main_style))
+            configs = device.config.split('\n')
+            for config in configs:
+                content.append(Paragraph(config.replace(" ", "&nbsp;"), self.styles.main_style))
             content.append(PageBreak())
 
         devices_types = self._get_device_name_to_type_dict(devices)

@@ -9,7 +9,7 @@ from app.running_config.util.device_config_types import DeviceType
 class TestHomeInstructionExportService(unittest.TestCase):
     def test_export_configurations(self):
         mock_downloaded_config = DownloadedConfig(
-            name="S11",
+            name="R11",
             device_type=DeviceType.ROUTER,
             neighbours=[],
             config="interface GigabitEthernet0/0 ip address 192.168.1.1 255.255.255.0 no shutdown"
