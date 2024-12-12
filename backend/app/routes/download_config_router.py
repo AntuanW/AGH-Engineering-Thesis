@@ -27,7 +27,7 @@ async def download_configs(
     # ...
 
     try:
-        filename = home_instruction_export_service.export_configurations(download_results)
+        filename = home_instruction_export_service.export_instruction(download_results)
     except FileNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Failed to generate the PDF file. Error: {e}")

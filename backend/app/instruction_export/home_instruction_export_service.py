@@ -14,28 +14,12 @@ class HomeInstructionExportService:
         self.pdf_generator: PdfGenerator = pdf_generator
         self.styles = PdfStyles()
 
-    def export_configurations(self, devices: list[DownloadedConfig]) -> str:
+    def export_instruction(self, devices: list[DownloadedConfig]) -> str:
         content = []
-        content.append(Paragraph("Running Configi Urządzeń", self.styles.title_style))
-        content.append(Spacer(1, 12))
+        content.extend(self._create_instruction_header())
         for device in devices:
-            content.append(Paragraph(f"{device.name} - {device.device_type.value}", self.styles.heading2_style))
-            content.append(Spacer(1, 12))
-            configs = device.config.split('\n')
-            for config in configs:
-                content.append(Paragraph(config.replace(" ", "&nbsp;"), self.styles.main_style))
-            content.append(PageBreak())
-
-        devices_types = self._get_device_name_to_type_dict(devices)
-        connections = self._get_device_connections(devices)
-
-        visualizer = TopologyVisualizer(devices_types, connections)
-        graph = visualizer.generate_graph()
-        image = visualizer.draw_graph(graph)
-        content.append(Paragraph("Schemat:", self.styles.heading1_style))
-        content.append(Spacer(1, 12))
-        content.append(image)
-        content.append(PageBreak())
+            content.extend(self._create_running_config_section(device))
+        content.extend(self._create_topology_graph(devices))
 
         filename = self.pdf_generator.generate_home_instruction(content)
         return filename
@@ -50,3 +34,36 @@ class HomeInstructionExportService:
                 if connection not in connections:
                     connections.add(connection)
         return list(connections)
+
+    def _create_instruction_header(self) -> list[Paragraph]:
+        return [
+            Paragraph("Running Configi Urządzeń", self.styles.title_style),
+            Spacer(1, 12)
+        ]
+
+    def _create_running_config_section(self, device: DownloadedConfig) -> list[Paragraph]:
+        content = [
+            Paragraph(f"{device.name} - {device.device_type.value}", self.styles.heading2_style),
+            Spacer(1, 12)
+        ]
+
+        configs = device.config.split('\n')
+        for config in configs:
+            content.append(Paragraph(config.replace(" ", "&nbsp;"), self.styles.main_style))
+        content.append(PageBreak())
+
+        return content
+
+    def _create_topology_graph(self, devices: list[DownloadedConfig]) -> list[Paragraph]:
+        devices_types = self._get_device_name_to_type_dict(devices)
+        connections = self._get_device_connections(devices)
+
+        visualizer = TopologyVisualizer(devices_types, connections)
+        graph = visualizer.generate_graph()
+        image = visualizer.draw_graph(graph)
+
+        return [
+            Paragraph("Schemat:", self.styles.heading2_style),
+            Spacer(1, 12),
+            image
+        ]

@@ -7,7 +7,7 @@ from app.running_config.util.device_config_types import DeviceType
 
 
 class TestHomeInstructionExportService(unittest.TestCase):
-    def test_export_configurations(self):
+    def test_export_instruction(self):
         mock_downloaded_config = DownloadedConfig(
             name="R11",
             device_type=DeviceType.ROUTER,
@@ -21,5 +21,5 @@ class TestHomeInstructionExportService(unittest.TestCase):
         download_results = [mock_downloaded_config]
 
         home_instruction_export_service = HomeInstructionExportService(pdf_generator=pdf_generator_mock)
-        filename = home_instruction_export_service.export_configurations(download_results)
+        filename = home_instruction_export_service.export_instruction(download_results)
         self.assertTrue(filename)
