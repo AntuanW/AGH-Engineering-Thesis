@@ -24,55 +24,10 @@ class InstructionExportService:
     def export_instructions(self, mappings: list[MappingModel]):
         content = []
         for mapping in mappings:
-            group = mapping.lab_group_number
-            devices = mapping.mapped_devices
-            ip_address = mapping.mapped_devices[0].ip_address
-            topology_name = self.topology_repo.find_object({"_id": ObjectId(mapping.topology_id)}).name
-
-            content.append(Paragraph("Instrukcja", self.styles.title_style))
-            content.append(Paragraph(f"{topology_name}", self.styles.italics_style))
-            content.append(Spacer(1, 12))
-
-            content.append(Paragraph(f"Grupa: {group}", self.styles.heading1_style))
-            content.append(Spacer(1, 12))
-
-            content.append(
-                Paragraph(f"Aby wgrać konfigurację, podłącz urządzenia do portów na adresie IP {ip_address}:",
-                          self.styles.main_style))
-            content.append(Spacer(1, 6))
-            for device in devices:
-                if device.device_type == DeviceType.PC:
-                    continue
-                content.append(Paragraph(f"{device.name} - port {device.port}", self.styles.main_style))
-                content.append(Spacer(1, 6))
-            content.append(Spacer(1, 12))
-
-            data = [["Urządzenie 1", "Interfejs 1", "Urządzenie 2", "Interfejs 2"]]
-            connections = self._get_device_connections(devices)
-            data.extend([
-                [connection.origin_name, connection.from_interface, connection.neighbour_name, connection.to_interface]
-                for connection in connections
-            ])
-            col_widths = [110, 110, 110, 110]
-            table = Table(data, colWidths=col_widths)
-            table.setStyle(self.styles.table_style)
-
-            content.append(Paragraph("Tabela połączeń:", self.styles.heading1_style))
-            content.append(Spacer(1, 12))
-            content.append(table)
-            content.append(PageBreak())
-
-            devices_types = self._get_device_name_to_type_dict(devices)
-            visualizer = TopologyVisualizer(devices_types, connections)
-            graph = visualizer.generate_graph()
-            image = visualizer.draw_graph(graph)
-            content.append(Paragraph(f"Grupa: {group}", self.styles.heading1_style))
-            content.append(Paragraph("Schemat:", self.styles.heading1_style))
-            content.append(Spacer(1, 12))
-            content.append(image)
-
-            content.append(Spacer(1, 12))
-            content.append(PageBreak())
+            content.extend(self._create_instruction_header(mapping))
+            content.extend(self._create_connection_steps(mapping))
+            content.extend(self._create_connections_table(mapping))
+            content.extend(self._create_topology_graph(mapping))
 
         filename = self.pdf_generator.generate_student_instruction(content)
         return filename
@@ -87,3 +42,77 @@ class InstructionExportService:
                 if connection not in connections:
                     connections.add(connection)
         return list(connections)
+
+    def _create_instruction_header(self, mapping: MappingModel) -> list[Paragraph]:
+        group = mapping.lab_group_number
+        topology_name = self.topology_repo.find_object({"_id": ObjectId(mapping.topology_id)}).name
+
+        return [
+            Paragraph("Instrukcja", self.styles.title_style),
+            Paragraph(f"{topology_name}", self.styles.italics_style),
+            Spacer(1, 12),
+            Paragraph(f"Grupa: {group}", self.styles.heading1_style),
+            Spacer(1, 12)
+        ]
+
+    def _create_connection_steps(self, mapping: MappingModel) -> list[Paragraph]:
+        devices = mapping.mapped_devices
+        ip_address = mapping.mapped_devices[0].ip_address
+
+        content = [
+            Paragraph("Aby wgrać konfiguracje, wykonaj następujące kroki:", self.styles.main_style),
+            Spacer(1, 12),
+            Paragraph("1. Połącz komputer z portem dostępowym.", self.styles.main_style),
+            Spacer(1, 6),
+            Paragraph(f"2. Podłącz poniższe urządzenia do odpowiednich portów na adresie IP {ip_address}:",
+                      self.styles.main_style),
+            Spacer(1, 6)
+        ]
+
+        for device in devices:
+            if device.device_type == DeviceType.PC:
+                continue
+            content.append(
+                Paragraph(f"<bullet>&bull;</bullet> {device.name} - port {device.port}", self.styles.bullet_style))
+            content.append(Spacer(1, 6))
+        content.append(Spacer(1, 6))
+
+        return content
+
+    def _create_connections_table(self, mapping: MappingModel) -> list[Paragraph]:
+        devices = mapping.mapped_devices
+        connections = self._get_device_connections(devices)
+
+        data = [["Urządzenie 1", "Interfejs 1", "Urządzenie 2", "Interfejs 2"]]
+        data.extend([
+            [connection.origin_name, connection.from_interface, connection.neighbour_name, connection.to_interface]
+            for connection in connections
+        ])
+        col_widths = [110, 110, 110, 110]
+        table = Table(data, colWidths=col_widths)
+        table.setStyle(self.styles.table_style)
+
+        return [
+            Paragraph("Tabela połączeń:", self.styles.heading2_style),
+            Spacer(1, 12),
+            table,
+            PageBreak()
+        ]
+
+    def _create_topology_graph(self, mapping: MappingModel) -> list[Paragraph]:
+        group = mapping.lab_group_number
+        devices = mapping.mapped_devices
+        connections = self._get_device_connections(devices)
+        devices_types = self._get_device_name_to_type_dict(devices)
+
+        visualizer = TopologyVisualizer(devices_types, connections)
+        graph = visualizer.generate_graph()
+        image = visualizer.draw_graph(graph)
+
+        return [
+            Paragraph(f"Grupa: {group}", self.styles.heading1_style),
+            Paragraph("Schemat:", self.styles.heading2_style),
+            Spacer(1, 12),
+            image,
+            Spacer(1, 12)
+        ]
