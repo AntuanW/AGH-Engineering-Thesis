@@ -20,7 +20,7 @@ class LabInstructionExportService:
         self.pdf_generator: PdfGenerator = pdf_generator
         self.styles = PdfStyles()
 
-    def export_instructions(self, mappings: list[MappingModel]):
+    def export_instructions(self, mappings: list[MappingModel]) -> str:
         content = []
         for mapping in mappings:
             group = mapping.lab_group_number

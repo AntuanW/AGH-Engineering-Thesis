@@ -14,12 +14,12 @@ class HomeInstructionExportService:
         self.pdf_generator: PdfGenerator = pdf_generator
         self.styles = PdfStyles()
 
-    def export_configurations(self, devices: list[DownloadedConfig]):
+    def export_configurations(self, devices: list[DownloadedConfig]) -> str:
         content = []
         content.append(Paragraph("Konfiguracje urządzeń", self.styles.title_style))
         content.append(Spacer(1, 12))
         for device in devices:
-            content.append(Paragraph(f"{device.name}", self.styles.heading1_style))
+            content.append(Paragraph(f"{device.name} - {device.device_type.value}", self.styles.heading1_style))
             content.append(Spacer(1, 12))
             content.append(Paragraph(f"{device.config}", self.styles.main_style))
             content.append(PageBreak())
