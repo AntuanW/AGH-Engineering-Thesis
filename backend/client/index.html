@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="index.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="index.js"></script>
+    <title>Witamy w 4.31!</title>
+</head>
+<body>
+<div class="page-container">
+    <div class="side-margin">
+    </div>
+
+    <div class="main">
+        <iframe name="iframe-upload-pkt" style="display:none;"></iframe>
+        <div class="operation-block" id="div-upload-pkt">
+            <h1>1. Upload a .PKT file</h1>
+            <form id="pkt-form" onsubmit="onSubmitUploadPkt()" method="POST" enctype='multipart/form-data' target="iframe-upload-pkt">
+                <input type="file" id="pkt_input" name="file" /> <br />
+                <span>Overwrite existing file?</span>
+                <input type="checkbox" value="true" name="force_overwrite" id="force-overwrite-input"> <br />
+                <input type="submit" class="button"/>
+            </form>
+        </div>
+
+
+
+        <iframe name="iframe-build-config" style="display:none;"></iframe>
+        <div class="operation-block" id="div-extract-config">
+            <h1>2. Extract configuration</h1>
+            <form onsubmit="onSubmitExtractConfig()" method="GET" id="extract-form" target="iframe-build-config">
+                <select class="__xml_select" form="extract-form" name="select" id="extract-form-select"></select> <br />
+                <input type="submit" class="button"/>
+            </form>
+        </div>
+
+
+
+        <iframe name="iframe-create-mapping" style="display:none;"></iframe>
+        <div class="operation-block" id="div-create-mapping">
+            <h1>3. Assign laboratory devices</h1>
+            <form id="mapping-form" onsubmit="onSubmitGetMapping()"  target="iframe-create-mapping">
+                <select class="__topo_select" name="select" form="mapping-form" id="mapping-form-select"></select> <br />
+
+                <div class="group-picker">
+                    <span>Groups:</span>
+                    <span class="__group_checkboxes" id="mapping-form-groups"></span><br />
+                </div>
+
+                <input type="submit" class="button" />
+            </form>
+        </div>
+
+
+
+        <iframe name="iframe-upload-config" style="display:none;"></iframe>
+        <div class="operation-block" id="div-upload-config">
+            <h1>4. Upload configuration to devices</h1>
+
+            <form id="config-upload-form" onsubmit="onSubmitUploadConfig()"  target="iframe-upload-config">
+                <select class="__mapping_select" name="select" form="config-upload-form" id="config-upload-form-select"></select> <br />
+
+                Groups:
+                <span class="__group_checkboxes" id="config-upload-form-groups"></span><br />
+
+                <input type="submit" class="button"/>
+            </form>
+        </div>
+
+
+
+        <iframe name="iframe-instruction" style="display:none;"></iframe>
+        <div class="operation-block">
+            <h1>5. Generate PDF instructions</h1>
+
+            <form id="instruction-form" onsubmit="onSubmitGeneratePDF()" target="iframe-instruction">
+                <select class="__mapping_select" name="select" form="instruction-form" id="instruction-form-select"></select> <br />
+                <input type="submit" class="button"/>
+            </form>
+        </div>
+
+
+        <iframe name="iframe-download" style="display:none;"></iframe>
+        <div class="operation-block">
+            <h1>6. Download configuration from devices</h1>
+            <form id="download-form" onsubmit="onSubmitDownloadConfig()" target="iframe-instruction">
+                <div style="margin-left: auto; margin-right: 0;">
+                    <span>Group: </span>
+                    <select class="__group_select" onchange="refreshDownloadDynamicDevices()" name="lab_group" form="download-form" id="download-form-select"></select> <br />
+                    <span>Config Name</span>
+                    <input type="text" name="lab_name"/>
+                </div>
+
+
+                <div style="margin: auto; width: 600px; margin-top: 20px;">
+                    <table id="download-dynamic-devices">
+
+                    </table>
+                </div>
+
+                <input type="button" class="button add-button" onclick="addDownloadDynamicDevice()" value="Add"/> <br />
+
+                <input type="submit" class="button"/>
+            </form>
+        </div>
+
+        <div class="page-footer">
+            <span></span>
+        </div>
+    </div>
+
+    <div class="side-margin">
+    </div>
+</div>
+
+
+<script>
+getObjectNames();
+</script>
+
+</body>
+</html>

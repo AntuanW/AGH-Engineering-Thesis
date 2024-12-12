@@ -12,6 +12,10 @@ class TopologyRepository(BaseRepository[TopologyModel]):
     def insert(self, topology: TopologyModel):
         return super().insert(topology.model_dump())
 
+    def list_names(self):
+        return [{"name": obj["name"], "_id": str(obj["_id"])}
+            for obj in self.get_collection().find({}, {"name": 1})]
+
     def find_by_id(self, topology_id: ObjectId) -> list[DeviceConfigInfo]:
         topology_dict: dict = super().find_one({"_id": topology_id})
         if not topology_dict:
