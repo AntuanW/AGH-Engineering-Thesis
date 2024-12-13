@@ -56,13 +56,30 @@ class NetmikoClient:
                     connect_handler.enable()
                 except Exception: pass
 
+            # match action:
+            #     case NetmikoAction.DOWNLOAD_RUNNING_CONFIG:
+            #         result = self._exec_download_commands(connect_handler)
+            #     case NetmikoAction.UPLOAD_COMMAND_SET:
+            #         result = self._exec_upload_command(connect_handler, device.mapped_config)
+            #     case NetmikoAction.SET_HOSTNAME_AND_CDP_TIMERS:
+            #         result = self._exec_hostname_and_cdp_commands(connect_handler, device.name)
             match action:
                 case NetmikoAction.DOWNLOAD_RUNNING_CONFIG:
-                    result = self._exec_download_commands(connect_handler)
+                    config_result: str = connect_handler.send_command(self.RUNNING_CONFIG_CMD)
+                    neighbors_result: str = connect_handler.send_command(self.CDP_NEIGHBORS_CMD)
+                    result = config_result, neighbors_result
+
                 case NetmikoAction.UPLOAD_COMMAND_SET:
-                    result = self._exec_upload_command(connect_handler, device.mapped_config)
+                    result = connect_handler.send_config_set(device.mapped_config)
+
                 case NetmikoAction.SET_HOSTNAME_AND_CDP_TIMERS:
-                    result = self._exec_hostname_and_cdp_commands(connect_handler, device.name)
+                    command_set = [
+                        self.SET_HOSTNAME.format(device.name),
+                        self.CDP_TIMER.format(5),
+                        self.CDP_HOLDTIME.format(10)
+                    ]
+                    result = connect_handler.send_config_set(command_set)
+
 
         return result
 

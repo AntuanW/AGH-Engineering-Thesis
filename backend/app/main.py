@@ -18,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.mount("/client", StaticFiles(directory="C:\\Studia\\Informatyka_WIeIT\\Inzynierka\\AGH-Engineering-Thesis\\backend\\client", html=True), name="client")
+app.mount("/client", StaticFiles(directory="client", html=True), name="client")
 
 app.include_router(upload_config_router.router)
 app.include_router(devices_management_router.router)
