@@ -1,0 +1,2 @@
+class EmptyDownloadException(Exception):
+    pass

@@ -6,4 +6,5 @@ class DownloadedConfig(BaseModel):
     name: str
     device_type: DeviceType
     neighbours: list[ConnectionModel]
+    config: str
 
