@@ -57,7 +57,7 @@ class ConfigDownloadService:
                 cdp_neighbors.append((
                     split_line[0],
                     split_line[1],
-                    split_line[4].split(" ", 1)[1]
+                    self._get_remote_interface(split_line[4])
                 ))
 
         connections = []
@@ -86,3 +86,6 @@ class ConfigDownloadService:
             return DeviceType.ROUTER
 
         return DeviceType.UNKNOWN
+
+    def _get_remote_interface(self, line: str):
+        return line.split(" ", 1)[1]
