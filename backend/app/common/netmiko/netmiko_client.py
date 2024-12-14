@@ -13,7 +13,7 @@ from .netmiko_device import NetmikoDevice
 class NetmikoClient:
     MODE_DIRECT = "cisco_ios"
     CONN_MODE = "generic_termserver_telnet"
-    GLOBAL_DELAY_FACTOR_VALUE = 10.0
+    GLOBAL_DELAY_FACTOR_VALUE = 3.0
     RUNNING_CONFIG_CMD = "show running-config"
     CDP_NEIGHBORS_CMD = "show cdp neighbors"
     SET_HOSTNAME = "hostname {}"
@@ -51,35 +51,17 @@ class NetmikoClient:
             redispatch(connect_handler, device_type=self.MODE_DIRECT)
 
             for _ in range(5):
-                # TODO: workaround
                 try:
                     connect_handler.enable()
                 except Exception: pass
 
-            # match action:
-            #     case NetmikoAction.DOWNLOAD_RUNNING_CONFIG:
-            #         result = self._exec_download_commands(connect_handler)
-            #     case NetmikoAction.UPLOAD_COMMAND_SET:
-            #         result = self._exec_upload_command(connect_handler, device.mapped_config)
-            #     case NetmikoAction.SET_HOSTNAME_AND_CDP_TIMERS:
-            #         result = self._exec_hostname_and_cdp_commands(connect_handler, device.name)
             match action:
                 case NetmikoAction.DOWNLOAD_RUNNING_CONFIG:
-                    config_result: str = connect_handler.send_command(self.RUNNING_CONFIG_CMD)
-                    neighbors_result: str = connect_handler.send_command(self.CDP_NEIGHBORS_CMD)
-                    result = config_result, neighbors_result
-
+                    result = self._exec_download_commands(connect_handler)
                 case NetmikoAction.UPLOAD_COMMAND_SET:
-                    result = connect_handler.send_config_set(device.mapped_config)
-
+                    result = self._exec_upload_command(connect_handler, device.mapped_config)
                 case NetmikoAction.SET_HOSTNAME_AND_CDP_TIMERS:
-                    command_set = [
-                        self.SET_HOSTNAME.format(device.name),
-                        self.CDP_TIMER.format(5),
-                        self.CDP_HOLDTIME.format(10)
-                    ]
-                    result = connect_handler.send_config_set(command_set)
-
+                    result = self._exec_hostname_and_cdp_commands(connect_handler, device.name)
 
         return result
 
@@ -96,16 +78,26 @@ class NetmikoClient:
             self.netmiko_constants.DEVICE_TYPE: self.CONN_MODE,
             self.netmiko_constants.GLOBAL_DELAY_FACTOR: self.GLOBAL_DELAY_FACTOR_VALUE,
             self.netmiko_constants.FAST_CLI: False,
-            self.netmiko_constants.AUTO_CONNECT: False
+            self.netmiko_constants.AUTO_CONNECT: False,
+            "session_log": "session_output.txt"
         }
 
     def _exec_download_commands(self, connect_handler: BaseConnection):
-        config_result: str = connect_handler.send_command(self.RUNNING_CONFIG_CMD)
-        neighbors_result: str = connect_handler.send_command(self.CDP_NEIGHBORS_CMD)
+        # config_result: str = connect_handler.send_command(self.RUNNING_CONFIG_CMD)
+        # neighbors_result: str = connect_handler.send_command(self.CDP_NEIGHBORS_CMD)
+        config_result: str = connect_handler.send_command_timing(self.RUNNING_CONFIG_CMD)
+        neighbors_result: str = connect_handler.send_command_timing(self.CDP_NEIGHBORS_CMD)
         return config_result, neighbors_result
 
     def _exec_upload_command(self, connect_handler: BaseConnection, running_config: list[str]):
-        return connect_handler.send_config_set(running_config)
+        connect_handler.send_command_timing("configure terminal")
+        # return connect_handler.send_config_set(running_config)
+        connect_handler.send_config_set(
+            config_commands=running_config,
+            enter_config_mode=False,
+            exit_config_mode=False
+        )
+        return connect_handler.send_command_timing("exit")
 
     def _exec_hostname_and_cdp_commands(self, connect_handler: BaseConnection, name: str, timer=5, holdtime=10):
         command_set = [
@@ -113,4 +105,15 @@ class NetmikoClient:
             self.CDP_TIMER.format(timer),
             self.CDP_HOLDTIME.format(holdtime)
         ]
-        return connect_handler.send_config_set(command_set)
+
+        # send command timing żeby wejśc do conf t
+        # send config set ale bez wchodzenia i wychodzenia z conf t
+        # send command timing żeby wyść z conf t
+        connect_handler.send_command_timing("configure terminal")
+        # return connect_handler.send_config_set(command_set)
+        connect_handler.send_config_set(
+            config_commands=command_set,
+            enter_config_mode=False,
+            exit_config_mode=False
+        )
+        return connect_handler.send_command_timing("exit")
