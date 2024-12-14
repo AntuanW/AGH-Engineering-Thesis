@@ -6,7 +6,7 @@ from fastapi import Depends
 from app.common.netmiko.netmiko_client import NetmikoClient
 from .utils.download_config_request import DownloadConfigRequest
 from .utils.downloaded_config import DownloadedConfig
-from .exceptions.config_Download_exceptions import EmptyDownloadException
+from .exceptions.config_download_exceptions import EmptyDownloadException
 from app.common.netmiko.netmiko_device import NetmikoDevice
 from ..models.connection import ConnectionModel
 from ..running_config.util.device_config_types import DeviceType
