@@ -28,7 +28,7 @@ class ConfigDownloadService:
             logging.info(f"Downloading config for {device.name}")
             config, neighbors = self._download(device)
 
-            if not (config or neighbors):
+            if not (config and neighbors):
                 raise EmptyDownloadException("Something went wrong with config download.")
 
             download_results.append(DownloadedConfig(
