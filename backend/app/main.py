@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from app.routes import upload_config_router, devices_management_router, file_export_router, download_config_router
+from fastapi.staticfiles import StaticFiles
 
 from app.logging_setup import setup_logging
 from pathlib import Path
