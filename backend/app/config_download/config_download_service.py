@@ -27,7 +27,8 @@ class ConfigDownloadService:
             download_results.append(DownloadedConfig(
                 name=device.name,
                 device_type=self._get_device_type(device),
-                neighbours=self._parse_neighbors(neighbors, device.name)
+                neighbours=self._parse_neighbors(neighbors, device.name),
+                config=config
             ))
         return download_results
 

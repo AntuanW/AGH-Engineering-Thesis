@@ -13,7 +13,7 @@ from bson import ObjectId
 from ..repository.topology_repository import TopologyRepository
 
 
-class InstructionExportService:
+class LabInstructionExportService:
     def __init__(self,
                  topology_repo=Depends(TopologyRepository),
                  pdf_generator=Depends(PdfGenerator)):
@@ -21,7 +21,7 @@ class InstructionExportService:
         self.pdf_generator: PdfGenerator = pdf_generator
         self.styles = PdfStyles()
 
-    def export_instructions(self, mappings: list[MappingModel]):
+    def export_instructions(self, mappings: list[MappingModel]) -> str:
         content = []
         for mapping in mappings:
             content.extend(self._create_instruction_header(mapping))
@@ -29,7 +29,7 @@ class InstructionExportService:
             content.extend(self._create_connections_table(mapping))
             content.extend(self._create_topology_graph(mapping))
 
-        filename = self.pdf_generator.generate_student_instruction(content)
+        filename = self.pdf_generator.generate_lab_instruction(content)
         return filename
 
     def _get_device_name_to_type_dict(self, devices: list[MappedDeviceModel]) -> dict:
