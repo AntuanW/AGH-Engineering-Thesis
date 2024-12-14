@@ -29,7 +29,7 @@ class LabInstructionExportService:
             content.extend(self._create_connections_table(mapping))
             content.extend(self._create_topology_graph(mapping))
 
-        filename = self.pdf_generator.generate_student_instruction(content)
+        filename = self.pdf_generator.generate_lab_instruction(content)
         return filename
 
     def _get_device_name_to_type_dict(self, devices: list[MappedDeviceModel]) -> dict:

@@ -38,3 +38,4 @@ class PdfGenerator:
 
     def generate_home_instruction(self, content):
         return self.generate_instruction(content, "home")
+
