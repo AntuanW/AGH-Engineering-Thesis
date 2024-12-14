@@ -32,13 +32,20 @@ class PdfStyles:
             name='Heading2',
             parent=getSampleStyleSheet()['Heading2'],
             fontName='Times New Roman',
-            fontSize=16
+            fontSize=18
         )
         self.italics_style = ParagraphStyle(
             name='Italics',
             parent=getSampleStyleSheet()['Title'],
             fontName='Times New Roman Italic',
             fontSize=16
+        )
+        self.bullet_style = ParagraphStyle(
+            name='Bullet',
+            parent=getSampleStyleSheet()['Bullet'],
+            fontName='Times New Roman',
+            fontSize=12,
+            bulletIndent=20,
         )
         self.table_style = TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
