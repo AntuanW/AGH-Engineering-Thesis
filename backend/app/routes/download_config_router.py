@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, status, HTTPException
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse
 
 from app.config_download.config_download_service import ConfigDownloadService
 from app.config_download.utils.download_config_request import DownloadConfigRequest
@@ -22,9 +22,6 @@ async def download_configs(
     config_download_service.change_hostnames_and_cdp_timers(download_request.devices)
 
     download_results: list[DownloadedConfig] = config_download_service.download_devices_config(download_request)
-
-    # TODO: reversed mapping to some packet tracer device
-    # ...
 
     try:
         filename = home_instruction_export_service.export_instruction(download_results)

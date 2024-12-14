@@ -4,7 +4,7 @@ from pathlib import Path
 from bson import ObjectId
 
 from app.repository.decrypted_xml_repository import DecryptedXMLRepository
-from app.running_config.basic_config_extractor import BasicConfigExtractor
+from app.running_config.config_extractor import ConfigExtractor
 from app.running_config.util.device_config_types import DeviceConfigInfo, DeviceType
 from app.running_config.exceptions.config_extraction_exceptions import XmlOpenException
 
@@ -15,7 +15,7 @@ class TestBasicConfigExtractor(unittest.TestCase):
     def test_get_topology_config_from_xml(self):
         decrypted_xml_repository: DecryptedXMLRepository = DecryptedXMLRepository()
         topology = decrypted_xml_repository.find_object({"_id": ObjectId("671e2fd1af242f362075d943")})
-        basic_config_extractor: BasicConfigExtractor = BasicConfigExtractor()
+        basic_config_extractor: ConfigExtractor = ConfigExtractor()
 
         device_counter: dict = {DeviceType.ROUTER: 0, DeviceType.SWITCH: 0, DeviceType.PC: 0}
 
@@ -31,7 +31,7 @@ class TestBasicConfigExtractor(unittest.TestCase):
     def test_get_topology_config_from_xml_pc(self):
         decrypted_xml_repository: DecryptedXMLRepository = DecryptedXMLRepository()
         topology = decrypted_xml_repository.find_object({"_id": ObjectId("674dab18bbbd7e2648903669")})
-        basic_config_extractor: BasicConfigExtractor = BasicConfigExtractor()
+        basic_config_extractor: ConfigExtractor = ConfigExtractor()
 
         device_counter: dict = {DeviceType.ROUTER: 0, DeviceType.SWITCH: 0, DeviceType.PC: 0}
 
@@ -46,5 +46,5 @@ class TestBasicConfigExtractor(unittest.TestCase):
 
     def test_get_topology_config_from_xml_raises_exception(self):
         xml_file_path: Path = RESOURCES_PATH.joinpath('resources/non-existent-topology.xml')
-        basic_config_extractor: BasicConfigExtractor = BasicConfigExtractor()
+        basic_config_extractor: ConfigExtractor = ConfigExtractor()
         self.assertRaises(XmlOpenException, basic_config_extractor.get_topology_config_from_xml, xml_file_path)
