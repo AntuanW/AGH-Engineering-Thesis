@@ -1,20 +1,12 @@
-FROM python:3.12.8-slim
+FROM python:3.12.8
+
+# Copy the current directory contents into the container at /backend
+COPY . /backend
+COPY .env .
 
 # Set the working directory
 WORKDIR /backend
 
-# Copy the current directory contents into the container at /backend
-COPY . /backend
+RUN pip install .
 
-# Create and activate virtual environment
-RUN python -m venv .venv && \
-    . .venv/bin/activate && \
-    pip install --no-cache-dir .
-
-# Set the environment PATH for the virtual environment
-ENV PATH="/backend/.venv/bin:$PATH"
-
-EXPOSE 8000
-
-# Run the application
 CMD ["start-app"]
