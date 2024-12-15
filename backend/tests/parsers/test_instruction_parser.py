@@ -1,7 +1,8 @@
 import pytest
 from pprint import pprint
 
-from app.parsers.InstructionParser import InstructionParser
+from app.common.parsers import instruction_parser
+from app.common.parsers.instruction_parser import InstructionParser
 
 router_config_1 = [
         "!",
