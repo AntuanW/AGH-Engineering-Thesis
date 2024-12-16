@@ -11,7 +11,7 @@ from .exceptions.config_extraction_exceptions import (
 )
 
 
-class BasicConfigExtractor:
+class ConfigExtractor:
     def __init__(self, tags: XmlConfigConstants = Depends(XmlConfigConstants)):
         self.tags = tags
 

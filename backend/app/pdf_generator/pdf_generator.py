@@ -13,9 +13,9 @@ class PdfGenerator:
     TEMP_PATH = Path(tempfile.gettempdir())
     PDF_OUTPUT_DIR = "pdf_files"
 
-    def generate_student_instruction(self, content):
+    def generate_instruction(self, content, instruction_type):
         current_datatime = datetime.now()
-        filename = f"instruction_{current_datatime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+        filename = f"{instruction_type}_instruction_{current_datatime.strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
         output_dir = self.TEMP_PATH / self.PDF_OUTPUT_DIR
 
         if not output_dir.exists():
@@ -32,3 +32,10 @@ class PdfGenerator:
 
         doc.build(content)
         return filename
+
+    def generate_lab_instruction(self, content):
+        return self.generate_instruction(content, "lab")
+
+    def generate_home_instruction(self, content):
+        return self.generate_instruction(content, "home")
+
