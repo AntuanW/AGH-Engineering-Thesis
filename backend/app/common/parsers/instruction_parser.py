@@ -17,7 +17,6 @@ class InstructionParser(Parser):
             r"^!",
             r"^Building configuration",
             r"^Current configuration.*",
-            r"^no aaa new-model",
             r"^no service timestamps.*",
             r"^no service password-encryption",
             r"^platform .*",
@@ -28,8 +27,6 @@ class InstructionParser(Parser):
             r"^login on-success.*",
             r"^subscriber templating",
             r"^no license.*",
-            r"^line con 0$",
-            r"^line vty \d+ \d+$",
             r"^login$",
             r"^version*",
             r"^license*"
