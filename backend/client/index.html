@@ -53,6 +53,17 @@
         </div>
 
 
+        <iframe name="iframe-instruction" style="display:none;"></iframe>
+        <div class="operation-block">
+            <h1>5. Generate PDF instructions</h1>
+
+            <form id="instruction-form" onsubmit="onSubmitGeneratePDF()" target="iframe-instruction">
+                <select class="__mapping_select" name="select" form="instruction-form" id="instruction-form-select"></select> <br />
+                <input type="submit" class="button"/>
+            </form>
+        </div>
+
+
 
         <iframe name="iframe-upload-config" style="display:none;"></iframe>
         <div class="operation-block" id="div-upload-config">
@@ -68,17 +79,6 @@
             </form>
         </div>
 
-
-
-        <iframe name="iframe-instruction" style="display:none;"></iframe>
-        <div class="operation-block">
-            <h1>5. Generate PDF instructions</h1>
-
-            <form id="instruction-form" onsubmit="onSubmitGeneratePDF()" target="iframe-instruction">
-                <select class="__mapping_select" name="select" form="instruction-form" id="instruction-form-select"></select> <br />
-                <input type="submit" class="button"/>
-            </form>
-        </div>
 
 
         <iframe name="iframe-download" style="display:none;"></iframe>

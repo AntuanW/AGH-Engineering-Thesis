@@ -9,10 +9,10 @@ from app.models.topology import TopologyModel
 from app.repository.topology_repository import TopologyRepository
 from app.running_config.util.device_config_types import DeviceType
 from app.common.netmiko.netmiko_device_type import NetmikoDeviceType
-from app.instruction_export.instruction_export_service import InstructionExportService
+from app.instruction_export.lab_instruction_export_service import LabInstructionExportService
 
 
-class TestStudentInstructionExportService(unittest.TestCase):
+class TestLabInstructionExportService(unittest.TestCase):
     @patch("app.repository.topology_repository.TopologyRepository.find_object")
     def test_export_instructions(self, find_object_mock):
         mock_lab_group_number = 1
@@ -46,6 +46,6 @@ class TestStudentInstructionExportService(unittest.TestCase):
         pdf_generator_mock.filename.return_value = "test"
 
         mappings = [MappingModel(**mock_mapping)]
-        instruction_export_service = InstructionExportService(topology_repo=TopologyRepository(), pdf_generator=pdf_generator_mock)
-        filename = instruction_export_service.export_instructions(mappings)
+        lab_instruction_export_service = LabInstructionExportService(topology_repo=TopologyRepository(), pdf_generator=pdf_generator_mock)
+        filename = lab_instruction_export_service.export_instructions(mappings)
         self.assertTrue(filename)
