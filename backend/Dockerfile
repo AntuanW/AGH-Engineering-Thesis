@@ -1,5 +1,8 @@
 FROM python:3.12.8
 
+# Install Java
+RUN apt-get update && apt-get install -y default-jre
+
 # Install fontconfig for managing fonts
 RUN apt-get update && apt-get install -y \
     fontconfig \
