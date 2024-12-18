@@ -24,6 +24,8 @@ COPY .env .
 # Set the working directory
 WORKDIR /backend
 
+RUN mkdir -p /backend/tmp
+
 RUN pip install .
 
 CMD ["start-app"]
