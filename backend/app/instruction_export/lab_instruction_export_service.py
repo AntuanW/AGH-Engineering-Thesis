@@ -86,7 +86,6 @@ class LabInstructionExportService:
         return content
 
     def _create_connections_table(self, mapping: MappingModel) -> list[Paragraph]:
-        logging.info("Creating connections table")
         devices = mapping.mapped_devices
         connections = self._get_device_connections(devices)
 
@@ -107,7 +106,6 @@ class LabInstructionExportService:
         ]
 
     def _create_topology_graph(self, mapping: MappingModel) -> list[Paragraph]:
-        logging.info("Creating topology schema")
         group = mapping.lab_group_number
         devices = mapping.mapped_devices
         connections = self._get_device_connections(devices)
@@ -122,5 +120,5 @@ class LabInstructionExportService:
             Paragraph("Schemat:", self.styles.heading2_style),
             Spacer(1, 12),
             image,
-            Spacer(1, 12)
+            PageBreak()
         ]

@@ -48,6 +48,7 @@ class MappingService:
         return mappings
 
     def get_device_mappings(self, topology_id: str, group_numbers: list[int] | None) -> list[MappingModel]:
+        logging.info(f"Start generating device mappings for topology {topology_id}")
         topology_id = ObjectId(topology_id)
         topology = self._topology_repo.find_object({"_id": topology_id})
 
@@ -70,9 +71,11 @@ class MappingService:
             },
             mapping.model_dump())
 
+        logging.info(f"Successfully generated device mappings for topology {topology_id}")
         return mapping_list
 
     def _get_device_mapping_for_lab_group(self, topology: TopologyModel, group_number: int) -> list[MappedDeviceModel]:
+        logging.info(f"Generating device mapping for group {group_number}")
         group = self._lab_group_repo.find_object({"lab_group_number": group_number})
         if group is None:
             raise KeyError(f"Group {group} does not exist.")

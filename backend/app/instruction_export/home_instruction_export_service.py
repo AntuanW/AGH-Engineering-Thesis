@@ -47,7 +47,6 @@ class HomeInstructionExportService:
         ]
 
     def _create_running_config_section(self, device: DownloadedConfig) -> list[Paragraph]:
-        logging.debug(f"Creating running config section for {device.name}")
         content = [
             Paragraph(f"{device.name} - {device.device_type.value}", self.styles.heading2_style),
             Spacer(1, 12)
@@ -61,12 +60,11 @@ class HomeInstructionExportService:
         return content
 
     def _create_topology_graph(self, devices: list[DownloadedConfig]) -> list[Paragraph]:
-        logging.info("Creating topology schema")
         devices_types = self._get_device_name_to_type_dict(devices)
         connections = self._get_device_connections(devices)
 
         if not connections:
-            logging.warning("No connections found between devices")
+            logging.info("No connections found between devices. Skipping topology schema generation.")
 
         visualizer = TopologyVisualizer(devices_types, connections)
         graph = visualizer.generate_graph()
