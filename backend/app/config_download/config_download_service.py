@@ -26,24 +26,19 @@ class ConfigDownloadService:
         download_results = []
         for device in download_config_request.devices:
             logging.info(f"Downloading config for {device.name}")
-            config, neighbors = self._download(device)
+            config, neighbors, hostname, device_type_str = self.netmiko_client.download_config_from_device(device)
 
             if not (config and neighbors):
                 raise EmptyDownloadException("Something went wrong with config download.")
 
             download_results.append(DownloadedConfig(
-                name=device.name,
-                device_type=self._get_device_type(device),
+                name=hostname,
+                device_type=self._get_device_type(device_type_str),
                 neighbours=self._parse_neighbors(neighbors, device.name),
                 config=config
             ))
             logging.info(f"Finished downloading config for {device.name} successfully.")
         return download_results
-
-    def _download(self, device: NetmikoDevice):
-        if device.device_type == DeviceType.SWITCH or device.device_type == DeviceType.ROUTER:
-            return self.netmiko_client.download_config_from_device(device)
-        return "", ""
 
     def _parse_neighbors(self, neighbors_string: str, origin_name: str) -> list[ConnectionModel]:
         cdp_neighbors = []
@@ -70,15 +65,14 @@ class ConfigDownloadService:
             ))
         return connections
 
-    def _get_device_type(self, device: NetmikoDevice):
-        switch_regex = r"^S\d{2}"
-        router_regex = r"^R\d{2}"
+    def  _get_device_type(self, device_type_str: str):
+        device_type_str = device_type_str.lower()
 
-        if re.match(switch_regex, device.name):
-            return DeviceType.SWITCH
-
-        if re.match(router_regex, device.name):
+        if device_type_str.find("router") >= 0:
             return DeviceType.ROUTER
+
+        if device_type_str.find("switch"):
+            return DeviceType.SWITCH
 
         return DeviceType.UNKNOWN
 

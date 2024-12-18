@@ -18,7 +18,8 @@ router = APIRouter(prefix="/config_download", tags=["config-download"])
 async def download_configs(
         download_request: DownloadConfigRequest,
         config_download_service: ConfigDownloadService = Depends(ConfigDownloadService),
-        home_instruction_export_service: HomeInstructionExportService = Depends(HomeInstructionExportService)):
+        home_instruction_export_service: HomeInstructionExportService = Depends(HomeInstructionExportService)
+):
     config_download_service.change_hostnames_and_cdp_timers(download_request.devices)
 
     download_results: list[DownloadedConfig] = config_download_service.download_devices_config(download_request)
