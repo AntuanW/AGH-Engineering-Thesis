@@ -1,3 +1,5 @@
+import logging
+
 from reportlab.platypus import Paragraph, Spacer, PageBreak, Table
 from app.pdf_generator.pdf_generator import PdfGenerator
 from app.pdf_generator.util.pdf_styles import PdfStyles
@@ -22,14 +24,18 @@ class LabInstructionExportService:
         self.styles = PdfStyles()
 
     def export_instructions(self, mappings: list[MappingModel]) -> str:
+        logging.info("Start generating lab instruction")
         content = []
         for mapping in mappings:
+            logging.info(f"Start generating lab instruction for group {mapping.lab_group_number}")
             content.extend(self._create_instruction_header(mapping))
             content.extend(self._create_connection_steps(mapping))
             content.extend(self._create_connections_table(mapping))
             content.extend(self._create_topology_graph(mapping))
+            logging.info(f"Lab instruction for group {mapping.lab_group_number} successfully generated")
 
         filename = self.pdf_generator.generate_lab_instruction(content)
+        logging.info(f"Lab instruction successfully generated: {filename}")
         return filename
 
     def _get_device_name_to_type_dict(self, devices: list[MappedDeviceModel]) -> dict:
@@ -80,6 +86,7 @@ class LabInstructionExportService:
         return content
 
     def _create_connections_table(self, mapping: MappingModel) -> list[Paragraph]:
+        logging.info("Creating connections table")
         devices = mapping.mapped_devices
         connections = self._get_device_connections(devices)
 
@@ -100,6 +107,7 @@ class LabInstructionExportService:
         ]
 
     def _create_topology_graph(self, mapping: MappingModel) -> list[Paragraph]:
+        logging.info("Creating topology schema")
         group = mapping.lab_group_number
         devices = mapping.mapped_devices
         connections = self._get_device_connections(devices)
