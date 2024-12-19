@@ -28,7 +28,8 @@ setup(
     install_requires=parse_requirements("requirements.txt"),
     python_requires=">=3.12",
     package_data={
-        "app": ["logging.yaml"]
+        "app": ["**/*"],
+        "client": ["**/*"],
     },
     entry_points={
         "console_scripts": [
