@@ -18,14 +18,14 @@ class ConfigDownloadService:
 
     def change_hostnames_and_cdp_timers(self, devices: list[NetmikoDevice]):
         for device in devices:
-            logging.info(f"Setting hostname and timers for {device.name}")
+            logging.info(f"Setting hostname and timers for {device.port}")
             self.netmiko_client.set_hostname_and_cdp_timers(device)
         time.sleep(10)
 
     def download_devices_config(self, download_config_request: DownloadConfigRequest) -> list[DownloadedConfig]:
         download_results = []
         for device in download_config_request.devices:
-            logging.info(f"Downloading config for {device.name}")
+            logging.info(f"Downloading config for {device.port}")
             config, neighbors, hostname, device_type_str = self.netmiko_client.download_config_from_device(device)
 
             if not (config and neighbors):
@@ -34,27 +34,33 @@ class ConfigDownloadService:
             download_results.append(DownloadedConfig(
                 name=hostname,
                 device_type=self._get_device_type(device_type_str),
-                neighbours=self._parse_neighbors(neighbors, device.name),
+                neighbours=self._parse_neighbors(neighbors, hostname),
                 config=config
             ))
-            logging.info(f"Finished downloading config for {device.name} successfully.")
+            logging.info(f"Finished downloading config for {device.port} successfully.")
         return download_results
 
     def _parse_neighbors(self, neighbors_string: str, origin_name: str) -> list[ConnectionModel]:
         cdp_neighbors = []
-        dev_regex = r"^(S\d{2}|R\d{2})"
+        # dev_regex = r"^(S\d{2}|R\d{2})"
+        dev_id = r"^Device ID"
         whitespace_regex = r"\s{2,}"
-
+        split_string = neighbors_string.splitlines()
         logging.info(f"Parsing {origin_name} neighbors")
-        for line in neighbors_string.splitlines():
-            if re.match(dev_regex, line):
-                split_line = re.split(whitespace_regex, line)
-                cdp_neighbors.append((
-                    split_line[0],
-                    split_line[1],
-                    self._get_remote_interface(split_line[4])
-                ))
-
+        i = 0
+        while not re.match(dev_id, split_string[i]):
+            i += 1
+        i += 1
+        while i < len(split_string) and split_string[i] != "":
+            print(split_string[i])
+            split_line = re.split(whitespace_regex, split_string[i])
+            cdp_neighbors.append((
+                split_line[0],
+                split_line[1],
+                self._get_remote_interface(split_line[4])
+            ))
+            i+=1
+        print(cdp_neighbors)
         connections = []
         for device_id, local_interface, remote_interface in cdp_neighbors:
             connections.append(ConnectionModel(
@@ -65,7 +71,7 @@ class ConfigDownloadService:
             ))
         return connections
 
-    def  _get_device_type(self, device_type_str: str):
+    def _get_device_type(self, device_type_str: str):
         device_type_str = device_type_str.lower()
 
         if device_type_str.find("router") >= 0:
