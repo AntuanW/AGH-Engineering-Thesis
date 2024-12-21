@@ -56,7 +56,9 @@ class NetmikoClient:
             connect_handler.write_channel("\r")
             redispatch(connect_handler, device_type=self.MODE_DIRECT)
 
-            connect_handler.send_command_timing("enable")
+            for _ in range(5):
+                try: connect_handler.enable()
+                except Exception: pass
 
             match action:
                 case NetmikoAction.DOWNLOAD_RUNNING_CONFIG:

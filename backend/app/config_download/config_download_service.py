@@ -42,9 +42,9 @@ class ConfigDownloadService:
 
     def _parse_neighbors(self, neighbors_string: str, origin_name: str) -> list[ConnectionModel]:
         cdp_neighbors = []
-        # dev_regex = r"^(S\d{2}|R\d{2})"
         dev_id = r"^Device ID"
         whitespace_regex = r"\s{2,}"
+        merged_last_two_columns_regex = r"^.+\s{1}.+$"
         split_string = neighbors_string.splitlines()
         logging.info(f"Parsing {origin_name} neighbors")
         i = 0
@@ -52,15 +52,19 @@ class ConfigDownloadService:
             i += 1
         i += 1
         while i < len(split_string) and split_string[i] != "":
-            print(split_string[i])
             split_line = re.split(whitespace_regex, split_string[i])
+            if re.match(merged_last_two_columns_regex, split_line[4]):
+                remote_interface = self._get_remote_interface(split_line[4])
+            else:
+                remote_interface = split_line[5]
+
             cdp_neighbors.append((
                 split_line[0],
                 split_line[1],
-                self._get_remote_interface(split_line[4])
+                remote_interface
             ))
             i+=1
-        print(cdp_neighbors)
+
         connections = []
         for device_id, local_interface, remote_interface in cdp_neighbors:
             connections.append(ConnectionModel(
