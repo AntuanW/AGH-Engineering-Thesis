@@ -5,7 +5,7 @@
 
 !.gitignore
 !/README.md
-!Dockerfile
+!docker-compose.yaml
 
 
 # System-specific gitignore
