@@ -16,10 +16,10 @@ class ConfigDownloadService:
     def __init__(self, netmiko_client: NetmikoClient = Depends(NetmikoClient)):
         self.netmiko_client = netmiko_client
 
-    def change_hostnames_and_cdp_timers(self, devices: list[NetmikoDevice]):
+    def change_cdp_timers(self, devices: list[NetmikoDevice]):
         for device in devices:
-            logging.info(f"Setting hostname and timers for {device.port}")
-            self.netmiko_client.set_hostname_and_cdp_timers(device)
+            logging.info(f"Setting timers for {device.port}")
+            self.netmiko_client.set_cdp_timers(device)
         time.sleep(10)
 
     def download_devices_config(self, download_config_request: DownloadConfigRequest) -> list[DownloadedConfig]:

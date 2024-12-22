@@ -33,7 +33,7 @@ class NetmikoClient:
         )
         return running_config, neighbors_str, hostname, device_type
 
-    def set_hostname_and_cdp_timers(self, device: NetmikoDevice):
+    def set_cdp_timers(self, device: NetmikoDevice):
         self._exec_netmiko_action(device, NetmikoAction.SET_CDP_TIMERS)
 
     def _exec_netmiko_action(self, device: NetmikoDevice | MappedDeviceModel, action: NetmikoAction):
