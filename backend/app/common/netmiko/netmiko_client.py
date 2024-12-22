@@ -90,9 +90,9 @@ class NetmikoClient:
         }
 
     def _exec_download_commands(self, connect_handler: BaseConnection):
+        hostname: str = connect_handler.find_prompt()
         config_result: str = connect_handler.send_command(self.RUNNING_CONFIG_CMD)
         neighbors_result: str = connect_handler.send_command(self.CDP_NEIGHBORS_CMD)
-        hostname: str = connect_handler.find_prompt()[:-1]
         device_type: str = connect_handler.send_command(self.SHOW_VERSION)
 
         return config_result, neighbors_result, hostname, device_type

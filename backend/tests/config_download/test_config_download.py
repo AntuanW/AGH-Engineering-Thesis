@@ -38,7 +38,7 @@ class TestConfigDownloadService(unittest.TestCase):
         assert result[0].from_interface == expected_output[0].from_interface
         assert result[0].to_interface == expected_output[0].to_interface
         assert result[1].neighbour_name == expected_output[1].neighbour_name
-        assert result[1].from_interface == expected_output[1].from_interface, f"{result[1].from_interface}"
+        assert result[1].from_interface == expected_output[1].from_interface
         assert result[1].to_interface == expected_output[1].to_interface
 
     @patch("app.common.netmiko.netmiko_client.NetmikoClient")
@@ -99,10 +99,26 @@ class TestConfigDownloadService(unittest.TestCase):
         config_download_service = ConfigDownloadService(netmiko_client_mock)
         result: list[DownloadedConfig] = config_download_service.download_devices_config(download_config_request)
 
+        print(result[0].name)
         assert len(result) == 2
-        assert result[0].name == "Router"
+        assert result[0].name == "Router", str(result[0].name)
         assert result[0].device_type == DeviceType.ROUTER
         assert len(result[0].neighbours) == 1
         assert result[1].name == "Switch"
         assert result[1].device_type == DeviceType.SWITCH
         assert len(result[1].neighbours) == 1
+
+    @patch("app.common.netmiko.netmiko_client.NetmikoClient")
+    def test_strip_hostname(self, netmiko_client_mock):
+        test_prompt_1 = "Router#"
+        test_prompt_2 = "Router(config)#"
+        test_prompt_3 = "Router(config-router)#"
+        test_prompt_4 = "Router(config-if)#"
+        expected_hostname = "Router"
+
+        config_download = ConfigDownloadService(netmiko_client_mock)
+
+        assert config_download._strip_hostname(test_prompt_1) == expected_hostname
+        assert config_download._strip_hostname(test_prompt_2) == expected_hostname
+        assert config_download._strip_hostname(test_prompt_3) == expected_hostname
+        assert config_download._strip_hostname(test_prompt_4) == expected_hostname

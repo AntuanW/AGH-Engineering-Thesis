@@ -30,7 +30,7 @@ Router       Fas 0/1          141            R       ISR4300- Gig 0/0/1
 
 ROUTER_CONFIG = "mocked config"
 SWITCH_CONFIG = "mocked config"
-ROUTER_HOSTNAME = "Router"
-SWITCH_HOSTNAME = "Switch"
+ROUTER_HOSTNAME = "Router#"
+SWITCH_HOSTNAME = "Switch#"
 ROUTER_VERSION = "Mocked version of Router"
 SWITCH_VERSION = "Mocked version of Switch"
