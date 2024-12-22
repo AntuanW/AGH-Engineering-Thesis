@@ -1,4 +1,5 @@
-from netmiko import BaseConnection, ConnectHandler, redispatch
+import netmiko
+from netmiko import BaseConnection, ConnectHandler
 from fastapi import Depends
 import time
 import logging
@@ -54,11 +55,13 @@ class NetmikoClient:
             connect_handler.write_channel("\r")
             time.sleep(1)
             connect_handler.write_channel("\r")
-            redispatch(connect_handler, device_type=self.MODE_DIRECT)
+            netmiko.redispatch(connect_handler, device_type=self.MODE_DIRECT)
 
             for _ in range(5):
-                try: connect_handler.enable()
-                except Exception: pass
+                try:
+                    connect_handler.enable()
+                except Exception:
+                    pass
 
             match action:
                 case NetmikoAction.DOWNLOAD_RUNNING_CONFIG:
