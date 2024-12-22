@@ -4,8 +4,9 @@ from unittest.mock import patch, MagicMock
 from bson.objectid import ObjectId
 
 from app.models.mapped_device import MappedDeviceModel
-from app.models.mapping import MappingModel
+from app.models.mapping import MappingCollectionModel, MappingType
 from app.models.topology import TopologyModel
+from app.repository.lab_group_repository import LabGroupRepository
 from app.repository.topology_repository import TopologyRepository
 from app.running_config.util.device_config_types import DeviceType
 from app.common.netmiko.netmiko_device_type import NetmikoDeviceType
@@ -27,11 +28,14 @@ class TestLabInstructionExportService(unittest.TestCase):
             mapped_config=[],
             neighbours=[]
         )
-        mock_mapping = {
+        mock_mapping_collection = {
             '_id': mock_mapping_id,
-            'lab_group_number': mock_lab_group_number,
+            'name': "test",
+            'type': MappingType.CREATED_FROM_PKT,
             'topology_id': mock_topology_id,
-            'mapped_devices': [mock_mapped_device]
+            'mappings': {
+                1: [mock_mapped_device]
+            }
         }
 
         mock_topology = TopologyModel(
@@ -45,7 +49,7 @@ class TestLabInstructionExportService(unittest.TestCase):
         pdf_generator_mock.generate_pdf.return_value = ""
         pdf_generator_mock.filename.return_value = "test"
 
-        mappings = [MappingModel(**mock_mapping)]
-        lab_instruction_export_service = LabInstructionExportService(topology_repo=TopologyRepository(), pdf_generator=pdf_generator_mock)
-        filename = lab_instruction_export_service.export_instructions(mappings)
+        mapping_collection = MappingCollectionModel(**mock_mapping_collection)
+        lab_instruction_export_service = LabInstructionExportService(TopologyRepository(), LabGroupRepository(), pdf_generator_mock)
+        filename = lab_instruction_export_service.export_instructions(mapping_collection)
         self.assertTrue(filename)

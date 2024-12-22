@@ -1,15 +1,15 @@
 from unittest.mock import patch
 
+from app.common.netmiko.netmiko_device_type import NetmikoDeviceType
 from app.mapping.mapping_service import MappingService
 from app.models.device import Interface
+from app.models.mapped_device import MappedDeviceModel
+from app.models.mapping import MappingCollectionModel, MappingType
 from app.models.topology import TopologyModel
 from app.repository.device_repository import DeviceRepository
 from app.repository.lab_group_repository import LabGroupRepository
 from app.repository.mapping_repository import MappingRepository
 from app.repository.topology_repository import TopologyRepository
-
-from bson.objectid import ObjectId
-
 from app.running_config.util.device_config_types import DeviceConfigInfo, DeviceType, DeviceLink
 
 
@@ -69,10 +69,10 @@ class TestMapping:
 
         mapping = mapping_service.get_device_mappings(mock_topology_id, [5])
 
-        assert mapping[0].mapped_devices[0].device_type == DeviceType.ROUTER
-        assert mapping[0].mapped_devices[1].device_type == DeviceType.SWITCH
-        assert Interface(mapping[0].mapped_devices[0].neighbours[0].to_interface) == Interface("Fa0/5")
-        assert Interface(mapping[0].mapped_devices[0].neighbours[1].to_interface) == Interface("Fa0/1")
+        assert mapping.mappings[5][0].device_type == DeviceType.ROUTER
+        assert mapping.mappings[5][1].device_type == DeviceType.SWITCH
+        assert Interface(mapping.mappings[5][0].neighbours[0].to_interface) == Interface("Fa0/5")
+        assert Interface(mapping.mappings[5][0].neighbours[1].to_interface) == Interface("Fa0/1")
 
     @patch("app.repository.topology_repository.TopologyRepository.find_object")
     def test_pc_mapping(self, find_object_mock):
@@ -110,7 +110,30 @@ class TestMapping:
         find_object_mock.return_value = mock_topology
 
         service = MappingService(LabGroupRepository(), DeviceRepository(), TopologyRepository(), MappingRepository())
-        mappings = service.get_device_mappings(mock_topology_id, [5])
+        mapping = service.get_device_mappings(mock_topology_id, [5])
 
-        assert mappings[0].mapped_devices[1].device_type == DeviceType.PC
-        assert mappings[0].mapped_devices[0].neighbours[0].to_interface == "PC0"
+        assert mapping.mappings[5][1].device_type == DeviceType.PC
+        assert mapping.mappings[5][0].neighbours[0].to_interface == "PC0"
+
+    def test_model(self):
+        model = MappingCollectionModel(name="adwd", type=MappingType.CREATED_FROM_PKT, topology_id="asdawd",
+                                       mappings={
+                                           2: [MappedDeviceModel(
+                                                name="adw",
+                                                ip_address="123123",
+                                                port=123151,
+                                                device_type=DeviceType.ROUTER,
+                                                netmiko_device_type=NetmikoDeviceType.CISCO_IOS,
+                                                mapped_config=[],
+                                                neighbours=[]
+                                            )]
+                                       })
+
+        assert model.mappings[2][0].name == "adw"
+
+        dict_ = model.model_dump()
+
+        model2 = MappingCollectionModel(**dict_)
+
+        assert model2.mappings[2][0].name == "adw"
+        assert type(tuple(model2.mappings.keys())[0]) == int

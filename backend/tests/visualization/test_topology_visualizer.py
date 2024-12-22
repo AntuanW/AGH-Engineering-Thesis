@@ -1,4 +1,7 @@
+import tempfile
 import unittest
+from pathlib import Path
+
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Spacer
 
@@ -8,8 +11,8 @@ from app.models.connection import ConnectionModel
 
 class TestTopologyVisualizer(unittest.TestCase):
     def generate_pdf_with_image(self, image):
-        pdf_file = "pdf_files/test_topology_visualization.pdf"
-        doc = SimpleDocTemplate(pdf_file, pagesize=A4)
+        pdf_file = Path(tempfile.gettempdir()) / "test_topology_visualization.pdf"
+        doc = SimpleDocTemplate(str(pdf_file), pagesize=A4)
 
         content = [image, Spacer(1, 12)]
         doc.build(content)

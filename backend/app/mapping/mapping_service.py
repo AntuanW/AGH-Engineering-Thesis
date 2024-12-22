@@ -6,7 +6,7 @@ from fastapi import Depends
 
 from app.models.connection import ConnectionModel
 from app.models.mapped_device import MappedDeviceModel
-from app.models.mapping import MappingModel
+from app.models.mapping import MappingCollectionModel, MappingType
 from app.models.rack import RackModel
 from app.models.topology import TopologyModel
 from app.repository.device_repository import DeviceRepository
@@ -34,43 +34,33 @@ class MappingService:
         self._topology_repo = topology_repo
         self._mapping_repo = mapping_repo
 
-    def get_mappings_by_topology_id(self, topology_id: str, group_numbers: list | None = None):
-        if group_numbers is None:
-            group_numbers = self._lab_group_repo.get_all_group_ids()
+    def get_device_mappings(self, topology_id: str, group_numbers: list[int] | None) -> MappingCollectionModel:
+        """
+        Creates and returns a topology equivalent to :param topology_id: using laboratory devices.
+        :param topology_id: ID of a topology extracted from PKT file.
+        :param group_numbers: Groups for which the mapping is calculated.
+        """
 
-        topology = self._topology_repo.find_object({"_id": ObjectId(topology_id)})
-        if topology is None:
-            raise KeyError(f"No topology with id {topology_id}.")
-
-        mappings = self._mapping_repo.find_objects({"topology_name": topology.name, "lab_group_number": {"$in": group_numbers}})
-        if len(mappings) == 0:
-            raise KeyError(f"No mappings found. Please generate them first.")
-        return mappings
-
-    def get_device_mappings(self, topology_id: str, group_numbers: list[int] | None) -> list[MappingModel]:
         topology_id = ObjectId(topology_id)
         topology = self._topology_repo.find_object({"_id": topology_id})
 
         if group_numbers is None:
             group_numbers = self._lab_group_repo.get_all_group_ids()
 
-        mapping_list = []
+        mapping_collection = MappingCollectionModel(name=topology.name,
+                                                    type=MappingType.CREATED_FROM_PKT,
+                                                    topology_id=str(topology_id))
         for group_number in group_numbers:
             mapped_devices = self._get_device_mapping_for_lab_group(topology, group_number)
-            mapping_list.append(MappingModel(
-                topology_id=str(topology_id),
-                lab_group_number=group_number,
-                mapped_devices=mapped_devices
-            ))
+            mapping_collection.mappings[group_number] = mapped_devices
 
-        for mapping in mapping_list:
-            self._mapping_repo.upsert({
-                "topology_id": topology_id,
-                "lab_group_number": mapping.lab_group_number
-            },
-            mapping.model_dump())
+        self._mapping_repo.upsert({
+            "topology_id": topology_id,
+            "name": mapping_collection.name
+        },
+        mapping_collection.model_dump())
 
-        return mapping_list
+        return mapping_collection
 
     def _get_device_mapping_for_lab_group(self, topology: TopologyModel, group_number: int) -> list[MappedDeviceModel]:
         group = self._lab_group_repo.find_object({"lab_group_number": group_number})
