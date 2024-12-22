@@ -31,6 +31,17 @@ class DeviceType(str, Enum):
     PC = 'PC'
     UNKNOWN = 'UNKNOWN'
 
+    @staticmethod
+    def get_device_type(device_type_str: str):
+        device_type_str = device_type_str.lower()
+        if device_type_str.find("router") >= 0:
+            return DeviceType.ROUTER
+
+        if device_type_str.find("switch") >= 0:
+            return DeviceType.SWITCH
+
+        return DeviceType.UNKNOWN
+
     def to_netmiko_device_type(self):
         return NetmikoDeviceType.CISCO_IOS if self.value != self.UNKNOWN else NetmikoDeviceType.UNKNOWN
 
