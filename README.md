@@ -26,7 +26,7 @@ Authors: Antoni Wójcik, Grzegorz Piśkorski, Zuzanna Olszówka, Bartłomiej Sł
 **[CLICK HERE](/frontend/README.md)**
 
 
-### How to run both backend and frondend in one docker container
+### How to run both backend and frondend on containers
 ```bash
 docker build -t single-container-app .
 docker run -d -p 8000:8000 -p 3000:3000 --name single-container-app single-container-app
