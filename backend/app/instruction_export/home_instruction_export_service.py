@@ -65,6 +65,18 @@ class HomeInstructionExportService:
 
         if not connections:
             logging.info("No connections found between devices. Skipping topology schema generation.")
+            return [
+                Paragraph("Brak schematu!", self.styles.heading2_style),
+                Spacer(1, 12),
+                Paragraph("Schemat nie został wygenerowany, ponieważ nie wykryto żadnych połączeń między urządzeniami.",
+                          self.styles.main_style),
+                Spacer(1, 12),
+                Paragraph("Upewnij się, że:", self.styles.main_style),
+                Spacer(1, 12),
+                Paragraph("- Wprowadziłeś właściwe urządzenia i podłączyłeś je do odpowiednich portów.", self.styles.main_style),
+                Spacer(1, 12),
+                Paragraph("- Urządzenia są prawidłowo połączone między sobą.", self.styles.main_style)
+            ]
 
         visualizer = TopologyVisualizer(devices_types, connections)
         graph = visualizer.generate_graph()
