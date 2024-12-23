@@ -60,11 +60,10 @@ class HomeInstructionExportService:
         return content
 
     def _create_topology_graph(self, devices: list[DownloadedConfig]) -> list[Paragraph]:
-        devices_types = self._get_device_name_to_type_dict(devices)
         connections = self._get_device_connections(devices)
 
         if not connections:
-            logging.info("No connections found between devices. Skipping topology schema generation.")
+            logging.warning("No connections found between devices. Skipping topology schema generation.")
             return [
                 Paragraph("Brak schematu!", self.styles.heading2_style),
                 Spacer(1, 12),
@@ -77,6 +76,8 @@ class HomeInstructionExportService:
                 Spacer(1, 12),
                 Paragraph("- Urządzenia są prawidłowo połączone między sobą.", self.styles.main_style)
             ]
+
+        devices_types = self._get_device_name_to_type_dict(devices)
 
         visualizer = TopologyVisualizer(devices_types, connections)
         graph = visualizer.generate_graph()
