@@ -1,8 +1,6 @@
 from reportlab.platypus import BaseDocTemplate, Frame, PageTemplate
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from app.pdf_generator.util.footer_canvas import FooterCanvas
 from datetime import datetime
 import tempfile
@@ -21,7 +19,6 @@ class PdfGenerator:
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
 
-        pdfmetrics.registerFont(TTFont('Times New Roman', 'Times.ttf'))
         footer = FooterCanvas(current_datatime)
 
         doc = BaseDocTemplate(str(output_dir / filename), pagesize=A4)

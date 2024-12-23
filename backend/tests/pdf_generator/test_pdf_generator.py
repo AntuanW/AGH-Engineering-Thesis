@@ -8,5 +8,5 @@ class TestPdfGenerator(unittest.TestCase):
     def test_generate_pdf(self):
         content = [Paragraph("TEST")]
         instruction_pdf_generator = PdfGenerator()
-        filename = instruction_pdf_generator.generate_student_instruction(content)
+        filename = instruction_pdf_generator.generate_instruction(content, "test")
         self.assertTrue(filename)
