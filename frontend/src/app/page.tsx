@@ -1,5 +1,3 @@
 export default function UploadConfigurationPage() {
-  return (
-    <h1>Upload config</h1>
-  );
+  return (<h1></h1>);
 }

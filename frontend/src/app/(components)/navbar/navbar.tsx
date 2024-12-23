@@ -12,13 +12,13 @@ const Navbar = () => {
     <div className="nav-container">
       <ul className="links-container">
         <li className="single-link-container">
-          <Link href="/" className={isActive("/")}>
-            Upload config
+          <Link href="/upload-topology" className={isActive("/upload-topology")}>
+            Upload topology
           </Link>
         </li>
         <li className="single-link-container">
-          <Link href="/download-config" className={isActive("/download-config")}>
-            Download config
+          <Link href="/download-topology" className={isActive("/download-topology")}>
+            Download topology
           </Link>
         </li>
         <li className="single-link-container">
