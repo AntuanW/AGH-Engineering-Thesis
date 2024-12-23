@@ -16,49 +16,55 @@ class ConfigDownloadService:
     def __init__(self, netmiko_client: NetmikoClient = Depends(NetmikoClient)):
         self.netmiko_client = netmiko_client
 
-    def change_hostnames_and_cdp_timers(self, devices: list[NetmikoDevice]):
+    def change_cdp_timers(self, devices: list[NetmikoDevice]):
         for device in devices:
-            logging.info(f"Setting hostname and timers for {device.name}")
-            self.netmiko_client.set_hostname_and_cdp_timers(device)
+            logging.info(f"Setting timers for {device.ip_address}:{device.port}")
+            self.netmiko_client.set_cdp_timers(device)
         time.sleep(10)
 
     def download_devices_config(self, download_config_request: DownloadConfigRequest) -> list[DownloadedConfig]:
         download_results = []
         for device in download_config_request.devices:
-            logging.info(f"Downloading config for {device.name}")
-            config, neighbors = self._download(device)
+            logging.info(f"Downloading config for {device.ip_address}:{device.port}")
+            config, neighbors, hostname, device_type_str = self.netmiko_client.download_config_from_device(device)
 
             if not (config and neighbors):
                 raise EmptyDownloadException("Something went wrong with config download.")
 
+            hostname = self._strip_hostname(hostname)
             download_results.append(DownloadedConfig(
-                name=device.name,
-                device_type=self._get_device_type(device),
-                neighbours=self._parse_neighbors(neighbors, device.name),
+                name=hostname,
+                device_type=DeviceType.get_device_type(device_type_str),
+                neighbours=self._parse_neighbors(neighbors, hostname),
                 config=config
             ))
-            logging.info(f"Finished downloading config for {device.name} successfully.")
+            logging.info(f"Finished downloading config for {hostname} ({device.ip_address}:{device.port}) successfully.")
         return download_results
-
-    def _download(self, device: NetmikoDevice):
-        if device.device_type == DeviceType.SWITCH or device.device_type == DeviceType.ROUTER:
-            return self.netmiko_client.download_config_from_device(device)
-        return "", ""
 
     def _parse_neighbors(self, neighbors_string: str, origin_name: str) -> list[ConnectionModel]:
         cdp_neighbors = []
-        dev_regex = r"^(S\d{2}|R\d{2})"
+        dev_id = r"^Device ID"
         whitespace_regex = r"\s{2,}"
-
+        merged_last_two_columns_regex = r"^.+\s{1}.+$"
+        split_string = neighbors_string.splitlines()
         logging.info(f"Parsing {origin_name} neighbors")
-        for line in neighbors_string.splitlines():
-            if re.match(dev_regex, line):
-                split_line = re.split(whitespace_regex, line)
-                cdp_neighbors.append((
-                    split_line[0],
-                    split_line[1],
-                    self._get_remote_interface(split_line[4])
-                ))
+        i = 0
+        while not re.match(dev_id, split_string[i]):
+            i += 1
+        i += 1
+        while i < len(split_string) and split_string[i] != "":
+            split_line = re.split(whitespace_regex, split_string[i])
+            if re.match(merged_last_two_columns_regex, split_line[4]):
+                remote_interface = self._get_remote_interface(split_line[4])
+            else:
+                remote_interface = split_line[5]
+
+            cdp_neighbors.append((
+                split_line[0],
+                split_line[1],
+                remote_interface
+            ))
+            i+=1
 
         connections = []
         for device_id, local_interface, remote_interface in cdp_neighbors:
@@ -70,17 +76,12 @@ class ConfigDownloadService:
             ))
         return connections
 
-    def _get_device_type(self, device: NetmikoDevice):
-        switch_regex = r"^S\d{2}"
-        router_regex = r"^R\d{2}"
-
-        if re.match(switch_regex, device.name):
-            return DeviceType.SWITCH
-
-        if re.match(router_regex, device.name):
-            return DeviceType.ROUTER
-
-        return DeviceType.UNKNOWN
-
     def _get_remote_interface(self, line: str):
         return line.split(" ", 1)[1]
+
+    def _strip_hostname(self, hostname: str) -> str:
+        hostname = hostname[:-1]
+        bracket_ind = hostname.find("(")
+        if bracket_ind == -1:
+            return hostname
+        return hostname[:bracket_ind]
