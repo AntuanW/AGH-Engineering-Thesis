@@ -20,10 +20,6 @@ class MappingRepository(BaseRepository[MappingCollectionModel]):
         return [ObjectId(x["topology_id"]) for x in self.get_collection().find(
             {}, {"topology_id": 1, "_id": 0})]
 
-    def find_mapped_devices_by_topology_id(self, topology_id: str) -> dict[int, list[MappedDeviceModel]]:
-        mapping_collection: MappingCollectionModel = self.find_object({'topology_id': topology_id}) or {}
-        return mapping_collection.mappings
-
     def find_mapped_devices_by_mapping_name(self, mapping_name: str) -> dict[int, list[MappedDeviceModel]]:
         """
         Finds a mapping object by its name. Mappings created by downloading configurations do not have
@@ -34,3 +30,10 @@ class MappingRepository(BaseRepository[MappingCollectionModel]):
 
     def find_mapping_by_name(self, name: str):
         return self.find_object({'name': name})
+
+    def find_mapping_by_id(self, id: str):
+        return self.find_object({'_id': ObjectId(id)})
+
+    def list_names(self):
+        return [{"name": obj.get("name", ""), "_id": str(obj["_id"])}
+            for obj in self.get_collection().find({}, {"name": 1})]

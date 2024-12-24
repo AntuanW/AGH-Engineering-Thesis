@@ -191,7 +191,7 @@ function onSubmitGetMapping() {
 
 function onSubmitUploadConfig() {
     form = document.getElementById("config-upload-form");
-    topo_id = form.select.value;
+    mapping_id = form.select.value;
 
     groups = document.getElementById("config-upload-form-groups");
     group_ids_url = "?"
@@ -209,7 +209,7 @@ function onSubmitUploadConfig() {
       }
     };
 
-    xhr.open("POST", `/config_upload/topologies/${topo_id}/configure/${group_ids_url}`, true);
+    xhr.open("POST", `/config_upload/mapping/${mapping_id}/configure/${group_ids_url}`, true);
     xhr.send();
 }
 
