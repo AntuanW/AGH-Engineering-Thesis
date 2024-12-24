@@ -1,7 +1,13 @@
+from collections import defaultdict
 from unittest.mock import patch
 
+from app.common.netmiko.netmiko_device import NetmikoDevice
 from app.common.netmiko.netmiko_device_type import NetmikoDeviceType
+from app.config_download.config_download_service import ConfigDownloadService
+from app.config_download.utils.download_config_request import DownloadConfigRequest
+from app.config_download.utils.downloaded_config import DownloadedConfig
 from app.mapping.mapping_service import MappingService
+from app.models.connection import ConnectionModel
 from app.models.device import Interface
 from app.models.mapped_device import MappedDeviceModel
 from app.models.mapping import MappingCollectionModel, MappingType
@@ -117,7 +123,7 @@ class TestMapping:
 
     def test_model(self):
         model = MappingCollectionModel(name="adwd", type=MappingType.CREATED_FROM_PKT, topology_id="asdawd",
-                                       mappings={
+                                       mappings=defaultdict(list, {
                                            2: [MappedDeviceModel(
                                                 name="adw",
                                                 ip_address="123123",
@@ -127,7 +133,7 @@ class TestMapping:
                                                 mapped_config=[],
                                                 neighbours=[]
                                             )]
-                                       })
+                                       }))
 
         assert model.mappings[2][0].name == "adw"
 
@@ -137,3 +143,35 @@ class TestMapping:
 
         assert model2.mappings[2][0].name == "adw"
         assert type(tuple(model2.mappings.keys())[0]) == int
+
+    def test_mapping_from_downloaded_config(self):
+        import random
+
+        devices = [
+            NetmikoDevice(name="r1", ip_address="xxx", port=1000),
+            NetmikoDevice(name="r2", ip_address="yyy", port=2000)
+        ]
+
+        guid = hex(random.getrandbits(16))
+        dcr = DownloadConfigRequest(lab_name=f"test-{guid}", lab_group=1, devices=devices)
+        dcr2 = DownloadConfigRequest(lab_name=f"test-{guid}", lab_group=2, devices=devices)
+        dc = [
+            DownloadedConfig(name="r1", device_type=DeviceType.ROUTER, neighbours=[
+                ConnectionModel(origin_name="r1", neighbour_name="r2", from_interface="Fa0/0", to_interface="Fa0/1"),
+            ], config="aaa\nbbb\n"),
+            DownloadedConfig(name="r2", device_type=DeviceType.ROUTER, neighbours=[
+                ConnectionModel(origin_name="r2", neighbour_name="r1", from_interface="Fa0/1", to_interface="Fa0/0"),
+            ], config="ccc\nddd\n")
+        ]
+
+        service = MappingService(LabGroupRepository(), DeviceRepository(),
+                                 TopologyRepository(), MappingRepository(), ConfigDownloadService())
+        mcm = service.upsert_mapping_from_downloaded_config(dcr, dc)
+        print(mcm)
+
+        mcm2 = service.upsert_mapping_from_downloaded_config(dcr2, dc)
+
+
+        assert mcm2.mappings[2][0].mapped_config == ['aaa', 'bbb', '']
+
+

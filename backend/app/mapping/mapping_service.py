@@ -202,7 +202,7 @@ class MappingService:
         group_info = self._lab_group_repo.find_object({"lab_group_number": request.lab_group})
         for i, device in enumerate(downloaded_configs):
             mapped_device = MappedDeviceModel(
-                name=re.match(r"hostname ([a-zA-Z]+)", device.config)[0],
+                name=device.name,
                 ip_address=group_info.rack.config_port_ip_address,
                 port=group_info.rack.config_ports[i],
                 device_type=device.device_type,
@@ -212,4 +212,5 @@ class MappingService:
             )
             mcm.mappings[request.lab_group].append(mapped_device)
 
-        self._mapping_repo.upsert({"name": request.lab_name}, mcm)
+        self._mapping_repo.upsert({"name": request.lab_name}, mcm.model_dump())
+        return mcm

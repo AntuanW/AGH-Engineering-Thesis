@@ -51,7 +51,7 @@ class BaseRepository(ABC, Generic[T]):
         return list(self.get_collection().find(*args, **kwargs))
 
     def find_objects(self, query) -> list[T]:
-        return [self._collection_type(**x) for x in self.get_collection().find(query)]
+        return [self._collection_type.model_validate(x) for x in self.get_collection().find(query)]
 
     def find_one(self, *args, **kwargs) -> dict:
         return self.get_collection().find_one(*args, **kwargs)
@@ -60,7 +60,7 @@ class BaseRepository(ABC, Generic[T]):
         result = self.get_collection().find_one(query)
         if result is None:
             return None
-        return self._collection_type(**result)
+        return self._collection_type.model_validate(result)
 
     def update(self, query, update_values) -> int:
         result = self.get_collection().update_one(query, {"$set": update_values})

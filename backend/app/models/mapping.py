@@ -14,7 +14,7 @@ class MappingCollectionModel(BaseModel):
     type: MappingType
     topology_id: str | None
     # noinspection PyDataclass
-    mappings: dict[int, list[MappedDeviceModel]] = Field(default_factory=defaultdict)
+    mappings: defaultdict[int, list[MappedDeviceModel]] = Field(default_factory=lambda: defaultdict(list))
 
     @field_serializer("mappings")
     def serialize_mappings(self, mappings):
