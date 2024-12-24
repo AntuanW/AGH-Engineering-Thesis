@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import Depends
 
 from reportlab.platypus import Paragraph, Spacer, PageBreak
@@ -16,6 +18,7 @@ class HomeInstructionExportService:
         self.styles = PdfStyles()
 
     def export_instruction(self, devices: list[DownloadedConfig]) -> str:
+        logging.info("Start generating home instruction")
         content = []
         content.extend(self._create_instruction_header())
         for device in devices:
@@ -23,6 +26,7 @@ class HomeInstructionExportService:
         content.extend(self._create_topology_graph(devices))
 
         filename = self.pdf_generator.generate_home_instruction(content)
+        logging.info(f"Home instruction successfully generated: {filename}")
         return filename
 
     def _get_device_name_to_type_dict(self, devices: list[DownloadedConfig]) -> dict:
@@ -56,10 +60,10 @@ class HomeInstructionExportService:
         return content
 
     def _create_topology_graph(self, devices: list[DownloadedConfig]) -> list[Paragraph]:
-        devices_types = self._get_device_name_to_type_dict(devices)
         connections = self._get_device_connections(devices)
 
         if not connections:
+            logging.warning("No connections found between devices. Skipping topology schema generation.")
             return [
                 Paragraph("Brak schematu!", self.styles.heading2_style),
                 Spacer(1, 12),
@@ -72,6 +76,8 @@ class HomeInstructionExportService:
                 Spacer(1, 12),
                 Paragraph("- Urządzenia są prawidłowo połączone między sobą.", self.styles.main_style)
             ]
+
+        devices_types = self._get_device_name_to_type_dict(devices)
 
         visualizer = TopologyVisualizer(devices_types, connections)
         graph = visualizer.generate_graph()

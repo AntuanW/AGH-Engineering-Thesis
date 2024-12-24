@@ -1,3 +1,5 @@
+import logging
+
 from reportlab.platypus import Paragraph, Spacer, PageBreak, Table
 from app.pdf_generator.pdf_generator import PdfGenerator
 from app.pdf_generator.util.pdf_styles import PdfStyles
@@ -25,14 +27,18 @@ class LabInstructionExportService:
         self.styles = PdfStyles()
 
     def export_instructions(self, mapping_collection: MappingCollectionModel) -> str:
+        logging.info("Start generating lab instruction")
         content = []
         for group, devices in mapping_collection.mappings.items():
+            logging.info(f"Start generating lab instruction for group {group}")
             content.extend(self._create_instruction_header(group, mapping_collection.topology_id))
             content.extend(self._create_connection_steps(devices, group))
             content.extend(self._create_connections_table(devices))
             content.extend(self._create_topology_graph(devices, group))
+            logging.info(f"Lab instruction for group {group} successfully generated")
 
         filename = self.pdf_generator.generate_lab_instruction(content)
+        logging.info(f"Lab instruction successfully generated: {filename}")
         return filename
 
     def _get_device_name_to_type_dict(self, devices: list[MappedDeviceModel]) -> dict:
@@ -101,6 +107,13 @@ class LabInstructionExportService:
 
     def _create_topology_graph(self, devices: list[MappedDeviceModel], group: int) -> list[Paragraph]:
         connections = self._get_device_connections(devices)
+
+        if not connections:
+            logging.warning("No connections found between devices. Skipping topology schema generation.")
+            return [
+                Paragraph("Brak schematu!", self.styles.heading2_style)
+            ]
+
         devices_types = self._get_device_name_to_type_dict(devices)
 
         visualizer = TopologyVisualizer(devices_types, connections)
@@ -112,5 +125,5 @@ class LabInstructionExportService:
             Paragraph("Schemat:", self.styles.heading2_style),
             Spacer(1, 12),
             image,
-            Spacer(1, 12)
+            PageBreak()
         ]

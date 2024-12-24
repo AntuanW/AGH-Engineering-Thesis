@@ -6,6 +6,7 @@ from app.common.netmiko.netmiko_device_type import NetmikoDeviceType
 from app.config_download.config_download_service import ConfigDownloadService
 from app.config_download.utils.download_config_request import DownloadConfigRequest
 from app.config_download.utils.downloaded_config import DownloadedConfig
+import unittest
 from app.mapping.mapping_service import MappingService
 from app.models.connection import ConnectionModel
 from app.models.device import Interface
@@ -19,7 +20,7 @@ from app.repository.topology_repository import TopologyRepository
 from app.running_config.util.device_config_types import DeviceConfigInfo, DeviceType, DeviceLink
 
 
-class TestMapping:
+class TestMapping(unittest.TestCase):
     @patch("app.repository.topology_repository.TopologyRepository.find_object")
     def test_mapping(self, find_object_mock):
         mock_topology_id = '5f8f8f8f8f8f8f8f8f8f8f8f'
@@ -167,11 +168,6 @@ class TestMapping:
         service = MappingService(LabGroupRepository(), DeviceRepository(),
                                  TopologyRepository(), MappingRepository(), ConfigDownloadService())
         mcm = service.upsert_mapping_from_downloaded_config(dcr, dc)
-        print(mcm)
-
         mcm2 = service.upsert_mapping_from_downloaded_config(dcr2, dc)
 
-
         assert mcm2.mappings[2][0].mapped_config == ['aaa', 'bbb', '']
-
-

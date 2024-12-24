@@ -3,13 +3,35 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib import colors
 from reportlab.platypus import TableStyle
+import os
+from pathlib import Path
 
 
 class PdfStyles:
+    FONTS_DIR_PATH = str(Path(__file__).parent.parent / 'static')
+
     def __init__(self):
-        pdfmetrics.registerFont(TTFont('Times New Roman', 'Times.ttf'))
-        pdfmetrics.registerFont(TTFont('Times New Roman Bold', 'Timesbd.ttf'))
-        pdfmetrics.registerFont(TTFont('Times New Roman Italic', 'Timesi.ttf'))
+        try:
+            pdfmetrics.registerFont(TTFont('Times New Roman', os.path.join(self.FONTS_DIR_PATH, 'Times.ttf')))
+        except FileNotFoundError:
+            raise FileNotFoundError('Font Times New Roman not found')
+        except Exception as e:
+            raise Exception(f'Error while registering font Times New Roman: {e}')
+
+        try:
+            pdfmetrics.registerFont(TTFont('Times New Roman Bold', os.path.join(self.FONTS_DIR_PATH, 'Timesbd.ttf')))
+        except FileNotFoundError:
+            raise FileNotFoundError('Font Times New Roman Bold not found')
+        except Exception as e:
+            raise Exception(f'Error while registering font Times New Roman Bold: {e}')
+
+        try:
+            pdfmetrics.registerFont(TTFont('Times New Roman Italic', os.path.join(self.FONTS_DIR_PATH, 'Timesi.ttf')))
+        except FileNotFoundError:
+            raise FileNotFoundError('Font Times New Roman Italic not found')
+        except Exception as e:
+            raise Exception(f'Error while registering font Times New Roman Italic: {e}')
+
         self.main_style = ParagraphStyle(
             name='Main',
             parent=getSampleStyleSheet()['Normal'],

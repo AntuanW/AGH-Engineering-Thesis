@@ -21,7 +21,7 @@ async def download_configs(
         config_download_service: ConfigDownloadService = Depends(ConfigDownloadService),
         home_instruction_export_service: HomeInstructionExportService = Depends(HomeInstructionExportService),
         mapping_service: MappingService = Depends(MappingService)):
-    config_download_service.change_hostnames_and_cdp_timers(download_request.devices)
+    config_download_service.change_cdp_timers(download_request.devices)
 
     download_results: list[DownloadedConfig] = config_download_service.download_devices_config(download_request)
     mapping_service.upsert_mapping_from_downloaded_config(download_request, download_results)

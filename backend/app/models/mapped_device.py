@@ -5,6 +5,7 @@ from ..common.netmiko.netmiko_device import NetmikoDevice
 
 
 class MappedDeviceModel(NetmikoDevice):
+    name: str
     device_type: DeviceType
     netmiko_device_type: NetmikoDeviceType
     neighbours: list[ConnectionModel]
