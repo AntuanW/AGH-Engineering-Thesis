@@ -20,9 +20,14 @@ class MappingRepository(BaseRepository[MappingCollectionModel]):
         return [ObjectId(x["topology_id"]) for x in self.get_collection().find(
             {}, {"topology_id": 1, "_id": 0})]
 
-    def find_devices_by_group(self, lab_group_number: int, topology_id: str) -> dict[int, list[MappedDeviceModel]]:
-        mapping_collection: MappingCollectionModel = self.find_object({'lab_group_number': lab_group_number, 'topology_id': topology_id})
-        if not mapping_collection:
-            return {}
-        devices = mapping_collection.mappings
-        return devices
+    def find_mapped_devices_by_topology_id(self, topology_id: str) -> dict[int, list[MappedDeviceModel]]:
+        mapping_collection: MappingCollectionModel = self.find_object({'topology_id': topology_id}) or {}
+        return mapping_collection.mappings
+
+    def find_mapped_devices_by_mapping_name(self, mapping_name: str) -> dict[int, list[MappedDeviceModel]]:
+        """
+        Finds a mapping object by its name. Mappings created by downloading configurations do not have
+        corresponding topologies.
+        """
+        mapping_collection: MappingCollectionModel = self.find_object({'name': mapping_name}) or {}
+        return mapping_collection.mappings

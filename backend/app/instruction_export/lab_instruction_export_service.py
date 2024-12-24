@@ -47,7 +47,7 @@ class LabInstructionExportService:
         return list(connections)
 
     def _create_instruction_header(self, group: int, topology_id: str) -> list[Paragraph]:
-        topology_name = self.topology_repo.find_object({"_id": ObjectId(topology_id)})
+        topology_name = self.topology_repo.find_object({"_id": ObjectId(topology_id)}).name
 
         return [
             Paragraph("Instrukcja", self.styles.title_style),

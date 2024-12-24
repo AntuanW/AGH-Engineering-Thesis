@@ -233,7 +233,7 @@ function onSubmitGeneratePDF() {
         }
     };
 
-    xhr.open("GET", `/file_export/export_student_instructions/${topo_id}`, true);
+    xhr.open("GET", `/file_export/export_lab_instructions/${topo_id}`, true);
     xhr.responseType = "blob";
     xhr.send();
 }
