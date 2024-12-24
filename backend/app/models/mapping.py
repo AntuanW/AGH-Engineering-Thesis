@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, field_serializer
 from .mapped_device import MappedDeviceModel
 from enum import Enum
+from collections import defaultdict
 
 
 class MappingType(str, Enum):
@@ -13,7 +14,7 @@ class MappingCollectionModel(BaseModel):
     type: MappingType
     topology_id: str | None
     # noinspection PyDataclass
-    mappings: dict[int, list[MappedDeviceModel]] = Field(default_factory=dict)
+    mappings: dict[int, list[MappedDeviceModel]] = Field(default_factory=defaultdict)
 
     @field_serializer("mappings")
     def serialize_mappings(self, mappings):

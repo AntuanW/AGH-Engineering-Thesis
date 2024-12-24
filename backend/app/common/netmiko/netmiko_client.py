@@ -53,7 +53,8 @@ class NetmikoClient:
             for _ in range(5):
                 try:
                     connect_handler.enable()
-                except Exception: pass
+                except Exception:
+                    pass
 
             match action:
                 case NetmikoAction.DOWNLOAD_RUNNING_CONFIG:

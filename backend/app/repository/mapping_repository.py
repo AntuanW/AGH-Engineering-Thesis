@@ -31,3 +31,6 @@ class MappingRepository(BaseRepository[MappingCollectionModel]):
         """
         mapping_collection: MappingCollectionModel = self.find_object({'name': mapping_name}) or {}
         return mapping_collection.mappings
+
+    def find_mapping_by_name(self, name: str):
+        return self.find_object({'name': name})

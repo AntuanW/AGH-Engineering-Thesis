@@ -1,9 +1,13 @@
 import logging
+import re
 from typing import NamedTuple
 
 from bson.objectid import ObjectId
 from fastapi import Depends
 
+from app.config_download.config_download_service import ConfigDownloadService
+from app.config_download.utils.download_config_request import DownloadConfigRequest
+from app.config_download.utils.downloaded_config import DownloadedConfig
 from app.models.connection import ConnectionModel
 from app.models.mapped_device import MappedDeviceModel
 from app.models.mapping import MappingCollectionModel, MappingType
@@ -28,11 +32,13 @@ class MappingService:
                  lab_group_repo: LabGroupRepository = Depends(LabGroupRepository),
                  device_repo: DeviceRepository = Depends(DeviceRepository),
                  topology_repo: TopologyRepository = Depends(TopologyRepository),
-                 mapping_repo: MappingRepository = Depends(MappingRepository)):
+                 mapping_repo: MappingRepository = Depends(MappingRepository),
+                 download_service: ConfigDownloadService = Depends(ConfigDownloadService)):
         self._lab_group_repo = lab_group_repo
         self._device_repo = device_repo
         self._topology_repo = topology_repo
         self._mapping_repo = mapping_repo
+        self._download_service = download_service
 
     def get_device_mappings(self, topology_id: str, group_numbers: list[int] | None) -> MappingCollectionModel:
         """
@@ -171,19 +177,9 @@ class MappingService:
                 neighbour_name = mapped_devices[neighbour.to_id].mapped_device.name
                 from_interface = mapped_devices[neighbour.from_id].substitutions.get(Interface(neighbour.from_if)) or neighbour.from_if
                 to_interface = mapped_devices[neighbour.to_id].substitutions.get(Interface(neighbour.to_if)) or neighbour.to_if
-
                 connections.append(ConnectionModel(origin_name=origin_name, neighbour_name=neighbour_name, from_interface=str(from_interface), to_interface=str(to_interface)))
 
             mapped_devices[device_info.dev_id].mapped_device.neighbours = connections
-            # mapped_devices[device_info.dev_id].mapped_device.neighbours = [
-            #     ConnectionModel(
-            #         origin_name=mapped_devices[device_info.dev_id].mapped_device.name,
-            #         neighbour_name=mapped_devices[neighbour.to_id].mapped_device.name,
-            #         from_interface=mapped_devices[neighbour.from_id].substitutions.get(neighbour.from_if) or neighbour.from_if,
-            #         to_interface=mapped_devices[neighbour.to_id].substitutions.get(neighbour.to_if) or neighbour.to_if
-            #     )
-            #     for neighbour in device_info.dev_neighbours
-            # ]
 
         return mapped_devices
 
@@ -197,3 +193,23 @@ class MappingService:
                     running_config[i] = running_config[i].replace(f, t)
 
         return mapped_devices
+
+    def upsert_mapping_from_downloaded_config(self, request: DownloadConfigRequest, downloaded_configs: list[DownloadedConfig]):
+        mcm = self._mapping_repo.find_mapping_by_name(request.lab_name) \
+              or MappingCollectionModel(name=request.lab_name, type=MappingType.DOWNLOADED, topology_id=None)
+        assert mcm.type == MappingType.DOWNLOADED
+
+        group_info = self._lab_group_repo.find_object({"lab_group_number": request.lab_group})
+        for i, device in enumerate(downloaded_configs):
+            mapped_device = MappedDeviceModel(
+                name=re.match(r"hostname ([a-zA-Z]+)", device.config)[0],
+                ip_address=group_info.rack.config_port_ip_address,
+                port=group_info.rack.config_ports[i],
+                device_type=device.device_type,
+                netmiko_device_type=device.device_type.to_netmiko_device_type(),
+                neighbours=device.neighbours.copy(),
+                mapped_config=device.config.split("\n")
+            )
+            mcm.mappings[request.lab_group].append(mapped_device)
+
+        self._mapping_repo.upsert({"name": request.lab_name}, mcm)
