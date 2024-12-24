@@ -62,7 +62,6 @@ class MappingService:
             mapping_collection.mappings[group_number] = mapped_devices
 
         self._mapping_repo.upsert({
-            "topology_id": topology_id,
             "name": mapping_collection.name
         },
         mapping_collection.model_dump())
