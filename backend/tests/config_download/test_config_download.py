@@ -7,8 +7,7 @@ from app.common.netmiko.netmiko_client import NetmikoClient
 from app.common.netmiko.netmiko_device import NetmikoDevice
 from app.config_download.utils.download_config_request import DownloadConfigRequest
 from app.running_config.util.device_config_types import DeviceType
-import tests.config_download.mocked_method_results as mmr
-
+import mocked_method_results as mmr
 
 class TestConfigDownloadService(unittest.TestCase):
     @patch("app.common.netmiko.netmiko_client.NetmikoClient")
