@@ -1,7 +1,4 @@
 import pytest
-from pprint import pprint
-
-from app.common.parsers import instruction_parser
 from app.common.parsers.instruction_parser import InstructionParser
 
 router_config_1 = [
@@ -196,8 +193,24 @@ def test_wrong_source_type():
 
 def test_instruction_parser_router():
     x = InstructionParser.from_source(router_config_1)
-    pprint(x)
+    expected_parsed_instructions = ['hostname Router', 'ip cef',
+                                    'no ipv6 cef', 'spanning-tree mode pvst',
+                                    'interface GigabitEthernet0/0', 'no ip address',
+                                    'duplex auto', 'speed auto', 'interface GigabitEthernet0/0.10',
+                                    'encapsulation dot1Q 10', 'ip address 100.0.0.1 255.255.255.0',
+                                    'interface GigabitEthernet0/0.20', 'encapsulation dot1Q 20',
+                                    'ip address 200.0.0.2 255.255.255.0', 'interface GigabitEthernet0/1',
+                                    'no ip address', 'duplex auto', 'speed auto', 'shutdown',
+                                    'interface GigabitEthernet0/2', 'no ip address', 'duplex auto',
+                                    'speed auto', 'shutdown', 'interface Vlan1', 'no ip address',
+                                    'shutdown', 'ip classless', 'ip flow-export version 9', 'line con 0',
+                                    'line aux 0', 'line vty 0 4', 'end']
+    assert x == expected_parsed_instructions, f"Parsing {router_config_1} failed, got: {x}"
 
 def test_instruction_parser_switch():
     x = InstructionParser.from_source(switch_config_1)
-    pprint(x)
+    expected_parsed_instructions = ['hostname Switch', 'spanning-tree mode pvst',
+                                    'spanning-tree extend system-id', 'interface Vlan1',
+                                    'no ip address', 'shutdown', 'line con 0',
+                                    'line vty 0 4', 'line vty 5 15', 'end']
+    assert x == expected_parsed_instructions, f"Parsing {switch_config_1} failed, got: {x}"
