@@ -94,7 +94,8 @@ async def extract_config(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Topology was either empty or invalid.")
 
     topology_id = topology_repository.insert(topology_config)
-    response = topology_repository.list_names()
+    # response = topology_repository.list_names()
+    response = {"topology_id": str(topology_id)}
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
