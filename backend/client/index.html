@@ -13,6 +13,16 @@
     </div>
 
     <div class="main">
+        <iframe name="iframe-upload-extract-assign", style="display: none;"></iframe>
+        <div class="operation-block">
+            <h1>1. Upload, Extract, and Assign Devices</h1>
+            <form id="combined-form" onsubmit="onSubmitCombinedAction()" method="POST" enctype='multipart/form-data' target="iframe-upload-extract-assign">
+                <input type="file" id="combined-pkt-input" name="file" /> <br />
+                <input type="checkbox" value="true" name="force_overwrite" id="combined-force-overwrite-input"> <br />
+                <input type="submit" class="button" value="Upload, Extract, and Assign"/>
+            </form>
+        </div>
+
         <iframe name="iframe-upload-pkt" style="display:none;"></iframe>
         <div class="operation-block" id="div-upload-pkt">
             <h1>1. Upload a .PKT file</h1>

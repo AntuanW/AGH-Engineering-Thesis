@@ -1,16 +1,16 @@
 function getObjectNames() {
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        window.localStorage.setItem("model", xhr.responseText);
-        response = JSON.parse(xhr.responseText);
-        populateXMLSelects(response);
-        populateTopologySelects(response);
-        populateMappingSelects(response);
-        populateGroupCheckboxes(response);
-        populateGroupSelects(response);
-        refreshDownloadDynamicDevices();
-      }
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            window.localStorage.setItem("model", xhr.responseText);
+            response = JSON.parse(xhr.responseText);
+            populateXMLSelects(response);
+            populateTopologySelects(response);
+            populateMappingSelects(response);
+            populateGroupCheckboxes(response);
+            populateGroupSelects(response);
+            refreshDownloadDynamicDevices();
+        }
     };
 
     xhr.open("GET", "/config_upload/index_dto", true);
@@ -133,10 +133,10 @@ function onSubmitUploadPkt() {
     const xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        // TODO update only the following step
-        getObjectNames();
-      }
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            // TODO update only the following step
+            getObjectNames();
+        }
     };
 
     xhr.open("POST", "/config_upload/upload_pkt", true);
@@ -154,9 +154,9 @@ function onSubmitExtractConfig() {
     const xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        getObjectNames();
-      }
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            getObjectNames();
+        }
     };
 
     xhr.open("GET", `/config_upload/extract_xml/${action}`, true);
@@ -179,9 +179,9 @@ function onSubmitGetMapping() {
     const xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        getObjectNames();
-      }
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            getObjectNames();
+        }
     };
 
     xhr.open("GET", `/config_upload/topologies/${topo_id}/mapping${group_ids_url}`, true);
@@ -204,9 +204,9 @@ function onSubmitUploadConfig() {
     const xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
+        if (xhr.readyState === 4 && xhr.status === 200) {
 
-      }
+        }
     };
 
     xhr.open("POST", `/config_upload/topologies/${topo_id}/configure/${group_ids_url}`, true);
@@ -270,4 +270,64 @@ function onSubmitDownloadConfig() {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify(payload));
 
+}
+
+function onSubmitCombinedAction() {
+    const form = document.getElementById("combined-form");
+    const fileInput = document.getElementById("combined-pkt-input");
+    const forceOverwrite = document.getElementById("combined-force-overwrite-input").checked;
+    const fileName = fileInput.files[0].name;
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            getObjectNames();
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                const xmlId = response.xml_id;
+                extractConfigAndAssignDevices(xmlId, fileName);
+            } else {
+                console.error("Error uploading file:", xhr.responseText);
+            }
+        }
+    };
+
+    xhr.open("POST", "/config_upload/upload_pkt", true);
+    xhr.send(formData);
+}
+
+function extractConfigAndAssignDevices(xmlId, fileName) {
+    const xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            getObjectNames();
+            assignDevicesToAllGroups(fileName);
+        }
+    };
+
+    xhr.open("GET", `/config_upload/extract_xml/${xmlId}`, true);
+    xhr.send();
+}
+
+function assignDevicesToAllGroups(fileName) {
+    const xhr = new XMLHttpRequest();
+    const groupIdsUrl = "?group_id=1&group_id=2&group_id=3&group_id=4&group_id=5&group_id=6";
+
+    // get topology_id from the file name
+    // TODO 
+    
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            alert(`Devices assigned successfully for file: ${fileName}`);
+        }
+    };
+
+    xhr.open("GET", `/config_upload/topologies/${topologyId}/configure${groupIdsUrl}`, true);
+    xhr.send();
 }
