@@ -52,10 +52,19 @@ input {
     background: var(--accent);
     font-size: 16px;
     font-weight: bold;
+    cursor: pointer;
 }
 
 .button.add-button {
     background: #ffc14d;
+}
+
+.button:hover {
+    background: #75da60;
+}
+
+.button.add-button:hover {
+    background: #e8bd70;
 }
 
 
