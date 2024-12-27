@@ -4,8 +4,6 @@ function getObjectNames() {
       if (xhr.readyState === 4 && xhr.status === 200) {
         window.localStorage.setItem("model", xhr.responseText);
         response = JSON.parse(xhr.responseText);
-        populateXMLSelects(response);
-        populateTopologySelects(response);
         populateMappingSelects(response);
         populateGroupCheckboxes(response);
         populateGroupSelects(response);
@@ -15,30 +13,6 @@ function getObjectNames() {
 
     xhr.open("GET", "/config_upload/index_dto", true);
     xhr.send();
-}
-
-
-
-function populateXMLSelects(response) {
-    selects = document.getElementsByClassName("__xml_select");
-    ss = "";
-    for (const obj of response.XMLs) {
-        ss += `<option value="${obj._id}">${obj.name}</option>\n`;
-    }
-    for (select of selects) {
-        select.innerHTML = ss;
-    }
-}
-
-function populateTopologySelects(response) {
-    selects = document.getElementsByClassName("__topo_select")
-    ss = ""
-    for (const obj of response.topologies) {
-        ss += `<option value="${obj._id}">${obj.name}</option>\n`
-    }
-    for (select of selects) {
-        select.innerHTML = ss;
-    }
 }
 
 function populateMappingSelects(response) {
@@ -93,7 +67,6 @@ function refreshDownloadDynamicDevices() {
     <tr>
     <td>IP</td>
     <td>Port</td>
-    <td>Device Name</td>
     <tr>
     </thead><tbody id="download-dynamic-devices-body"></tbody>`
 
@@ -117,9 +90,6 @@ function addDownloadDynamicDevice() {
     }
     html += "</select>"
     cell2.innerHTML = html;
-
-    cell3 = row.insertCell(2);
-    cell3.innerHTML = `<input name="name" type="text" />`;
 }
 
 
@@ -127,66 +97,6 @@ function addDownloadDynamicDevice() {
 
 
 
-
-function onSubmitUploadPkt() {
-    form = document.getElementById("pkt-form");
-    const xhr = new XMLHttpRequest();
-
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        // TODO update only the following step
-        getObjectNames();
-      }
-    };
-
-    xhr.open("POST", "/config_upload/upload_pkt", true);
-
-    const formData = new FormData();
-    formData.append("file", form.pkt_input.files[0]);
-    xhr.send(formData);
-}
-
-
-function onSubmitExtractConfig() {
-    form = document.getElementById("extract-form");
-    action = form.select.value;
-
-    const xhr = new XMLHttpRequest();
-
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        getObjectNames();
-      }
-    };
-
-    xhr.open("GET", `/config_upload/extract_xml/${action}`, true);
-    xhr.send();
-}
-
-
-function onSubmitGetMapping() {
-    form = document.getElementById("mapping-form");
-    topo_id = form.select.value;
-
-    groups = document.getElementById("mapping-form-groups");
-    group_ids_url = "?"
-    for (child of groups.children) {
-        if (child.checked) {
-            group_ids_url += `group_id=${child.value}&`;
-        }
-    }
-
-    const xhr = new XMLHttpRequest();
-
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        getObjectNames();
-      }
-    };
-
-    xhr.open("GET", `/config_upload/topologies/${topo_id}/mapping${group_ids_url}`, true);
-    xhr.send();
-}
 
 
 function onSubmitUploadConfig() {
@@ -213,31 +123,6 @@ function onSubmitUploadConfig() {
     xhr.send();
 }
 
-
-function onSubmitGeneratePDF() {
-    form = document.getElementById("instruction-form");
-    topo_id = form.select.value;
-
-    const xhr = new XMLHttpRequest();
-
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            var downloadUrl = URL.createObjectURL(xhr.response);
-            var a = document.createElement("a");
-            document.body.appendChild(a);
-            a.style = "display: none";
-            a.href = downloadUrl;
-            a.download = "";
-            a.click();  // https://stackoverflow.com/questions/32623731/how-to-make-browser-download-file-from-xhr-request
-            a.remove(); // what a pile of garbage that is
-        }
-    };
-
-    xhr.open("GET", `/file_export/export_student_instructions/${topo_id}`, true);
-    xhr.responseType = "blob";
-    xhr.send();
-}
-
 function onSubmitDownloadConfig() {
     function processRow(row) {
         let inputs = Array.from(row.querySelectorAll("input, select"));
@@ -245,8 +130,7 @@ function onSubmitDownloadConfig() {
         console.log(inputs);
         return {
             ip_address: inputs.find(e => e.name == "ip_address").value,
-            port: inputs.find(e => e.name == "port").value,
-            name: inputs.find(e => e.name == "name").value
+            port: inputs.find(e => e.name == "port").value
         }
     }
 
@@ -270,4 +154,82 @@ function onSubmitDownloadConfig() {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify(payload));
 
+}
+
+
+function onSubmitCombineUploadSteps() {
+    // Upload
+    form = document.getElementById("pkt-form");
+    const xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        // TODO update only the following step
+        getObjectNames();
+      }
+    };
+
+    xhr.open("POST", "/config_upload/upload_pkt", false);
+
+    const formData = new FormData();
+    formData.append("file", form.pkt_input.files[0]);
+    xhr.send(formData);
+    const uploadResponse = JSON.parse(xhr.responseText);
+
+    // Extract
+    xml_id = uploadResponse.xml_id;
+
+    const xhr2 = new XMLHttpRequest();
+
+    xhr2.onreadystatechange = function() {
+      if (xhr2.readyState === 4 && xhr2.status === 200) {
+        getObjectNames();
+      }
+    };
+
+    xhr2.open("GET", `/config_upload/extract_xml/${xml_id}`, false);
+    xhr2.send();
+    const extractResponse = JSON.parse(xhr2.responseText)
+
+    // Map
+    topo_id = extractResponse.topology_id;
+
+    groups = document.getElementById("mapping-form-groups");
+    group_ids_url = "?"
+    for (child of groups.children) {
+        if (child.checked) {
+            group_ids_url += `group_id=${child.value}&`;
+        }
+    }
+
+    const xhr3 = new XMLHttpRequest();
+
+    xhr3.onreadystatechange = function() {
+      if (xhr3.readyState === 4 && xhr3.status === 200) {
+        getObjectNames();
+      }
+    };
+
+    xhr3.open("GET", `/config_upload/topologies/${topo_id}/mapping${group_ids_url}`, false);
+    xhr3.send();
+
+    // PDFs
+    const xhr4 = new XMLHttpRequest();
+
+    xhr4.onreadystatechange = function() {
+        if (xhr4.readyState === 4 && xhr4.status === 200) {
+            var downloadUrl = URL.createObjectURL(xhr4.response);
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+            a.href = downloadUrl;
+            a.download = "";
+            a.click();  // https://stackoverflow.com/questions/32623731/how-to-make-browser-download-file-from-xhr-request
+            a.remove(); // what a pile of garbage that is
+        }
+    };
+
+    xhr4.open("GET", `/file_export/export_lab_instructions/${topo_id}`, true);
+    xhr4.responseType = "blob";
+    xhr4.send();
 }
