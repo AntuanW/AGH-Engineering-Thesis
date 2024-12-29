@@ -35,3 +35,11 @@ export const mapDevicesForGroups = async (topologyId: string, labGroups: FormDat
       throw new Error(`HTTP GET error while mapping topology. Status: ${error}`)
     });
 }
+
+export const downloadInstruction = async (topologyId: string) => {
+  return await fetch(`http://localhost:8000/file_export/export_lab_instructions/${topologyId}`)
+    .then((response) => response.blob())
+    .catch((error) => {
+      throw new Error(`HTTP GET error while downloading instruction. Status: ${error}`)
+    });
+}

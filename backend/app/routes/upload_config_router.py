@@ -125,7 +125,7 @@ async def configure_devices(
 
 
 @router.get("/topologies/{topology_id}/mapping")
-def get_device_mapping(topology_id: str,
+async def get_device_mapping(topology_id: str,
                        group_id: list[int] | None = Query(default=None),
                        mapping_service: MappingService = Depends(MappingService)):
     try:

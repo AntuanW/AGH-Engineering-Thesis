@@ -1,6 +1,6 @@
 "use client"
 import { Group } from "@/app/(interfaces)/common/Group";
-import { extractTopologyDetails, mapDevicesForGroups, uploadTopologyFile } from "@/app/(services)/TopologyUploadService";
+import { downloadInstruction, extractTopologyDetails, mapDevicesForGroups, uploadTopologyFile } from "@/app/(services)/TopologyUploadService";
 import { useState } from "react";
 import { ExtractResponse, UploadResponse } from "./responses";
 
@@ -43,9 +43,26 @@ const UploadForm = (props: Props) => {
   const mapDevices = async (formData: FormData, topologyId: string) => {
     const labGroups: FormDataEntryValue[] = formData.getAll('lab-group');
     try {
-      return await mapDevicesForGroups(topologyId, labGroups);
+      const mappingResponse = await mapDevicesForGroups(topologyId, labGroups);
+      if (mappingResponse) {
+        handleDownload(topologyId);
+      }
     } catch (error) {
       console.error(`Failed to map topology: ${error}`);
+    }
+  }
+
+  const handleDownload = async (topologyId: string) => {
+    try {
+      const blobResponse = await downloadInstruction(topologyId);
+      const url = window.URL.createObjectURL(blobResponse);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `instruction-${topologyId}`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(`Failed to download instructions: ${error}`);
     }
   }
 
