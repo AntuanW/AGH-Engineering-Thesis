@@ -3,6 +3,7 @@ import { Group } from "@/app/(interfaces)/common/Group";
 import { downloadInstruction, extractTopologyDetails, mapDevicesForGroups, uploadTopologyFile } from "@/app/(services)/TopologyUploadService";
 import { useState } from "react";
 import { ExtractResponse, UploadResponse } from "./responses";
+import { revalidateIndexDto } from "@/app/(server-actions)/IndexDtoRevalidation";
 
 interface Props {
   groups: Group[];
@@ -45,6 +46,7 @@ const UploadForm = (props: Props) => {
     try {
       const mappingResponse = await mapDevicesForGroups(topologyId, labGroups);
       if (mappingResponse) {
+        revalidateIndexDto();
         handleDownload(topologyId);
       }
     } catch (error) {
@@ -86,7 +88,7 @@ const UploadForm = (props: Props) => {
         return (
           <li key={i}>
             <span>{group.lab_group_number}</span>
-            <input type="checkbox" value={group.lab_group_number} name="lab-group"/>
+            <input type="checkbox" value={group.lab_group_number} name="lab-group" defaultChecked/>
           </li>
         );
       })}

@@ -1,7 +1,11 @@
 import { IndexDto } from "../(interfaces)/common/IndexDto";
 
 export const getIndexDto = async (): Promise<IndexDto> => {
-  return await fetch("http://localhost:8000/config_upload/index_dto")
+  return await fetch("http://localhost:8000/config_upload/index_dto", {
+    next: {
+      tags: ["index-dto"]
+    }
+  })
     .then((response) => response.json())
     .then((data: IndexDto) => data)
     .catch((error) => {

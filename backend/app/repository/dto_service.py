@@ -29,7 +29,6 @@ class DTOService:
 
     def create_index_dto(self):
         return {
-            "XMLs": self.xml_repo.list_names(),
             "topologies": self.topo_repo.list_names(),
             "groups": self.group_repo.get_all_groups(),
             "mappings": self._list_mapping_names(),

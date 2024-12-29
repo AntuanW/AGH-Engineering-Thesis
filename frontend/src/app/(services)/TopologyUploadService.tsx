@@ -43,3 +43,13 @@ export const downloadInstruction = async (topologyId: string) => {
       throw new Error(`HTTP GET error while downloading instruction. Status: ${error}`)
     });
 }
+
+export const configureDevices = async (topologyId: string, groupId: string) => {
+  return await fetch(`http://localhost:8000/config_upload/topologies/${topologyId}/configure?group_id=${groupId}`, {
+    method: "POST"
+  })
+  .then((data) => data)
+  .catch((error) => {
+    throw new Error(`HTTP POST error while configuring devices. Status: ${error}`)
+  });
+}

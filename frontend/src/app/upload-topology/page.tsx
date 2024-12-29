@@ -1,3 +1,4 @@
+import ConfigurationForm from "../(components)/configuration-form/configurationForm";
 import UploadForm from "../(components)/upload-form/uploadForm";
 import { Group } from "../(interfaces)/common/Group";
 import { IndexDto } from "../(interfaces)/common/IndexDto";
@@ -8,7 +9,14 @@ const UploadTopology = async () =>  {
   const sortedGroups: Group[] = indexDto.groups.sort((a, b) => (a.lab_group_number - b.lab_group_number));
 
   return (
-    <UploadForm groups={sortedGroups}/>
+    <div>
+      <UploadForm groups={sortedGroups}/>
+      <ConfigurationForm
+        groups={sortedGroups}
+        mappings={indexDto.mappings}
+        topologies={indexDto.topologies}
+      />
+    </div>
   );
 }
 
