@@ -15,3 +15,6 @@ class LabGroupRepository(BaseRepository[LabGroupModel]):
 
     def get_all_groups(self):
         return list(self.find_objects({}))
+
+    def get_ip_of_group(self, group: int):
+        return self.find_object({"lab_group_number": group}).rack.config_port_ip_address
