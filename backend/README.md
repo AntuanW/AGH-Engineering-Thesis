@@ -31,3 +31,9 @@ pip install -e .
 ```bash
 start-app
 ```
+
+### How to run backend in container (Docker)
+```bash
+docker build -t agh-engineering-thesis-backend .
+docker run -d --network host --name agh-engineering-thesis-backend -p 8000:8000 agh-engineering-thesis-backend
+```
