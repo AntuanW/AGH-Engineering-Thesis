@@ -40,3 +40,21 @@ a {
     color-scheme: dark;
   }
 }
+
+input {
+  cursor: pointer;
+}
+
+.submit-button {
+  padding: .5em;
+  font-weight: bolder;
+  background: #1D84B5;
+  border: none;
+  border-radius: 5px;
+  color: #ffffff;
+}
+
+.submit-button:hover {
+  color: #132E32;
+  transition: .5s;
+}

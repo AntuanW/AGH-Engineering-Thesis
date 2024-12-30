@@ -3,6 +3,9 @@ import { Group } from "@/app/(interfaces)/common/Group";
 import { Mapping } from "@/app/(interfaces)/common/Mapping";
 import { Topolgy } from "@/app/(interfaces)/common/Topology";
 import { configureDevices } from "@/app/(services)/TopologyUploadService";
+import { useState } from "react";
+
+import "./configurationForm.css";
 
 interface Props {
   groups: Group[];
@@ -11,6 +14,16 @@ interface Props {
 }
 
 const ConfigurationForm = (props: Props) => {
+  const [areConfigured, setAreConfigured] = useState(false);
+  const [color, setColor] = useState("red");
+
+  const onRadioChange = () => {
+    if (areConfigured) {
+      setAreConfigured(false);
+      setColor("red");
+    }
+  }
+
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -18,32 +31,53 @@ const ConfigurationForm = (props: Props) => {
     const mappingId = formData.get("config-select")?.toString();
 
     if (mappingId && groupId) {
-      await configureDevices(mappingId, groupId)
+      try {
+        await configureDevices(mappingId, groupId)
+        setAreConfigured(true);
+        setColor("green");
+      } catch (error) {
+        console.log(`Something went wrong with upload: ${error}`);
+      }
     }
     return;
   }
   
   return (
-    <form id="config-form" onSubmit={handleFormSubmit}>
-      <select id="config-select" name="config-select" form="config-form">
-      {props.mappings.map((mapping, i) => {
-        return (
-          <option key={i} value={mapping._id}>{mapping.name}</option>
-        );
-      })}
-      </select>
-      <ul>
-      {props.groups.map((group, i) => {
-        return (
-          <li key={i}>
-            <span>{group.lab_group_number}</span>
-            <input type="radio" value={group.lab_group_number} name="lab-group"/>
-          </li>
-        );
-      })}
-      </ul>
-      <input type="submit" className="button"/>
-    </form>
+    <div className="form-container">
+      <h1>Configure devices</h1>
+      <form id="config-form" onSubmit={handleFormSubmit}>
+        <select id="config-select" name="config-select" form="config-form">
+        {props.mappings.map((mapping, i) => {
+          return (
+            <option key={i} className="config-option" value={mapping._id}>{mapping.name}</option>
+          );
+        })}
+        </select>
+        <ul className="check-box-group">
+        {props.groups.map((group, i) => {
+          const RadioStyle: React.CSSProperties = {
+            background: color
+          }
+
+          return (
+            <li key={i} className="group-item">
+              <input 
+                id={`group${group.lab_group_number}`} 
+                type="radio" value={group.lab_group_number} 
+                name="lab-group" className="radio"
+                style={RadioStyle} onClick={onRadioChange}
+              />
+              <label htmlFor={`group${group.lab_group_number}`}>{group.lab_group_number}</label>
+            </li>
+          );
+        })}
+        </ul>
+        <div className="submit-container">
+          <input type="submit" className="submit-button" defaultValue="Submit"/>
+          <div className="circle" style={{background: color}}></div>
+        </div>
+      </form>
+    </div>
   );
 }
 
