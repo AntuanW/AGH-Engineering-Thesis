@@ -13,21 +13,20 @@ Authors: Antoni Wójcik, Grzegorz Piśkorski, Zuzanna Olszówka, Bartłomiej Sł
 - React
 
 ### Requirements
-- python 3.12 or above
+- python 3.12.8 or above
 - node.js
 - npm
 
+### How to run the whole system using docker-compose
+```bash
+docker build -t agh-engineering-thesis-app .
+docker run -d -p 8000:8000 -p 3000:3000 --name agh-engineering-thesis-app agh-engineering-thesis-app
+```
+
 ### How to build dev environment
 
-#### How to run backend
+#### Backend
 **[CLICK HERE](/backend/README.md)**
 
-#### How to run frontend:
+#### Frontend:
 **[CLICK HERE](/frontend/README.md)**
-
-
-### How to run both backend and frondend on containers
-```bash
-docker build -t single-container-app .
-docker run -d -p 8000:8000 -p 3000:3000 --name single-container-app single-container-app
-```
