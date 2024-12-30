@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.responses import FileResponse
 
+from app.models.mapping import MappingCollectionModel
 from app.repository.exceptions.repository_exceptions import DatabaseException
 from app.repository.mapping_repository import MappingRepository
 from app.instruction_export.lab_instruction_export_service import LabInstructionExportService
@@ -24,14 +25,14 @@ async def export_lab_instructions(topology_id: str,
     :return: PDF file
     """
     try:
-        mappings: list = mapping_repository.find_objects({"topology_id": topology_id})
-        if not mappings:
+        mapping: MappingCollectionModel = mapping_repository.find_object({"topology_id": topology_id})
+        if not mapping:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There are no mappings in the database.")
     except DatabaseException:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Something went wrong with database connection.")
     try:
-        filename = lab_instruction_export_service.export_instructions(mappings)
+        filename = lab_instruction_export_service.export_instructions(mapping)
     except FileNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Failed to generate the PDF file. Error: {e}")

@@ -4,5 +4,5 @@ from app.common.netmiko.netmiko_device import NetmikoDevice
 
 class DownloadConfigRequest(BaseModel):
     lab_name: str
-    lab_group: str
+    lab_group: int
     devices: list[NetmikoDevice]

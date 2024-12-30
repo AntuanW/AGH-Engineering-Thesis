@@ -5,7 +5,8 @@ from app.pdf_generator.pdf_generator import PdfGenerator
 from app.pdf_generator.util.pdf_styles import PdfStyles
 from ..models.connection import ConnectionModel
 from ..models.mapped_device import MappedDeviceModel
-from ..models.mapping import MappingModel
+from ..models.mapping import MappingCollectionModel
+from ..repository.lab_group_repository import LabGroupRepository
 from ..running_config.util.device_config_types import DeviceType
 from ..visualization.topology_visualizer import TopologyVisualizer
 
@@ -17,22 +18,24 @@ from ..repository.topology_repository import TopologyRepository
 
 class LabInstructionExportService:
     def __init__(self,
-                 topology_repo=Depends(TopologyRepository),
-                 pdf_generator=Depends(PdfGenerator)):
+                 topology_repo = Depends(TopologyRepository),
+                 group_repo = Depends(LabGroupRepository),
+                 pdf_generator = Depends(PdfGenerator)):
         self.topology_repo: TopologyRepository = topology_repo
+        self.group_repo: LabGroupRepository = group_repo
         self.pdf_generator: PdfGenerator = pdf_generator
         self.styles = PdfStyles()
 
-    def export_instructions(self, mappings: list[MappingModel]) -> str:
+    def export_instructions(self, mapping_collection: MappingCollectionModel) -> str:
         logging.info("Start generating lab instruction")
         content = []
-        for mapping in mappings:
-            logging.info(f"Start generating lab instruction for group {mapping.lab_group_number}")
-            content.extend(self._create_instruction_header(mapping))
-            content.extend(self._create_connection_steps(mapping))
-            content.extend(self._create_connections_table(mapping))
-            content.extend(self._create_topology_graph(mapping))
-            logging.info(f"Lab instruction for group {mapping.lab_group_number} successfully generated")
+        for group, devices in mapping_collection.mappings.items():
+            logging.info(f"Start generating lab instruction for group {group}")
+            content.extend(self._create_instruction_header(group, mapping_collection.topology_id))
+            content.extend(self._create_connection_steps(devices, group))
+            content.extend(self._create_connections_table(devices))
+            content.extend(self._create_topology_graph(devices, group))
+            logging.info(f"Lab instruction for group {group} successfully generated")
 
         filename = self.pdf_generator.generate_lab_instruction(content)
         logging.info(f"Lab instruction successfully generated: {filename}")
@@ -49,9 +52,8 @@ class LabInstructionExportService:
                     connections.add(connection)
         return list(connections)
 
-    def _create_instruction_header(self, mapping: MappingModel) -> list[Paragraph]:
-        group = mapping.lab_group_number
-        topology_name = self.topology_repo.find_object({"_id": ObjectId(mapping.topology_id)}).name
+    def _create_instruction_header(self, group: int, topology_id: str) -> list[Paragraph]:
+        topology_name = self.topology_repo.find_object({"_id": ObjectId(topology_id)}).name
 
         return [
             Paragraph("Instrukcja", self.styles.title_style),
@@ -61,9 +63,8 @@ class LabInstructionExportService:
             Spacer(1, 12)
         ]
 
-    def _create_connection_steps(self, mapping: MappingModel) -> list[Paragraph]:
-        devices = mapping.mapped_devices
-        ip_address = mapping.mapped_devices[0].ip_address
+    def _create_connection_steps(self, devices: list[MappedDeviceModel], group: int) -> list[Paragraph]:
+        ip_address = self.group_repo.get_ip_of_group(group)
 
         content = [
             Paragraph("Aby wgrać konfiguracje, wykonaj następujące kroki:", self.styles.main_style),
@@ -85,8 +86,7 @@ class LabInstructionExportService:
 
         return content
 
-    def _create_connections_table(self, mapping: MappingModel) -> list[Paragraph]:
-        devices = mapping.mapped_devices
+    def _create_connections_table(self, devices: list[MappedDeviceModel]) -> list[Paragraph]:
         connections = self._get_device_connections(devices)
 
         data = [["Urządzenie 1", "Interfejs 1", "Urządzenie 2", "Interfejs 2"]]
@@ -105,9 +105,7 @@ class LabInstructionExportService:
             PageBreak()
         ]
 
-    def _create_topology_graph(self, mapping: MappingModel) -> list[Paragraph]:
-        group = mapping.lab_group_number
-        devices = mapping.mapped_devices
+    def _create_topology_graph(self, devices: list[MappedDeviceModel], group: int) -> list[Paragraph]:
         connections = self._get_device_connections(devices)
 
         if not connections:

@@ -31,6 +31,6 @@ class DTOService:
         return {
             "topologies": self.topo_repo.list_names(),
             "groups": self.group_repo.get_all_groups(),
-            "mappings": self._list_mapping_names(),
+            "mappings": self.mapping_repo.list_names()
         }
 

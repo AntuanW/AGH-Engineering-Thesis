@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 from bson.objectid import ObjectId
 
-from app.models.mapping import MappingModel
+from app.models.mapping import MappingCollectionModel, MappingType
 from app.repository.mapping_repository import MappingRepository
 from app.models.mapped_device import MappedDeviceModel
 from app.running_config.util.device_config_types import DeviceType
@@ -15,7 +15,6 @@ def test_basic_connection():
 
 def test_find_devices_by_group():
     mock_lab_group_number = 1
-    mock_mapping_id = ObjectId('5f8f8f8f8f8f8f8f8f8f8f8f')
     mock_topology_id = '5f8f8f8f8f8f8f8f8f8f8f8f'
     mock_mapped_device = MappedDeviceModel(
         name='Router',
@@ -27,17 +26,19 @@ def test_find_devices_by_group():
         neighbours=[]
     )
     mock_mapping = {
-        '_id': mock_mapping_id,
-        'lab_group_number': mock_lab_group_number,
+        'name': 'test',
+        'type': MappingType.CREATED_FROM_PKT,
         'topology_id': mock_topology_id,
-        'mapped_devices': [mock_mapped_device]
+        'mappings': {1: [mock_mapped_device]}
     }
 
-    expected_mapping = MappingModel(**mock_mapping)
+    expected_mapping = MappingCollectionModel(**mock_mapping)
 
     repo = MappingRepository()
-    repo.find_devices_by_group = MagicMock(return_value=mock_mapping['mapped_devices'])
-    found_mapping = repo.find_devices_by_group(mock_lab_group_number, mock_topology_id)
+    repo.find_devices_by_group = MagicMock(return_value=mock_mapping['mappings'])
+    found_mappings = repo.find_devices_by_group(mock_lab_group_number, mock_topology_id)
 
-    assert found_mapping is not None
-    assert found_mapping == expected_mapping.mapped_devices
+    print(found_mappings)
+
+    assert found_mappings is not None
+    assert found_mappings == expected_mapping.mappings

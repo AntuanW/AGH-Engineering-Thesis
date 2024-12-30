@@ -1,5 +1,7 @@
+import tempfile
 import os
 import unittest
+from pathlib import Path
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Spacer
 
@@ -8,7 +10,7 @@ from app.models.connection import ConnectionModel
 
 
 class TestTopologyVisualizer(unittest.TestCase):
-    PDF_FILENAME = "pdf_files/test_topology_visualization.pdf"
+    PDF_FILENAME = str(Path(tempfile.gettempdir()) / "test_topology_visualization.pdf")
 
     def setUp(self):
         if os.path.exists(self.PDF_FILENAME):
