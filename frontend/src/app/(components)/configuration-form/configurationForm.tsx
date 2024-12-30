@@ -15,10 +15,10 @@ const ConfigurationForm = (props: Props) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const groupId = formData.get("lab-group")?.toString();
-    const topologyId = formData.get("config-select")?.toString();
+    const mappingId = formData.get("config-select")?.toString();
 
-    if (topologyId && groupId) {
-      await configureDevices(topologyId, groupId)
+    if (mappingId && groupId) {
+      await configureDevices(mappingId, groupId)
     }
     return;
   }

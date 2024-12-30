@@ -44,8 +44,8 @@ export const downloadInstruction = async (topologyId: string) => {
     });
 }
 
-export const configureDevices = async (topologyId: string, groupId: string) => {
-  return await fetch(`http://localhost:8000/config_upload/topologies/${topologyId}/configure?group_id=${groupId}`, {
+export const configureDevices = async (mappingId: string, groupId: string) => {
+  return await fetch(`http://localhost:8000/config_upload/mapping/${mappingId}/configure?group_id=${groupId}`, {
     method: "POST"
   })
   .then((data) => data)
