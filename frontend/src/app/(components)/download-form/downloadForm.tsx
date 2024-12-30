@@ -1,9 +1,11 @@
 "use client"
 import { Group } from "@/app/(interfaces)/common/Group";
 import { useForm, useFieldArray } from "react-hook-form";
+import { downloadTopology } from "@/app/(services)/TopologyDownloadService";
+import { ProgressState } from "@/app/(interfaces)/common/ProgressState";
+import { useState } from "react";
 
 import "./downloadForm.css";
-import { downloadTopology } from "@/app/(services)/TopologyDownloadService";
 
 interface Props {
   groups: Group[];
@@ -19,6 +21,9 @@ interface FormValues {
 }
 
 const DownloadTopologyForm = (props: Props) => {
+  const { NOT_READY, IN_PROGRESS, READY } = ProgressState;
+  const [color, setColor] = useState(NOT_READY);
+
   const form = useForm<FormValues>();
   const { register, control, handleSubmit, formState, watch, resetField } = form;
   const { errors } = formState;
@@ -34,11 +39,14 @@ const DownloadTopologyForm = (props: Props) => {
 
   const onGroupChange = () => {
     resetField("devices", {defaultValue: []});
+    setColor(NOT_READY);
   }
 
   const onSubmit = async (data: FormValues) => {
     try {
+      setColor(IN_PROGRESS);
       const blobResponse = await downloadTopology(data);
+      setColor(READY);
       const url = window.URL.createObjectURL(blobResponse);
       const link = document.createElement('a');
       link.href = url;
@@ -54,35 +62,46 @@ const DownloadTopologyForm = (props: Props) => {
     <div className="form-container">
       <h1 className="form-header">Download topology</h1>
       <form id="download-form" onSubmit={handleSubmit(onSubmit)}>
-        <label htmlFor="group-select">Lab group</label> 
-        <select  id="group-select" form="download-form" {...register("lab_group")} onChange={onGroupChange}>
-        {props.groups.map((group, i) => {
-          return (
-            <option key={i} className="group-option" value={group.lab_group_number}>
-              {group.lab_group_number}
-            </option>
-          );
-        })}
-        </select>
+        <div className="form-elem shorter">
+          <label htmlFor="group-select">Lab group</label> 
+          <select  id="group-select" form="download-form" {...register("lab_group")} onChange={onGroupChange}>
+          {props.groups.map((group, i) => {
+            return (
+              <option key={i} className="group-option" value={group.lab_group_number}>
+                {group.lab_group_number}
+              </option>
+            );
+          })}
+          </select>
+        </div>
+        
+        <div className="form-elem shorter">
+          <label htmlFor="lab-name">Lab name</label>
+          <input id="lab-name" type="text" {...register("lab_name", {
+            required: "Lab name is required!"
+          })}/>
+          <p style={{color: "red"}}>{errors.lab_name?.message}</p>
+        </div>
 
-        <label htmlFor="lab-name">Lab name</label>
-        <input id="lab-name" type="text" {...register("lab_name", {
-          required: "Lab name is required!"
-        })}/>
-        <p style={{color: "red"}}>{errors.lab_name?.message}</p>
-
-        <div>
-          <label>List of connected devices</label>
-          <div>
+        <div className="form-elem connections">
+          <div className="add-connection">
+            <label>List of connected devices</label>
+            <button type="button" className="add-button" onClick={() => append({
+              ip_address: getCurrentGroup()?.rack.config_port_ip_address,
+              port: getCurrentGroup()?.rack.config_ports[0]
+            })}>Add</button>
+          </div>
+          <div id="connections">
             {fields.map((field, i) => {
               const currentGroup: Group | undefined = getCurrentGroup();
               return (
                 <div key={field.id} className="form-control">
-                  <input 
+                  <input
+                    style={{cursor: "not-allowed", width: "45%", textAlign: "center"}}
                     type="text" {...register(`devices.${i}.ip_address`)}
                     value={currentGroup?.rack.config_port_ip_address}
                     disabled/>
-                  <select {...register(`devices.${i}.port`)}>
+                  <select style={{cursor: "pointer", width: "30%"}} {...register(`devices.${i}.port`)}>
                     {currentGroup?.rack.config_ports.map((port, j) => (
                       <option key={j} value={port}>{port}</option>
                     ))}
@@ -90,15 +109,12 @@ const DownloadTopologyForm = (props: Props) => {
                 </div>
               );
             })}
-            <button type="button" onClick={() => append({
-              ip_address: getCurrentGroup()?.rack.config_port_ip_address,
-              port: getCurrentGroup()?.rack.config_ports[0]
-            })}>Add connection</button>
           </div>
         </div>
 
         <div className="submit-container">
-          <input type="submit" className="submit-button" defaultValue="Submit"/>
+          <input type="submit" className="submit-button"/>
+          <div className="circle" style={{background: color}}></div>
         </div>
       </form>
     </div>
