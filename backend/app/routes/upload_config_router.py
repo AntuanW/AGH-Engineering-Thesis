@@ -127,7 +127,7 @@ async def get_device_mapping(topology_id: str,
                        group_id: list[int] | None = Query(default=None),
                        mapping_service: MappingService = Depends(MappingService)):
     try:
-        mappings: list[MappingCollectionModel] = mapping_service.get_device_mappings(topology_id, group_id)
+        mappings: MappingCollectionModel = mapping_service.get_device_mappings(topology_id, group_id)
         return JSONResponse(content=jsonable_encoder(mappings), status_code=status.HTTP_200_OK)
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
