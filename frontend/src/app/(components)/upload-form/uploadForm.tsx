@@ -5,12 +5,16 @@ import { useState } from "react";
 import { ExtractResponse, UploadResponse } from "./responses";
 import { revalidateIndexDto } from "@/app/(server-actions)/IndexDtoRevalidation";
 
+import "./uploadForm.css";
+
 interface Props {
   groups: Group[];
 }
 
 const UploadForm = (props: Props) => {
   const [file, setFile] = useState<File | null>(null);
+  const [isMapped, setIsMapped] = useState(false);
+  const [color, setColor] = useState("red");
 
   const uploadFile = async (formData: FormData) => {
     if (!file) {
@@ -34,6 +38,7 @@ const UploadForm = (props: Props) => {
     try {
       const extractResponse: ExtractResponse = await extractTopologyDetails(xmlId);
       if (extractResponse.topology_id) {
+        setColor("orange");
         mapDevices(formData, extractResponse.topology_id);
       }
     } catch (error) {
@@ -46,6 +51,8 @@ const UploadForm = (props: Props) => {
     try {
       const mappingResponse = await mapDevicesForGroups(topologyId, labGroups);
       if (mappingResponse) {
+        setIsMapped(true);
+        setColor("green");
         revalidateIndexDto();
         handleDownload(topologyId);
       }
@@ -80,21 +87,39 @@ const UploadForm = (props: Props) => {
     uploadFile(formData);
   };
 
+  const onCheckBoxChange = () => {
+    if (isMapped) {
+      setIsMapped(false);
+      setColor("red");
+    }
+  }
+
   return (
-    <form id="upload-pkt" onSubmit={handleFormSubmit}>
-      <input type="file" onChange={handleFileChange}/>
-      <ul>
-      {props.groups.map((group, i) => {
-        return (
-          <li key={i}>
-            <span>{group.lab_group_number}</span>
-            <input type="checkbox" value={group.lab_group_number} name="lab-group" defaultChecked/>
-          </li>
-        );
-      })}
-      </ul>
-      <input type="submit" className="button"/>
-    </form>
+    <div className="form-container">
+      <h1 className="form-header">Upload topology</h1>
+      <form id="upload-pkt" onSubmit={handleFormSubmit}>
+        <input type="file" onChange={handleFileChange}/>
+        <ul className="check-box-group">
+        {props.groups.map((group, i) => {
+          return (
+            <li key={i} className="group-item">
+              <input
+                id={`checkbox-group-${group.lab_group_number}`} 
+                type="checkbox" value={group.lab_group_number}
+                name="lab-group" className="checkbox" 
+                onChange={onCheckBoxChange} defaultChecked
+              />
+              <label htmlFor={`group${group.lab_group_number}`}>{group.lab_group_number}</label>
+            </li>
+          );
+        })}
+        </ul>
+        <div className="submit-container">
+          <input type="submit" className="submit-button" defaultValue="Submit"/>
+          <div className="circle" style={{background: color}}></div>
+        </div>
+      </form>
+    </div>
   );
 }
 

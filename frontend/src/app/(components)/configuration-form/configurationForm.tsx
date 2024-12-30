@@ -44,7 +44,7 @@ const ConfigurationForm = (props: Props) => {
   
   return (
     <div className="form-container">
-      <h1>Configure devices</h1>
+      <h1 className="form-header">Configure devices</h1>
       <form id="config-form" onSubmit={handleFormSubmit}>
         <select id="config-select" name="config-select" form="config-form">
         {props.mappings.map((mapping, i) => {
@@ -55,17 +55,13 @@ const ConfigurationForm = (props: Props) => {
         </select>
         <ul className="check-box-group">
         {props.groups.map((group, i) => {
-          const RadioStyle: React.CSSProperties = {
-            background: color
-          }
-
           return (
             <li key={i} className="group-item">
               <input 
                 id={`group${group.lab_group_number}`} 
                 type="radio" value={group.lab_group_number} 
                 name="lab-group" className="radio"
-                style={RadioStyle} onClick={onRadioChange}
+                onClick={onRadioChange}
               />
               <label htmlFor={`group${group.lab_group_number}`}>{group.lab_group_number}</label>
             </li>
