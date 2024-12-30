@@ -1,0 +1,16 @@
+#config-form {
+  padding: .5em;
+  background: #f8f8f8;
+  border-radius: 0 0 10px 10px;
+  text-align: center;
+}
+
+#config-select {
+  padding: .5em;
+  font-size: 1rem;
+  width: 80%;
+}
+
+#config-select:hover {
+  cursor: pointer;
+}
