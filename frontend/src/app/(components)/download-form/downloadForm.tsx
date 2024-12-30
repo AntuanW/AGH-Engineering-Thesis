@@ -28,7 +28,7 @@ const DownloadTopologyForm = (props: Props) => {
   const { register, control, handleSubmit, formState, watch, resetField } = form;
   const { errors } = formState;
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     name: "devices",
     control
   });
@@ -106,6 +106,11 @@ const DownloadTopologyForm = (props: Props) => {
                       <option key={j} value={port}>{port}</option>
                     ))}
                   </select>
+                  {i >= 0 && (
+                    <button type="button" className="remove-button" onClick={() => remove(i)}>
+                      Remove
+                    </button>
+                  )}
                 </div>
               );
             })}

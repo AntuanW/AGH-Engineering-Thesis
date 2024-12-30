@@ -59,3 +59,18 @@
   background-color: #508484;
   transition: .3s;
 }
+
+.remove-button {
+  border: none;
+  background: #E05263;
+  padding: .3em;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bolder;
+  color: #132E32;
+}
+
+.remove-button:hover {
+  background-color: #AD4450;
+  transition: .3s;
+}
