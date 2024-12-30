@@ -61,6 +61,9 @@ class Interface(BaseModel):
     def __hash__(self):
         return self.__str__().__hash__()
 
+    def __eq__(self, other):
+        return self.type == other.type and self.value == other.value
+
     def port_number(self) -> int:
         """Returns the last number in interface value, ex. Gi0/1/16 -> 16"""
         return int(self.value.split("/")[-1])

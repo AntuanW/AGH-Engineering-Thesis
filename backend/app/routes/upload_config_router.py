@@ -9,7 +9,7 @@ from bson.objectid import ObjectId
 from app.decryptor.file_service import FileService
 from app.decryptor.decryptor_service import DecryptorService
 from app.mapping.mapping_service import MappingService
-from app.models.mapping import MappingModel
+from app.models.mapping import MappingCollectionModel
 from app.repository.dto_service import DTOService
 from app.repository.mapping_repository import MappingRepository
 from app.running_config.running_config_service import RunningConfigService
@@ -99,21 +99,19 @@ async def extract_config(
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
-@router.post("/topologies/{topology_id}/configure")
+@router.post("/mapping/{mapping_id}/configure")
 async def configure_devices(
-        topology_id: str,
+        mapping_id: str,
         group_id: list[int] | None = Query(default=None),
         mapping_repository: MappingRepository = Depends(MappingRepository),
-        config_upload_service: ConfigUploadService = Depends(ConfigUploadService)
-) -> JSONResponse:
+        config_upload_service: ConfigUploadService = Depends(ConfigUploadService)) -> JSONResponse:
+    mapping_collection = mapping_repository.find_mapping_by_id(mapping_id)
     for lab_group_number in group_id:
-        mapped_devices = mapping_repository.find_devices_by_group(lab_group_number, topology_id)
-        if not mapped_devices:
+        if not (devices := mapping_collection.mappings.get(lab_group_number)):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Devices not found for group {lab_group_number}.")
-
         try:
-            config_upload_service.upload_configs(mapped_devices)
+            config_upload_service.upload_configs(devices)
         except DeviceConnectionError as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail=f"Connection error while configuring devices. Error: {e}")
@@ -129,7 +127,7 @@ def get_device_mapping(topology_id: str,
                        group_id: list[int] | None = Query(default=None),
                        mapping_service: MappingService = Depends(MappingService)):
     try:
-        mappings: list[MappingModel] = mapping_service.get_device_mappings(topology_id, group_id)
+        mappings: list[MappingCollectionModel] = mapping_service.get_device_mappings(topology_id, group_id)
         return JSONResponse(content=jsonable_encoder(mappings), status_code=status.HTTP_200_OK)
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="topology_id has invalid format")
