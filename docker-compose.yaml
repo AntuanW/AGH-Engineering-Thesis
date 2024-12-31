@@ -13,5 +13,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    network_mode: "host"
     depends_on:
       - backend

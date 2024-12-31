@@ -3,6 +3,7 @@ import { Group } from "@/app/(interfaces)/common/Group";
 import { Mapping } from "@/app/(interfaces)/common/Mapping";
 import { Topolgy } from "@/app/(interfaces)/common/Topology";
 import { configureDevices } from "@/app/(services)/TopologyUploadService";
+import { ProgressState } from "@/app/(interfaces)/common/ProgressState";
 import { useState } from "react";
 
 import "./configurationForm.css";
@@ -14,13 +15,15 @@ interface Props {
 }
 
 const ConfigurationForm = (props: Props) => {
+  const { NOT_READY, IN_PROGRESS, READY } = ProgressState;
+  const [color, setColor] = useState(NOT_READY);
+
   const [areConfigured, setAreConfigured] = useState(false);
-  const [color, setColor] = useState("red");
 
   const onRadioChange = () => {
     if (areConfigured) {
       setAreConfigured(false);
-      setColor("red");
+      setColor(NOT_READY);
     }
   }
 
@@ -32,9 +35,10 @@ const ConfigurationForm = (props: Props) => {
 
     if (mappingId && groupId) {
       try {
+        setColor(IN_PROGRESS);
         await configureDevices(mappingId, groupId)
         setAreConfigured(true);
-        setColor("green");
+        setColor(READY);
       } catch (error) {
         console.log(`Something went wrong with upload: ${error}`);
       }
@@ -69,7 +73,7 @@ const ConfigurationForm = (props: Props) => {
         })}
         </ul>
         <div className="submit-container">
-          <input type="submit" className="submit-button" defaultValue="Submit"/>
+          <input type="submit" className="submit-button"/>
           <div className="circle" style={{background: color}}></div>
         </div>
       </form>

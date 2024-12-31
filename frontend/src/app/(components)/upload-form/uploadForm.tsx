@@ -1,9 +1,10 @@
 "use client"
 import { Group } from "@/app/(interfaces)/common/Group";
 import { downloadInstruction, extractTopologyDetails, mapDevicesForGroups, uploadTopologyFile } from "@/app/(services)/TopologyUploadService";
-import { useState } from "react";
 import { ExtractResponse, UploadResponse } from "./responses";
 import { revalidateIndexDto } from "@/app/(server-actions)/IndexDtoRevalidation";
+import { ProgressState } from "@/app/(interfaces)/common/ProgressState";
+import { useState } from "react";
 
 import "./uploadForm.css";
 
@@ -12,9 +13,11 @@ interface Props {
 }
 
 const UploadForm = (props: Props) => {
+  const {NOT_READY, IN_PROGRESS, READY} = ProgressState;
+  const [color, setColor] = useState(NOT_READY);
+
   const [file, setFile] = useState<File | null>(null);
   const [isMapped, setIsMapped] = useState(false);
-  const [color, setColor] = useState("red");
 
   const uploadFile = async (formData: FormData) => {
     if (!file) {
@@ -38,7 +41,7 @@ const UploadForm = (props: Props) => {
     try {
       const extractResponse: ExtractResponse = await extractTopologyDetails(xmlId);
       if (extractResponse.topology_id) {
-        setColor("orange");
+        setColor(IN_PROGRESS);
         mapDevices(formData, extractResponse.topology_id);
       }
     } catch (error) {
@@ -52,7 +55,7 @@ const UploadForm = (props: Props) => {
       const mappingResponse = await mapDevicesForGroups(topologyId, labGroups);
       if (mappingResponse) {
         setIsMapped(true);
-        setColor("green");
+        setColor(READY);
         revalidateIndexDto();
         handleDownload(topologyId);
       }
@@ -90,7 +93,7 @@ const UploadForm = (props: Props) => {
   const onCheckBoxChange = () => {
     if (isMapped) {
       setIsMapped(false);
-      setColor("red");
+      setColor(NOT_READY);
     }
   }
 
@@ -115,7 +118,7 @@ const UploadForm = (props: Props) => {
         })}
         </ul>
         <div className="submit-container">
-          <input type="submit" className="submit-button" defaultValue="Submit"/>
+          <input type="submit" className="submit-button"/>
           <div className="circle" style={{background: color}}></div>
         </div>
       </form>
