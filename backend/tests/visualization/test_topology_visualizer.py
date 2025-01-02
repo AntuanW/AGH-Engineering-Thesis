@@ -1,4 +1,3 @@
-#TODO fix test
 import tempfile
 import os
 import unittest
