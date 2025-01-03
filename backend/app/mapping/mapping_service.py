@@ -140,7 +140,7 @@ class MappingService:
             else:
                 # All missing are GI or FA, so the device can be substituted
                 substitutions = {iface: self._find_best_interface_replacement(iface, device) for iface in missing_interfaces}
-                logging.warn(f"No exact match for {requirements.dev_name} found on rack {rack_id}, but a Gi/Fa replacement was mapped.")
+                logging.warning(f"No exact match for {requirements.dev_name} found on rack {rack_id}, but a Gi/Fa replacement was mapped.")
                 return MapWithSubs(device, substitutions)
 
         raise ValueError(f"No valid mapping found for {requirements.dev_name} on rack {rack_id}.")
