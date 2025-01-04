@@ -42,7 +42,7 @@ class HomeInstructionExportService:
 
     def _create_instruction_header(self) -> list[Paragraph]:
         return [
-            Paragraph("Running Configi Urządzeń", self.styles.title_style),
+            Paragraph("Konfiguracje urządzeń", self.styles.title_style),
             Spacer(1, 12)
         ]
 
