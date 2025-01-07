@@ -1,5 +1,6 @@
-import ConfigurationForm from "../(components)/configuration-form/configurationForm";
-import UploadForm from "../(components)/upload-form/uploadForm";
+import ConfigurationForm from "../(components)/upload-forms/configuration-form/configurationForm";
+import InstructionForm from "../(components)/instruction-form/instructionForm";
+import UploadForm from "../(components)/upload-forms/upload-topology-form/uploadForm";
 import { Group } from "../(interfaces)/common/Group";
 import { IndexDto } from "../(interfaces)/common/IndexDto";
 import { getIndexDto } from "../(services)/IndexDtoService";
@@ -13,6 +14,10 @@ const UploadTopology = async () =>  {
   return (
     <div className="forms-wrapper">
       <UploadForm groups={sortedGroups}/>
+      <InstructionForm 
+        topologies={indexDto.topologies}
+        groups={indexDto.groups}
+      />
       <ConfigurationForm
         groups={sortedGroups}
         mappings={indexDto.mappings}

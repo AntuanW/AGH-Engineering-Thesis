@@ -1,7 +1,5 @@
-from http.client import responses
-
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 
@@ -24,6 +22,39 @@ async def get_devices(device_repository: DeviceRepository = Depends(DeviceReposi
     return JSONResponse(status_code=status.HTTP_200_OK, content=response)
 
 
+@router.get("/devices/{device_id}")
+async def get_single_device(
+        device_id: str,
+        device_repository: DeviceRepository = Depends(DeviceRepository)
+) -> JSONResponse:
+    try:
+        device_id = ObjectId(device_id)
+        response: DeviceModel = device_repository.find_object({"_id": device_id})
+    except InvalidId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="device_id has invalid format.")
+    except DatabaseException:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Something went wrong with database connection.")
+
+    return JSONResponse(status_code=status.HTTP_200_OK, content=response.model_dump())
+
+
+@router.put("/devices/{device_id}")
+async def update_device(
+        device_id: str,
+        new_device: DeviceModel,
+        device_repository: DeviceRepository = Depends(DeviceRepository)
+) -> JSONResponse:
+    try:
+        device_id = ObjectId(device_id)
+        response = device_repository.update({"_id": device_id}, new_device.model_dump())
+    except InvalidId:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="device_id has invalid format.")
+    except DatabaseException:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Something went wrong with database connection.")
+
+    return JSONResponse(status_code=status.HTTP_200_OK, content=new_device.model_dump())
+
+
 @router.post("/devices")
 async def create_device(
         new_device: DeviceModel,
@@ -41,7 +72,7 @@ async def create_device(
 async def delete_device(
         device_id: str,
         device_repository: DeviceRepository = Depends(DeviceRepository)
-) -> Response:
+) -> JSONResponse:
     try:
         device_id = ObjectId(device_id)
         n_affected: int = device_repository.delete({"_id": device_id})
@@ -53,4 +84,5 @@ async def delete_device(
     if not n_affected:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"There is no device with id: {device_id} in database.")
 
-    return Response(status_code=status.HTTP_200_OK)
+    response = {"affected": n_affected}
+    return JSONResponse(status_code=status.HTTP_200_OK, content=response)

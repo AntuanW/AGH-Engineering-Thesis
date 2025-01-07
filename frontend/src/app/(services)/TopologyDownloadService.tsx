@@ -12,7 +12,7 @@ export const downloadTopology = async (requestBody: FormValues) => {
     method: "POST",
     body: JSON.stringify(requestBody),
     headers: {
-			'content-type': 'application/json;charset=UTF-8',
+			'content-type': 'application/json;charset=UTF-8'
 		}
   })
   .then((response) => response.blob())

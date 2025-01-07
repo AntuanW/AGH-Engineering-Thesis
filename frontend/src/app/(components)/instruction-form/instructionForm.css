@@ -1,0 +1,20 @@
+#instruction-form {
+  padding: .5em;
+  background: #f8f8f8;
+  border-radius: 0 0 10px 10px;
+  text-align: center;
+}
+
+#instruction-select {
+    padding: .5em;
+    font-size: 1rem;
+    width: 80%;
+  }
+  
+#instruction-select:hover {
+  cursor: pointer;
+}
+
+.only-submit {
+  justify-content: center;
+}
