@@ -4,7 +4,7 @@ from pathlib import Path
 import yaml
 
 
-def read_yaml_file(path: str, encoding: str = "utf-8") -> dict:
+def read_yaml_file(path: str | Path, encoding: str = "utf-8") -> dict:
     default_dict = {"version": 1}   # Needs investigation
     try:
         with open(path, "r", encoding=encoding) as input_file:

@@ -40,7 +40,7 @@ const ConfigurationForm = (props: Props) => {
         setAreConfigured(true);
         setColor(READY);
       } catch (error) {
-        console.log(`Something went wrong with upload: ${error}`);
+        console.error(`Something went wrong with upload: ${error}`);
       }
     }
     return;

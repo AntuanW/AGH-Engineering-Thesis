@@ -1,4 +1,4 @@
-import { ExtractResponse, UploadResponse } from "../(components)/upload-form/responses";
+import { ExtractResponse, UploadResponse } from "../(components)/upload-forms/upload-topology-form/responses";
 
 export const uploadTopologyFile = async (fileData: FormData): Promise<UploadResponse> => {
   return await fetch("http://localhost:8000/config_upload/upload_pkt", {

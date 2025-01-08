@@ -91,5 +91,5 @@ class DeviceModel(BaseModel):
     name: str
     device_type: DeviceType
     interfaces: list[Interface]
-    commands: list[str]
+    commands: list[str] = []
     rack_id: int

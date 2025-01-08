@@ -1,6 +1,6 @@
 "use client"
 import { Group } from "@/app/(interfaces)/common/Group";
-import { downloadInstruction, extractTopologyDetails, mapDevicesForGroups, uploadTopologyFile } from "@/app/(services)/TopologyUploadService";
+import { extractTopologyDetails, mapDevicesForGroups, uploadTopologyFile } from "@/app/(services)/TopologyUploadService";
 import { ExtractResponse, UploadResponse } from "./responses";
 import { revalidateIndexDto } from "@/app/(server-actions)/IndexDtoRevalidation";
 import { ProgressState } from "@/app/(interfaces)/common/ProgressState";
@@ -57,24 +57,9 @@ const UploadForm = (props: Props) => {
         setIsMapped(true);
         setColor(READY);
         revalidateIndexDto();
-        handleDownload(topologyId);
       }
     } catch (error) {
       console.error(`Failed to map topology: ${error}`);
-    }
-  }
-
-  const handleDownload = async (topologyId: string) => {
-    try {
-      const blobResponse = await downloadInstruction(topologyId);
-      const url = window.URL.createObjectURL(blobResponse);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `instruction-${topologyId}`;
-      link.click();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error(`Failed to download instructions: ${error}`);
     }
   }
 
