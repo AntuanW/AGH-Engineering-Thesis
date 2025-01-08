@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import "./page.css";
+import Link from "next/link";
 
 interface DeviceDetailsParams {
   params: Promise<{ deviceId: string }>
@@ -27,6 +28,7 @@ const EmptyDevice = {
 
 const DeviceDetails = ({ params }: DeviceDetailsParams) => {
   const { SHOW, HIDE } = InterfacesState;
+  const [deviceId, setDeviceId] = useState("");
   const [device, setDevice] = useState<Device>(EmptyDevice);
   const [showInterfaces, setShowInterfaces] = useState(false);
   const [showIntefracesTxt, setShowInterfacesTxt] = useState(SHOW);
@@ -34,8 +36,10 @@ const DeviceDetails = ({ params }: DeviceDetailsParams) => {
   useEffect(() => {
     const fetchDevice = async () => {
       try {
-        const fetchedDevice: Device = await getSingleDevice((await params).deviceId);
+        const _id = (await params).deviceId;
+        const fetchedDevice: Device = await getSingleDevice(_id);
         setDevice(fetchedDevice);
+        setDeviceId(_id);
       } catch (error) {
         console.error(`Failed to fetch device data: ${error}`);
       }
@@ -57,7 +61,7 @@ const DeviceDetails = ({ params }: DeviceDetailsParams) => {
     try {
       response = await deleteSingleDevice((await params).deviceId);
     } catch (error) {
-      console.log(`Error occured while deleting device with di ${(await params).deviceId}. Status: ${error}`);
+      console.error(`Error occured while deleting device with di ${(await params).deviceId}. Status: ${error}`);
     } finally {
       if (response) {
         redirect("/manage-devices");
@@ -101,7 +105,7 @@ const DeviceDetails = ({ params }: DeviceDetailsParams) => {
 
       <div className="details-actions-container">
         <button className="back" onClick={onBack}>Back</button>
-        <button className="edit">Edit</button>
+        <Link href={`/manage-devices/${deviceId}/edit`} className="edit">Edit</Link>
         <button className="delete" onClick={onDelete}>Delete</button>
       </div>
     </div>

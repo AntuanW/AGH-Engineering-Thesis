@@ -58,5 +58,20 @@ export const createNewDevice = async (requestBody: FormValues) => {
     .then((data) => data)
     .catch((error) => {
       throw new Error(`HTTP POST error while creating new device. Status: ${error}`)
-    })
+    });
+}
+
+export const updateDevice = async (deviceId: string, requestBody: FormValues) => {
+  return await fetch(`http://localhost:8000/devices_management/devices/${deviceId}`, {
+    method: "PUT",
+    body: JSON.stringify(requestBody),
+    headers: {
+			'content-type': 'application/json;charset=UTF-8'
+		}
+  })
+    .then((response) => response.json())
+    .then((data) => data)
+    .catch((error) => {
+      throw new Error(`HTTP POST error while creating new device. Status: ${error}`)
+    });
 }

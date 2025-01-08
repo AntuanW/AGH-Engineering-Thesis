@@ -55,7 +55,7 @@ const DeviceForm = (props: Props) => {
     try {
       response = await createNewDevice(data);
     } catch (error) {
-      console.log(`Error occured while creating new device: ${error}`);
+      console.error(`Error occured while creating new device: ${error}`);
     } finally {
       if (response) {
         revalidateDevices();

@@ -29,7 +29,6 @@ const InstructionForm = (props: Props) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const topologyId = formData.get(`instruction-select`)?.toString();
-    console.log(topologyId);
     if (topologyId) {
       handleDownload(topologyId);
     }
