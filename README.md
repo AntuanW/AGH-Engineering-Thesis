@@ -6,16 +6,17 @@ Faculty: Computer Science <br>
 Authors: Antoni Wójcik, Grzegorz Piśkorski, Zuzanna Olszówka, Bartłomiej Słupik <br>
 
 ### Stack
-- python
+- Python
 - FastAPI
 - MongoDB
 - Java
 - React
 
 ### Requirements
-- python 3.12
-- node.js
+- python 3.12.8
+- node.js v22.11.0
 - npm
+- Java
 
 ### How to run the whole system using docker-compose
 ```bash
