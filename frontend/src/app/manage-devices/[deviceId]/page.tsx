@@ -5,6 +5,8 @@ import { deleteSingleDevice, getSingleDevice } from "@/app/(services)/DeviceMana
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import "./page.css";
+
 interface DeviceDetailsParams {
   params: Promise<{ deviceId: string }>
 }
@@ -62,16 +64,30 @@ const DeviceDetails = ({ params }: DeviceDetailsParams) => {
       }
     }
   }
+
+  const onBack = () => {
+    redirect("/manage-devices");
+  }
+
+  const getClassName = () => {
+    return showInterfaces ? "hide" : "show";
+  }
   
   return (
     <div className="device-details-card">
-      <h1>{device.name}</h1>
-      <p>{device.device_type}</p>
-      <p>{device.rack_id}</p>
+      <div className="device-name-info">
+        <h1>{device.name}</h1>
+      </div>
+      <div className="device-basic-info">
+        <p>Device type: {device.device_type}</p>
+        <p>Rack id: {device.rack_id}</p>
+      </div>
       
-      <button onClick={onShowIntefaces}>
-        {showIntefracesTxt}
-      </button>
+      <div className="show-hide-container">
+        <button className={`show-hide ${getClassName()}`} onClick={onShowIntefaces}>
+          {showIntefracesTxt}
+        </button>
+      </div>
 
       <div className="all-interfaces-container">
         {showInterfaces && device.interfaces.map((iface, i) => {
@@ -84,8 +100,9 @@ const DeviceDetails = ({ params }: DeviceDetailsParams) => {
       </div>
 
       <div className="details-actions-container">
-        <button>Edit</button>
-        <button onClick={onDelete}>Delete</button>
+        <button className="back" onClick={onBack}>Back</button>
+        <button className="edit">Edit</button>
+        <button className="delete" onClick={onDelete}>Delete</button>
       </div>
     </div>
   );

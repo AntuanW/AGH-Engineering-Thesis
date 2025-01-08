@@ -1,10 +1,13 @@
 "use client"
+import { Group } from "@/app/(interfaces)/common/Group";
 import { DeviceType } from "@/app/(interfaces)/device-management/DeviceType";
 import { InterfaceType } from "@/app/(interfaces)/device-management/InterfaceType";
 import { revalidateDevices } from "@/app/(server-actions)/DevicesRevalifation";
 import { createNewDevice } from "@/app/(services)/DeviceManagementService";
 import { redirect } from "next/navigation";
 import { FieldError, useFieldArray, useForm } from "react-hook-form";
+
+import "./deviceForm.css";
 
 interface FormValues {
   name: string;
@@ -17,12 +20,20 @@ interface FormValues {
   }[];
 }
 
-const DeviceForm = () => {
+interface Props {
+  groups: Group[];
+}
+
+const DeviceForm = (props: Props) => {
   const form = useForm<FormValues>({
     resolver: async (data) => {
       const errors: Partial<Record<keyof FormValues, FieldError>> = {};
 
-      if (!data.interfaces || data.interfaces.length === 0) {
+      if (!data.name) {
+        errors.name = {type: "manula", message: "Device name is required."}
+      } 
+      
+      else if (!data.interfaces || data.interfaces.length === 0) {
         errors.interfaces = {type: "manula", message: "At least one interface is required."}
       }
       return {
@@ -54,18 +65,16 @@ const DeviceForm = () => {
   }
 
   return (
-    <div className="form-container">
+    <div className="form-container create-wrap">
       <h1 className="form-header">Add new device</h1>
       <form id="create-form" onSubmit={handleSubmit(onSubmit)}>
-        <div className="input-container">
+        <div className="input-container form-elem shorter">
           <label htmlFor="name-input">Device name</label>
-          <input id="name-input" type="text" {...register("name", {
-            required: "Device name is required."
-          })}/>
+          <input id="name-input" type="text" {...register("name")}/>
           <p style={{color: "red"}}>{errors.name?.message}</p>
         </div>
 
-        <div className="input-container">
+        <div className="input-container form-elem shorter">
           <label htmlFor="device-type-select">Device type</label>
           <select id="device-type-select" style={{cursor: "pointer"}} {...register("device_type")}>
             <option value={`${DeviceType.ROUTER}`}>{DeviceType.ROUTER}</option>
@@ -73,17 +82,20 @@ const DeviceForm = () => {
           </select>
         </div>
 
-        <div className="input-container">
+        <div className="input-container form-elem shorter">
           <label htmlFor="rack-id-input">Rack id</label>
-          <input id="rack-id-input" type="number" min={1} {...register("rack_id", {
-            required: "Rack id is required."
-          })}/>
-          <p style={{color: "red"}}>{errors.rack_id?.message}</p>
+          <select id="rack-id-input" form="create-form" {...register("rack_id")}>
+            {props.groups.map((group, i) => (
+              <option key={i} value={group.lab_group_number}>
+                {group.lab_group_number}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className="add-interface">
+        <div className="add-interface form-elem shorter">
           <label>List of interfaces</label>
-          <button type="button" className="add-device-button" onClick={() => append({
+          <button type="button" className="add-iface-button add-button" onClick={() => append({
             type: InterfaceType.FA,
             value: ""
           })}>
@@ -94,7 +106,7 @@ const DeviceForm = () => {
         <div id="interfaces">
           {fields.map((field, i) => {
             return (
-              <div key={i} className="interface-list">
+              <div key={i} className="interface-list form-elem">
                 <select style={{cursor: "pointer"}} {...register(`interfaces.${i}.type`)}>
                   {Object.values(InterfaceType).map((iface, j) => (
                     <option key={j} value={iface}>{iface}</option>
@@ -109,11 +121,11 @@ const DeviceForm = () => {
               </div>
             );
           })}
-          {<p style={{color: "red"}}>{errors.interfaces?.message}</p>}
+          {<p className="iface-error" style={{color: "red"}}>{errors.interfaces?.message}</p>}
         </div>
 
-        <div>
-          <input type="submit" className="submit-button"/>
+        <div className="single-submit-container">
+          <input type="submit" className="submit-button submit-device"/>
         </div>
       </form>
     </div>

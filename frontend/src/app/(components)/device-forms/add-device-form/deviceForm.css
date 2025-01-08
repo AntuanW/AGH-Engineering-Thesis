@@ -1,0 +1,43 @@
+.create-wrap {
+  width: 40%;
+  margin: 1em auto;
+}
+
+.form-elem {
+  display: flex;
+  flex-direction: column;
+  row-gap: .2em;
+  padding: .5em;
+  margin: 0 auto;
+}
+
+.shorter {
+  width: 50%;
+}
+
+.add-interface {
+  text-align: center;
+}
+
+.add-iface-button {
+  width: 30%;
+  margin: 0 auto;
+}
+
+#rack-id-input {
+  cursor: pointer;
+}
+
+.interface-list {
+  margin: 0 auto;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.iface-error {
+  text-align: center;
+}
+
+.submit-device {
+  margin-bottom: 1em;
+}

@@ -1,0 +1,87 @@
+.device-details-card {
+  width: 50%;
+  margin: 2em auto;
+  padding-bottom: .1em;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  color: #132E32;
+  background: #f8f8f8;
+  border-radius: 10px 10px 10px 10px;
+}
+
+.device-name-info {
+  text-align: center;
+  background: #1D84B5;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  border-radius: 10px 10px 0 0;
+}
+
+.device-basic-info {
+  font-size: 1.2rem;
+  font-weight: bolder;
+  text-align: center;
+  margin: 1em auto;
+  display: flex;
+  flex-direction: column;
+  row-gap: 1em;
+  justify-content: center;
+}
+
+.details-actions-container {
+  margin: 1em;
+  display: flex;
+  justify-content: center;
+  column-gap: 2rem;
+}
+
+.show-hide, .back, .edit, .delete {
+  font-size: 1.3rem;
+  padding: .5em;
+  font-weight: bolder;
+  border: none;
+  border-radius: 5px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.back {
+  background: #1D84B5;
+}
+
+.show-hide-container {
+  text-align: center;
+}
+
+.show-hide {
+  font-size: 1rem;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.show {
+  background: #1D84B5;
+}
+
+.hide {
+  background: #C5283D;
+}
+
+.edit {
+  background: #FFC857;
+}
+
+.delete {
+  background: #C5283D;
+}
+
+.show-hide:hover, .back:hover, .edit:hover, .delete:hover {
+  color: #132E32;
+  transition: .5s;
+}
+
+.all-interfaces-container {
+  display: flex;
+  flex-direction: column;
+  row-gap: 1em;
+  text-align: center;
+}

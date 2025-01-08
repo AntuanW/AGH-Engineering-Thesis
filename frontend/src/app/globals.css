@@ -88,6 +88,14 @@ input {
   margin: .5em auto;
 }
 
+.single-submit-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  margin: .5em auto;
+}
+
 .group-item {
   text-align: center;
 }
@@ -103,4 +111,34 @@ input {
   border-radius: 50%;
   width: 1.2rem;
   height: 1.2rem;
+}
+
+.add-button {
+  border: none;
+  background: #79C99E;
+  padding: .3em;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bolder;
+  color: #132E32;
+}
+
+.add-button:hover {
+  background-color: #508484;
+  transition: .3s;
+}
+
+.remove-button {
+  border: none;
+  background: #E05263;
+  padding: .3em;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bolder;
+  color: #132E32;
+}
+
+.remove-button:hover {
+  background-color: #AD4450;
+  transition: .3s;
 }
