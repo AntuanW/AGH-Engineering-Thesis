@@ -17,6 +17,7 @@ Authors: Antoni Wójcik, Grzegorz Piśkorski, Zuzanna Olszówka, Bartłomiej Sł
 - node.js v22.11.0
 - npm
 - Java
+- Packet Tracer 8.2.2 (for designing topologies)
 
 ### How to run the whole system using docker-compose
 ```bash
